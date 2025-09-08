@@ -40,5 +40,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ... Nanti, rute untuk Keranjang, Checkout, dan Admin akan ditambahkan di sini ...
     Route::apiResource('/cart', CartController::class)->except(['show']);
-Route::post('/checkout', [OrderController::class, 'store']);
+    Route::post('/checkout', [OrderController::class, 'store']);
+
+    Route::middleware('is.admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::apiResource('/products', App\Http\Controllers\Api\Admin\ProductController::class);
+        Route::get('/orders', [App\Http\Controllers\Api\Admin\OrderController::class, 'index']);
+        Route::put('/orders/{order}', [App\Http\Controllers\Api\Admin\OrderController::class, 'update']);
+    });
 });
