@@ -39,4 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // ... Nanti, rute untuk Keranjang, Checkout, dan Admin akan ditambahkan di sini ...
+    Route::apiResource('/cart', CartController::class)->except(['show']);
+Route::post('/checkout', [OrderController::class, 'store']);
 });
