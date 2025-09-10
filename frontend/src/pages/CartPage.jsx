@@ -1,4 +1,4 @@
-function ManageOrdersPage() {
+function CartPage() {
 	return (
 		<div>
 			<h1>Halaman Cart</h1>
@@ -7,4 +7,4 @@ function ManageOrdersPage() {
 	);
 }
 
-export default ManageOrdersPage;
+export default CartPage;
