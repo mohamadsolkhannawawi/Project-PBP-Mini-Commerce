@@ -10,51 +10,45 @@ class ProductController extends Controller
 {
     /**
      * Menampilkan daftar semua produk.
-     * Fungsi ini juga menangani fungsionalitas pencarian.
-     * Sesuai dengan User Story 1 & 2.
+     * Mendukung pencarian berdasarkan nama produk.
      */
     public function index(Request $request)
     {
-        // 1. Mulai Query
-        // Kita mulai dengan query builder untuk tabel produk.
-        // Kita gunakan 'with('category')' untuk 'Eager Loading'. Ini sangat efisien
-        // karena mengambil semua produk beserta data kategorinya dalam satu query,
-        // mencegah masalah N+1 query.
-        $query = Product::with('category');
+        // 1. Mulai query builder untuk produk
+        $query = Product::query();
 
-        // 2. Logika Pencarian (Search)
-        // Kita periksa apakah ada parameter 'search' di URL request.
+        // 2. Terapkan Eager Loading untuk relasi 'category' dan 'images'
+        // Ini untuk mencegah masalah N+1 query dan membuat API lebih efisien.
+        $query->with(['category', 'images']);
+
+        // 3. Cek jika ada parameter pencarian (?search=...) di URL
         if ($request->has('search')) {
-            $searchTerm = $request->search;
-            // Jika ada, kita tambahkan kondisi 'where' pada query.
-            // Kita mencari di kolom 'name' produk ATAU di kolom 'name' pada tabel relasi 'category'.
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('category', function ($subQuery) use ($searchTerm) {
-                      $subQuery->where('name', 'like', '%' . $searchTerm . '%');
-                  });
-            });
+            $searchTerm = $request->input('search');
+            $query->where('name', 'like', '%' . $searchTerm . '%');
         }
-        
-        // 3. Eksekusi Query dan Kirim Respon
-        // Kita ambil semua produk yang sesuai dengan query (bisa difilter atau tidak)
-        // dan mengembalikannya sebagai respon JSON.
-        $products = $query->get();
 
+        // 4. Ambil semua produk yang aktif saja untuk ditampilkan ke publik
+        $products = $query->where('is_active', true)->paginate(10); // Menggunakan paginate untuk data yang lebih besar
+
+        // 5. Kembalikan data dalam format JSON
         return response()->json($products);
     }
 
     /**
      * Menampilkan detail satu produk.
+     * Menggunakan Route Model Binding dari Laravel.
      */
     public function show(Product $product)
     {
-        // Berkat 'Route Model Binding' Laravel, kita tidak perlu mencari produk manual.
-        // Laravel secara otomatis mengambil data produk dari database berdasarkan ID di URL
-        // dan memasukkannya ke dalam variabel $product.
-        // Jika produk tidak ditemukan, Laravel akan otomatis mengirim respon 404 Not Found.
+        // 1. Cek apakah produk yang diminta aktif
+        if (!$product->is_active) {
+            return response()->json(['message' => 'Product not found or not active'], 404);
+        }
+
+        // 2. Muat relasi kategori dan gambar untuk detail
+        $product->load(['category', 'images']);
         
-        // Kita muat juga relasi kategorinya untuk ditampilkan di detail.
-        return response()->json($product->load('category'));
+        // 3. Kembalikan data produk tunggal sebagai JSON
+        return response()->json($product);
     }
 }
