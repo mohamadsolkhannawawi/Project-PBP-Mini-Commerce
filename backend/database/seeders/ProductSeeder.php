@@ -2,57 +2,38 @@
 
 namespace Database\Seeders;
 
-use App\Models\Product;
 use Illuminate\Database\Seeder;
+use App\Models\Product;
+use App\Models\Category;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Produk untuk kategori Makanan (ID: 1)
-        Product::create([
-            'name' => 'Nasi Goreng Spesial',
-            'price' => 25000,
-            'stock' => 50,
-            'category_id' => 1,
-            'is_active' => true,
-        ]);
-        Product::create([
-            'name' => 'Keripik Singkong Balado',
-            'price' => 15000,
-            'stock' => 100,
-            'category_id' => 1,
-            'is_active' => true,
-        ]);
+        $categories = Category::pluck('id');
 
-        // Produk untuk kategori Minuman (ID: 2)
-        Product::create([
-            'name' => 'Es Kopi Susu Gula Aren',
-            'price' => 18000,
-            'stock' => 75,
-            'category_id' => 2,
-            'is_active' => true,
-        ]);
+        $products = [
+            ['name' => 'Smartphone Pro X', 'price' => 7500000, 'stock' => 50],
+            ['name' => 'Laptop UltraBook 14', 'price' => 12500000, 'stock' => 30],
+            ['name' => 'Kemeja Lengan Panjang', 'price' => 250000, 'stock' => 100],
+            ['name' => 'Gaun Musim Panas', 'price' => 450000, 'stock' => 80],
+            ['name' => 'Novel Fiksi Ilmiah', 'price' => 120000, 'stock' => 200],
+            ['name' => 'Vitamin C 500mg', 'price' => 80000, 'stock' => 300],
+            ['name' => 'Smartwatch Series 8', 'price' => 3200000, 'stock' => 60],
+            ['name' => 'Celana Jeans Pria', 'price' => 350000, 'stock' => 120],
+        ];
 
-        // Produk untuk kategori Kerajinan Tangan (ID: 3)
-        Product::create([
-            'name' => 'Tas Rotan Handmade',
-            'price' => 150000,
-            'stock' => 20,
-            'category_id' => 3,
-            'is_active' => true,
-        ]);
-
-        // Produk untuk kategori Pakaian (ID: 4)
-        Product::create([
-            'name' => 'Kaos Batik Pekalongan',
-            'price' => 85000,
-            'stock' => 40,
-            'category_id' => 4,
-            'is_active' => true,
-        ]);
+        foreach ($products as $product) {
+            Product::create([
+                'name' => $product['name'],
+                'slug' => Str::slug($product['name']),
+                'price' => $product['price'],
+                'stock' => $product['stock'],
+                'description' => 'Ini adalah deskripsi standar untuk ' . $product['name'] . '.',
+                'category_id' => $categories->random(),
+                'image_url' => '[https://placehold.co/600x400?text=](https://placehold.co/600x400?text=)' . urlencode($product['name']),
+            ]);
+        }
     }
 }
