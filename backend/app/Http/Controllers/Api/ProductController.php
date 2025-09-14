@@ -1,57 +1,47 @@
 <?php
 
-namespace App\Http\Controllers\Api\Admin;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public function index()
+    /**
+     * Menampilkan daftar semua produk.
+     * Mendukung pencarian berdasarkan nama produk.
+     */
+    public function index(Request $request)
     {
-        $products = Product::with('category')->get();
+        $query = Product::query();
+        $query->with(['category', 'images']);
+
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where('name', 'like', '%' . $searchTerm . '%');
+        }
+
+        // PERBAIKAN: Hanya ambil produk yang statusnya 'is_active' adalah true (atau 1).
+        // Ini memastikan produk yang dinonaktifkan oleh admin tidak akan tampil di frontend.
+        $products = $query->where('is_active', true)->get();
+
         return response()->json($products);
     }
 
-    public function store(StoreProductRequest $request)
-    {
-        $validatedData = $request->validated();
-        
-        if (empty($validatedData['slug'])) {
-            $validatedData['slug'] = Str::slug($validatedData['name']);
-        }
-
-        $product = Product::create($validatedData);
-        return response()->json($product, 201);
-    }
-
+    /**
+     * Menampilkan detail satu produk.
+     * Menggunakan Route Model Binding dari Laravel.
+     */
     public function show(Product $product)
     {
-        return response()->json($product->load('category', 'images'));
-    }
-
-    public function update(StoreProductRequest $request, Product $product)
-    {
-        $validatedData = $request->validated();
-
-        // PERBAIKAN: Secara otomatis membuat slug baru jika nama berubah
-        if (isset($validatedData['name'])) {
-            $validatedData['slug'] = Str::slug($validatedData['name']);
+        if (!$product->is_active) {
+            return response()->json(['message' => 'Product not found or not active'], 404);
         }
-        
-        $product->update($validatedData);
-        
-        // Memuat ulang data dari database untuk memastikan respons adalah data terbaru
-        return response()->json($product->fresh());
-    }
 
-    public function destroy(Product $product)
-    {
-        $product->is_active = false;
-        $product->save();
-        return response()->json(['message' => 'Produk berhasil dinonaktifkan.']);
+        $product->load(['category', 'images']);
+        
+        return response()->json($product);
     }
 }
+
