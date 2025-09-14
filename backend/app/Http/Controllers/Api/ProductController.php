@@ -1,54 +1,57 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    /**
-     * Menampilkan daftar semua produk.
-     * Mendukung pencarian berdasarkan nama produk.
-     */
-    public function index(Request $request)
+    public function index()
     {
-        // 1. Mulai query builder untuk produk
-        $query = Product::query();
-
-        // 2. Terapkan Eager Loading untuk relasi 'category' dan 'images'
-        // Ini untuk mencegah masalah N+1 query dan membuat API lebih efisien.
-        $query->with(['category', 'images']);
-
-        // 3. Cek jika ada parameter pencarian (?search=...) di URL
-        if ($request->has('search')) {
-            $searchTerm = $request->input('search');
-            $query->where('name', 'like', '%' . $searchTerm . '%');
-        }
-
-        // 4. Ambil semua produk yang aktif saja untuk ditampilkan ke publik
-        $products = $query->where('is_active', true)->paginate(10); // Menggunakan paginate untuk data yang lebih besar
-
-        // 5. Kembalikan data dalam format JSON
+        $products = Product::with('category')->get();
         return response()->json($products);
     }
 
-    /**
-     * Menampilkan detail satu produk.
-     * Menggunakan Route Model Binding dari Laravel.
-     */
-    public function show(Product $product)
+    public function store(StoreProductRequest $request)
     {
-        // 1. Cek apakah produk yang diminta aktif
-        if (!$product->is_active) {
-            return response()->json(['message' => 'Product not found or not active'], 404);
+        $validatedData = $request->validated();
+        
+        if (empty($validatedData['slug'])) {
+            $validatedData['slug'] = Str::slug($validatedData['name']);
         }
 
-        // 2. Muat relasi kategori dan gambar untuk detail
-        $product->load(['category', 'images']);
+        $product = Product::create($validatedData);
+        return response()->json($product, 201);
+    }
+
+    public function show(Product $product)
+    {
+        return response()->json($product->load('category', 'images'));
+    }
+
+    public function update(StoreProductRequest $request, Product $product)
+    {
+        $validatedData = $request->validated();
+
+        // PERBAIKAN: Secara otomatis membuat slug baru jika nama berubah
+        if (isset($validatedData['name'])) {
+            $validatedData['slug'] = Str::slug($validatedData['name']);
+        }
         
-        // 3. Kembalikan data produk tunggal sebagai JSON
-        return response()->json($product);
+        $product->update($validatedData);
+        
+        // Memuat ulang data dari database untuk memastikan respons adalah data terbaru
+        return response()->json($product->fresh());
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->is_active = false;
+        $product->save();
+        return response()->json(['message' => 'Produk berhasil dinonaktifkan.']);
     }
 }

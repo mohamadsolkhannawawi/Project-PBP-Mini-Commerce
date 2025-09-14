@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Import semua contoroller yang akan kita gunakan
+// Import semua controller yang akan kita gunakan
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CartController;
@@ -15,18 +15,13 @@ use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
 */
 
 // Rute Publik (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product:slug}', [ProductController::class, 'show']); // Menggunakan slug untuk SEO-friendly URL
+Route::get('/products/{product:slug}', [ProductController::class, 'show']);
 
 // Rute yang membutuhkan otentikasi (pengguna harus login)
 Route::middleware('auth:sanctum')->group(function () {
@@ -46,5 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function () {
     Route::apiResource('/products', AdminProductController::class);
     Route::get('/orders', [AdminOrderController::class, 'index']);
+    
+    // PERBAIKAN: Mengembalikan ke Route::put yang benar secara semantik.
+    // Ini akan bekerja setelah cache dibersihkan dan Postman disesuaikan.
     Route::put('/orders/{order}', [AdminOrderController::class, 'update']);
 });
+
