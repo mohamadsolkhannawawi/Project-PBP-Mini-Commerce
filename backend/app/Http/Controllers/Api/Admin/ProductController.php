@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreProductRequest; // <-- Gunakan Form Request kita
+use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -14,61 +14,48 @@ class ProductController extends Controller
      */
     public function index()
     {
-        // Ambil semua produk, termasuk data kategorinya.
         $products = Product::with('category')->get();
         return response()->json($products);
     }
 
     /**
-     * Menyimpan produk baru ke dalam database.
-     * Sesuai dengan User Story 6.
+     * Menyimpan produk baru ke database.
      */
     public function store(StoreProductRequest $request)
     {
-        // Validasi akan dijalankan secara otomatis oleh StoreProductRequest.
-        // Jika validasi gagal, Laravel akan mengirim respon error 422 secara otomatis.
-        
-        // Jika validasi berhasil, kita buat produk baru.
-        $product = Product::create($request->validated());
-
-        // Kirim respon sukses beserta data produk yang baru dibuat.
-        return response()->json($product->load('category'), 201);
+        $validatedData = $request->validated();
+        $product = Product::create($validatedData);
+        return response()->json($product, 201);
     }
 
     /**
-     * Menampilkan detail satu produk spesifik.
+     * Menampilkan detail satu produk.
      */
     public function show(Product $product)
     {
-        // Gunakan Route Model Binding untuk mengambil produk.
-        return response()->json($product->load('category'));
+        return response()->json($product->load('category', 'images'));
     }
 
     /**
-     * Mengupdate data produk yang sudah ada.
-     * Sesuai dengan User Story 6.
+     * Memperbarui data produk yang ada.
      */
     public function update(StoreProductRequest $request, Product $product)
     {
-        // Validasi dijalankan oleh StoreProductRequest.
-        
-        // Update produk dengan data yang sudah divalidasi.
-        $product->update($request->validated());
-
-        // Kirim respon sukses beserta data produk yang sudah diupdate.
-        return response()->json($product->load('category'));
+        $validatedData = $request->validated();
+        $product->update($validatedData);
+        return response()->json($product);
     }
 
     /**
-     * Menghapus produk dari database.
-     * Sesuai dengan User Story 6.
+     * Menonaktifkan produk (Soft Delete), bukan menghapus permanen.
      */
     public function destroy(Product $product)
     {
-        // Hapus produk.
-        $product->delete();
-
-        // Kirim respon sukses tanpa konten.
-        return response()->json(['message' => 'Product deleted successfully'], 200);
+        // PERBAIKAN: Alih-alih menghapus, kita ubah status is_active menjadi false.
+        $product->is_active = false;
+        $product->save();
+        
+        // Mengembalikan respons dengan pesan sukses.
+        return response()->json(['message' => 'Produk berhasil dinonaktifkan.']);
     }
 }
