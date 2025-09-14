@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->decimal('total', 10, 2);
-            $table->string('status')->default('diproses');
+            $table->foreignId('user_id')->constrained('users')->onDelete('restrict');
+            $table->string('order_number', 50)->unique();
+            $table->decimal('total', 12, 2);
+            $table->enum('status', ['pending', 'diproses', 'dikirim', 'selesai', 'batal'])->default('pending');
             $table->text('address_text');
             $table->timestamps();
         });

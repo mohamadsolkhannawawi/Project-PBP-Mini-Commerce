@@ -2,49 +2,49 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// Import semua controller yang akan kita gunakan
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 
 /*
 |--------------------------------------------------------------------------
-| Rute Publik (Tidak Memerlukan Login)
+| API Routes
 |--------------------------------------------------------------------------
 |
-| Rute-rute ini dapat diakses oleh siapa saja, termasuk pengunjung.
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
 |
 */
+
+// Rute Publik (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
+Route::get('/products/{product:slug}', [ProductController::class, 'show']); // Menggunakan slug untuk SEO-friendly URL
 
-
-/*
-|--------------------------------------------------------------------------
-| Rute Terotentikasi (Wajib Login)
-|--------------------------------------------------------------------------
-|
-| Semua rute di dalam grup ini dilindungi oleh Sanctum.
-| Pengguna harus mengirimkan token API yang valid untuk mengaksesnya.
-|
-*/
+// Rute yang membutuhkan otentikasi (pengguna harus login)
 Route::middleware('auth:sanctum')->group(function () {
-    // Rute untuk mendapatkan data pengguna yang sedang login
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
-    // Rute untuk Logout
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // ... Nanti, rute untuk Keranjang, Checkout, dan Admin akan ditambahkan di sini ...
-    Route::apiResource('/cart', CartController::class)->except(['show']);
-    Route::post('/checkout', [OrderController::class, 'store']);
+    // Rute untuk Keranjang Belanja
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart', [CartController::class, 'store']);
+    Route::put('/cart-items/{cartItem}', [CartController::class, 'update']);
+    Route::delete('/cart-items/{cartItem}', [CartController::class, 'destroy']);
 
-    Route::middleware('is.admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::apiResource('/products', App\Http\Controllers\Api\Admin\ProductController::class);
-        Route::get('/orders', [App\Http\Controllers\Api\Admin\OrderController::class, 'index']);
-        Route::put('/orders/{order}', [App\Http\Controllers\Api\Admin\OrderController::class, 'update']);
-    });
+    // Rute untuk Checkout
+    Route::post('/checkout', [OrderController::class, 'store']);
+});
+
+// Rute Khusus Admin (membutuhkan login & peran 'admin')
+Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function () {
+    Route::apiResource('/products', AdminProductController::class);
+    Route::get('/orders', [AdminOrderController::class, 'index']);
+    Route::put('/orders/{order}', [AdminOrderController::class, 'update']);
 });
