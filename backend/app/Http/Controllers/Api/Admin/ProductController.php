@@ -6,56 +6,54 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str; // <-- Tambahkan ini
 
 class ProductController extends Controller
 {
-    /**
-     * Menampilkan daftar semua produk untuk admin.
-     */
     public function index()
     {
         $products = Product::with('category')->get();
         return response()->json($products);
     }
 
-    /**
-     * Menyimpan produk baru ke database.
-     */
     public function store(StoreProductRequest $request)
     {
         $validatedData = $request->validated();
+        
+        // Secara otomatis membuat slug dari nama jika tidak disediakan
+        if (empty($validatedData['slug'])) {
+            $validatedData['slug'] = Str::slug($validatedData['name']);
+        }
+
         $product = Product::create($validatedData);
         return response()->json($product, 201);
     }
 
-    /**
-     * Menampilkan detail satu produk.
-     */
     public function show(Product $product)
     {
         return response()->json($product->load('category', 'images'));
     }
 
-    /**
-     * Memperbarui data produk yang ada.
-     */
     public function update(StoreProductRequest $request, Product $product)
     {
         $validatedData = $request->validated();
+
+        // PERBAIKAN: Secara otomatis membuat slug baru jika nama berubah
+        if (isset($validatedData['name'])) {
+            $validatedData['slug'] = Str::slug($validatedData['name']);
+        }
+        
         $product->update($validatedData);
-        return response()->json($product);
+        
+        // Memuat ulang data dari database untuk memastikan respons adalah data terbaru
+        return response()->json($product->fresh());
     }
 
-    /**
-     * Menonaktifkan produk (Soft Delete), bukan menghapus permanen.
-     */
     public function destroy(Product $product)
     {
-        // PERBAIKAN: Alih-alih menghapus, kita ubah status is_active menjadi false.
         $product->is_active = false;
         $product->save();
-        
-        // Mengembalikan respons dengan pesan sukses.
         return response()->json(['message' => 'Produk berhasil dinonaktifkan.']);
     }
 }
+

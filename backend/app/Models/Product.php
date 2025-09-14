@@ -45,3 +45,4 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 }
+

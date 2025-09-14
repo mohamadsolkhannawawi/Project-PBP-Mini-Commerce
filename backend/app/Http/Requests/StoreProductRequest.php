@@ -11,8 +11,8 @@ class StoreProductRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Kita asumsikan otorisasi sudah ditangani oleh middleware 'is.admin' di rute.
-        // Jadi, kita bisa langsung return true di sini.
+        // Otorisasi sudah ditangani oleh middleware 'is.admin' di file rute,
+        // jadi kita bisa langsung mengizinkan request di sini.
         return true;
     }
 
@@ -23,16 +23,29 @@ class StoreProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Aturan validasi ini akan digunakan untuk membuat (store) dan memperbarui (update) produk.
+        // Mendapatkan ID produk dari rute jika ada (ini hanya terjadi saat proses update)
+        $productId = $this->route('product') ? $this->route('product')->id : null;
+
         return [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products,slug,' . ($this->product->id ?? ''),
+            // Saat CREATE: name wajib diisi.
+            // Saat UPDATE: name boleh dikirim, boleh tidak (sometimes).
+            'name' => 'sometimes|required|string|max:255',
+
+            // Saat CREATE: slug tidak wajib dikirim (akan dibuat otomatis).
+            // Saat UPDATE: slug juga tidak wajib, tapi jika dikirim, harus unik
+            // (kecuali untuk produk dengan ID yang sedang di-update).
+            'slug' => 'sometimes|string|max:255|unique:products,slug,' . $productId,
+            
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
+
+            // Aturan 'sometimes' berarti validasi ini hanya berjalan jika field-nya ada di request.
+            // Ini penting untuk UPDATE, di mana admin mungkin hanya ingin mengubah stok.
+            'price' => 'sometimes|required|numeric|min:0',
+            'stock' => 'sometimes|required|integer|min:0',
+            'category_id' => 'sometimes|required|exists:categories,id',
             'image_url' => 'nullable|string|max:500',
             'is_active' => 'sometimes|boolean',
         ];
     }
 }
+
