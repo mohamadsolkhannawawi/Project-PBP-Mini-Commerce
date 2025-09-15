@@ -1,22 +1,44 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, {
+	createContext,
+	useState,
+	useContext,
+	useEffect,
+	useCallback,
+} from "react";
 import axiosClient from "../api/axiosClient";
 
-// Membuat Context
 const AuthContext = createContext();
 
-// Provider Component
-export const AuthProvider = ({ children }) => {
+export function useAuth() {
+	return useContext(AuthContext);
+}
+
+export function AuthProvider({ children }) {
 	const [user, setUser] = useState(null);
 	const [token, setToken] = useState(localStorage.getItem("ACCESS_TOKEN"));
+	const [loading, setLoading] = useState(true); // State untuk loading verifikasi
 
-	useEffect(() => {
-		// Jika ada token, coba ambil data pengguna
+	// Fungsi untuk mengambil data pengguna berdasarkan token
+	const fetchUser = useCallback(async () => {
 		if (token) {
-			// Anda bisa menambahkan endpoint /api/user di Laravel untuk mengambil data user
-			// Untuk sekarang, kita asumsikan token valid jika ada.
-			// Di aplikasi nyata, Anda harus memverifikasi token ini ke server.
+			try {
+				// Endpoint /api/user ini sudah ada di backend (dari pekerjaan #27)
+				const response = await axiosClient.get("/user");
+				setUser(response.data);
+			} catch (error) {
+				console.error("Token tidak valid, menghapus token:", error);
+				localStorage.removeItem("ACCESS_TOKEN");
+				setToken(null);
+				setUser(null);
+			}
 		}
+		setLoading(false);
 	}, [token]);
+
+	// Jalankan fetchUser saat komponen pertama kali dimuat
+	useEffect(() => {
+		fetchUser();
+	}, [fetchUser]);
 
 	const setAuthToken = (newToken) => {
 		setToken(newToken);
@@ -35,27 +57,31 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	const register = async (userData) => {
-		const response = await axiosClient.post("/register", userData);
-		// Otomatis login setelah register berhasil
+		await axiosClient.post("/register", userData);
 		return login({ email: userData.email, password: userData.password });
 	};
 
-	const logout = () => {
-		// Di sini Anda bisa memanggil API logout jika perlu
-		setUser(null);
-		setAuthToken(null);
+	const logout = async () => {
+		try {
+			await axiosClient.post("/logout");
+		} catch (error) {
+			console.error("Gagal logout dari server:", error);
+		} finally {
+			setUser(null);
+			setAuthToken(null);
+		}
 	};
 
-	return (
-		<AuthContext.Provider
-			value={{ user, token, login, register, logout, setAuthToken, setUser }}
-		>
-			{children}
-		</AuthContext.Provider>
-	);
-};
+	const value = { user, token, loading, login, register, logout };
 
-// Custom Hook untuk menggunakan context
-export const useAuth = () => {
-	return useContext(AuthContext);
-};
+	// Tampilkan pesan loading saat aplikasi sedang memverifikasi sesi login
+	if (loading) {
+		return (
+			<div className="flex justify-center items-center h-screen">
+				Memverifikasi sesi...
+			</div>
+		);
+	}
+
+	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}

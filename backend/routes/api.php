@@ -25,6 +25,10 @@ Route::get('/products/{product:slug}', [ProductController::class, 'show']);
 
 // Rute yang membutuhkan otentikasi (pengguna harus login)
 Route::middleware('auth:sanctum')->group(function () {
+    // Rute untuk mengambil data user yang sedang login
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Rute untuk Keranjang Belanja
@@ -32,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart', [CartController::class, 'store']);
     Route::put('/cart-items/{cartItem}', [CartController::class, 'update']);
     Route::delete('/cart-items/{cartItem}', [CartController::class, 'destroy']);
+    
 
     // Rute untuk Checkout
     Route::post('/checkout', [OrderController::class, 'store']);
