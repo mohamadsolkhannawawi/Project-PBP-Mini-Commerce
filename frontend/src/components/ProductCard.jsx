@@ -1,29 +1,27 @@
 import React from "react";
 import { ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 
 function ProductCard({ product }) {
 	const { user } = useAuth();
 	const { addToCart } = useCart();
+	const navigate = useNavigate();
 
-	// PERBAIKAN: Ubah menjadi fungsi async
 	const handleAddToCart = async (e) => {
-		e.preventDefault(); // Mencegah navigasi saat tombol diklik
+		e.preventDefault();
 		if (!user) {
 			alert("Silakan login untuk menambahkan produk ke keranjang.");
+			navigate("/login");
 			return;
 		}
 
 		try {
-			// PERBAIKAN: Tunggu (await) sampai proses addToCart selesai
 			await addToCart(product, 1);
-			// Hanya tampilkan pesan sukses jika tidak ada error
 			alert(`${product.name} telah ditambahkan ke keranjang!`);
 		} catch (error) {
-			// Pesan error sekarang akan ditangani di dalam CartContext
-			// Biarkan kosong di sini atau tampilkan notifikasi yang lebih baik
+			// Error sudah ditangani di dalam CartContext
 		}
 	};
 
@@ -46,13 +44,17 @@ function ProductCard({ product }) {
 				<p className="text-blue-600 font-bold text-xl my-2">
 					Rp {new Intl.NumberFormat("id-ID").format(product.price)}
 				</p>
-				<button
-					onClick={handleAddToCart}
-					className="w-full mt-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center transition-colors"
-				>
-					<ShoppingCart size={18} className="mr-2" />
-					Tambah ke Keranjang
-				</button>
+
+				{/* PERBAIKAN: Tombol ini hanya muncul jika BUKAN admin */}
+				{user?.role !== "admin" && (
+					<button
+						onClick={handleAddToCart}
+						className="w-full mt-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center transition-colors"
+					>
+						<ShoppingCart size={18} className="mr-2" />
+						Tambah ke Keranjang
+					</button>
+				)}
 			</div>
 		</Link>
 	);

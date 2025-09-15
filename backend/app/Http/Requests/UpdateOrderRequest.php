@@ -25,7 +25,7 @@ class UpdateOrderRequest extends FormRequest
     {
         return [
             // Memastikan 'status' yang dikirim harus salah satu dari nilai yang diizinkan.
-            'status' => ['required', Rule::in(['diproses', 'dikirim', 'selesai', 'batal'])],
+            'status' => ['required', Rule::in(['pending', 'diproses', 'dikirim', 'selesai', 'batal'])],
         ];
     }
 }

@@ -6,6 +6,9 @@ function ManageOrdersPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage] = useState(10);
+
 	const fetchOrders = useCallback(async () => {
 		try {
 			setLoading(true);
@@ -34,9 +37,15 @@ function ManageOrdersPage() {
 			alert("Status pesanan berhasil diperbarui.");
 		} catch (err) {
 			alert("Gagal memperbarui status. Silakan coba lagi.");
-			fetchOrders();
+			fetchOrders(); // Re-fetch to get the original state if update fails
 		}
 	};
+
+	// Pagination logic
+	const indexOfLastOrder = currentPage * itemsPerPage;
+	const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
+	const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+	const totalPages = Math.ceil(orders.length / itemsPerPage);
 
 	if (loading)
 		return <div className="p-4 text-center">Memuat data pesanan...</div>;
@@ -47,14 +56,18 @@ function ManageOrdersPage() {
 
 	return (
 		<>
-			<h1 className="text-3xl font-bold text-[#001F3F] mb-6">
-				Manajemen Pesanan
-			</h1>
+			<div className="flex justify-between items-center mb-6">
+				<div>
+					<h1 className="text-3xl font-bold text-[#001F3F]">Manajemen Pesanan</h1>
+					<p className="text-gray-600">Total Pesanan: {orders.length}</p>
+				</div>
+			</div>
 
 			<div className="bg-white shadow-md rounded-lg overflow-hidden">
 				<table className="min-w-full">
 					<thead className="bg-[#4D809E] text-white">
 						<tr>
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">No.</th>
 							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								No. Pesanan
 							</th>
@@ -73,11 +86,12 @@ function ManageOrdersPage() {
 						</tr>
 					</thead>
 					<tbody className="text-gray-700">
-						{orders.map((order) => (
+						{currentOrders.map((order, index) => (
 							<tr
 								key={order.id}
 								className="border-b border-gray-200 hover:bg-gray-50"
 							>
+								<td className="px-5 py-4">{indexOfFirstOrder + index + 1}</td>
 								<td className="px-5 py-4">{order.order_number}</td>
 								<td className="px-5 py-4">{order.user?.name || "N/A"}</td>
 								<td className="px-5 py-4">
@@ -106,6 +120,30 @@ function ManageOrdersPage() {
 					</tbody>
 				</table>
 			</div>
+
+			{totalPages > 1 && (
+				<div className="flex justify-between items-center mt-4">
+					<button
+						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+						disabled={currentPage === 1}
+						className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md disabled:opacity-50"
+					>
+						Back
+					</button>
+					<span>
+						Halaman {currentPage} dari {totalPages}
+					</span>
+					<button
+						onClick={() =>
+							setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+						}
+						disabled={currentPage === totalPages}
+						className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md disabled:opacity-50"
+					>
+						Next
+					</button>
+				</div>
+			)}
 		</>
 	);
 }

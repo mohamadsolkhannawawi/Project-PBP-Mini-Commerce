@@ -66,9 +66,21 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        $product->is_active = false;
+        $product->delete();
+        return response()->json(['message' => 'Produk berhasil dihapus secara permanen.']);
+    }
+
+    public function toggleStatus(Product $product)
+    {
+        $product->is_active = !$product->is_active;
         $product->save();
-        return response()->json(['message' => 'Produk berhasil dinonaktifkan.']);
+
+        $status = $product->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        return response()->json([
+            'message' => "Produk berhasil {$status}.",
+            'product' => $product->fresh()
+        ]);
     }
 }
 

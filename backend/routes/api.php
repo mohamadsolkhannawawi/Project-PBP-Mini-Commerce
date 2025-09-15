@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // Rute Khusus Admin (membutuhkan login & peran 'admin')
 Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function () {
     Route::apiResource('/products', AdminProductController::class);
+    Route::patch('/products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus']);
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::get('/debug/categories', [ProductController::class, 'debugCategories'])->middleware('auth:sanctum');
     

@@ -11,43 +11,36 @@ import CartPage from "./pages/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import ManageProductsPage from "./pages/admin/ManageProductsPage.jsx";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import UserProtectedRoute from "./components/UserProtectedRoute.jsx"; // <-- Impor komponen baru
+
 
 function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <Routes>
-            {/* Rute Publik */}
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="product/:slug" element={<ProductDetailPage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-              
-              {/* Rute Terproteksi untuk Pengguna Biasa */}
-              <Route element={<UserProtectedRoute />}>
-                <Route path="cart" element={<CartPage />} />
-                <Route path="checkout" element={<CheckoutPage />} />
-              </Route>
-            </Route>
+	return (
+		<BrowserRouter>
+			<AuthProvider>
+				<CartProvider>
+					<Routes>
+						<Route path="/" element={<MainLayout />}>
+							<Route index element={<HomePage />} />
+							<Route
+								path="product/:productId"
+								element={<ProductDetailPage />}
+							/>
+							<Route path="login" element={<LoginPage />} />
+							<Route path="register" element={<RegisterPage />} />
+							<Route path="cart" element={<CartPage />} />
+							<Route path="checkout" element={<CheckoutPage />} />
+						</Route>
 
-            {/* Rute Admin Terproteksi */}
-            <Route element={<ProtectedRoute adminOnly={true} />}>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<Navigate to="products" replace />} />
-                <Route path="products" element={<ManageProductsPage />} />
-                <Route path="orders" element={<ManageOrdersPage />} />
-              </Route>
-            </Route>
-
-          </Routes>
-        </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  );
+						<Route path="/admin" element={<AdminLayout />}>
+							<Route index element={<Navigate to="products" replace />} />
+							<Route path="products" element={<ManageProductsPage />} />
+							<Route path="orders" element={<ManageOrdersPage />} />
+						</Route>
+					</Routes>
+				</CartProvider>
+			</AuthProvider>
+		</BrowserRouter>
+	);
 }
 
 export default App;

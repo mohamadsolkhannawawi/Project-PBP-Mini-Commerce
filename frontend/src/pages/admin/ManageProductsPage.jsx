@@ -10,6 +10,9 @@ function ManageProductsPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedProduct, setSelectedProduct] = useState(null);
 
+	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage] = useState(10);
+
 	const fetchProducts = useCallback(async () => {
 		try {
 			setLoading(true);
@@ -49,18 +52,45 @@ function ManageProductsPage() {
 		}
 	};
 
-	const handleDelete = async (productId) => {
-		if (window.confirm("Apakah Anda yakin ingin menonaktifkan produk ini?")) {
+	const handleToggleStatus = async (product) => {
+		try {
+			const response = await axiosClient.patch(
+				`/admin/products/${product.id}/toggle-status`
+			);
+			setProducts((prevProducts) =>
+				prevProducts.map((p) =>
+						p.id === product.id ? response.data.product : p
+				)
+			);
+		} catch (err) {
+			alert("Gagal mengubah status produk.");
+		}
+	};
+
+	const handlePermanentDelete = async (productId) => {
+		if (
+			window.confirm(
+				"Apakah Anda yakin ingin menghapus produk ini secara permanen? Tindakan ini tidak dapat diurungkan."
+			)
+		) {
 			try {
 				await axiosClient.delete(`/admin/products/${productId}`);
-				await fetchProducts();
+				setProducts((prevProducts) =>
+					prevProducts.filter((p) => p.id !== productId)
+				);
 			} catch (err) {
-				alert("Gagal menonaktifkan produk.");
+				alert("Gagal menghapus produk.");
 			}
 		}
 	};
 
-	if (loading)
+	// Pagination logic
+	const indexOfLastProduct = currentPage * itemsPerPage;
+	const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
+	const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+	const totalPages = Math.ceil(products.length / itemsPerPage);
+
+	if (loading) 
 		return <div className="p-4 text-center">Memuat data produk...</div>;
 	if (error)
 		return (
@@ -70,7 +100,10 @@ function ManageProductsPage() {
 	return (
 		<>
 			<div className="flex justify-between items-center mb-6">
-				<h1 className="text-3xl font-bold text-[#001F3F]">Manajemen Produk</h1>
+				<div>
+					<h1 className="text-3xl font-bold text-[#001F3F]">Manajemen Produk</h1>
+					<p className="text-gray-600">Total Produk: {products.length}</p>
+				</div>
 				<button
 					onClick={() => {
 						setSelectedProduct(null);
@@ -86,6 +119,7 @@ function ManageProductsPage() {
 				<table className="min-w-full">
 					<thead className="bg-[#4D809E] text-white">
 						<tr>
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">No.</th>
 							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								Nama Produk
 							</th>
@@ -105,11 +139,12 @@ function ManageProductsPage() {
 						</tr>
 					</thead>
 					<tbody className="text-gray-700">
-						{products.map((product) => (
+						{currentProducts.map((product, index) => (
 							<tr
 								key={product.id}
 								className="border-b border-gray-200 hover:bg-gray-50"
 							>
+								<td className="px-5 py-4">{indexOfFirstProduct + index + 1}</td>
 								<td className="px-5 py-4">{product.name}</td>
 								<td className="px-5 py-4">{product.category?.name || "N/A"}</td>
 								<td className="px-5 py-4">
@@ -118,16 +153,16 @@ function ManageProductsPage() {
 								<td className="px-5 py-4">{product.stock}</td>
 								<td className="px-5 py-4">
 									<span
-										className={`px-2 py-1 text-xs font-semibold leading-tight ${
-											product.is_active
+										className={`px-2 py-1 text-xs font-semibold leading-tight ${product.is_active
 												? "text-green-700 bg-green-100"
 												: "text-red-700 bg-red-100"
-										} rounded-full`}
+										}
+											rounded-full`}
 									>
 										{product.is_active ? "Aktif" : "Nonaktif"}
 									</span>
 								</td>
-								<td className="px-5 py-4 text-right">
+								<td className="px-5 py-4 text-right flex items-center">
 									<button
 										onClick={() => {
 											setSelectedProduct(product);
@@ -138,10 +173,20 @@ function ManageProductsPage() {
 										Edit
 									</button>
 									<button
-										onClick={() => handleDelete(product.id)}
-										className="text-[#F07167] hover:underline"
+										onClick={() => handleToggleStatus(product)}
+										className={`hover:underline mr-4 ${product.is_active
+												? "text-yellow-600"
+												: "text-green-600"
+										}
+										`}
 									>
-										Nonaktifkan
+										{product.is_active ? "Nonaktifkan" : "Aktifkan"}
+									</button>
+									<button
+										onClick={() => handlePermanentDelete(product.id)}
+										className="text-red-600 hover:underline"
+									>
+										🗑️
 									</button>
 								</td>
 							</tr>
@@ -149,6 +194,30 @@ function ManageProductsPage() {
 					</tbody>
 				</table>
 			</div>
+
+			{totalPages > 1 && (
+				<div className="flex justify-between items-center mt-4">
+					<button
+						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+						disabled={currentPage === 1}
+						className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md disabled:opacity-50"
+					>
+						Back
+					</button>
+					<span>
+						Halaman {currentPage} dari {totalPages}
+					</span>
+					<button
+						onClick={() =>
+							setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+						}
+						disabled={currentPage === totalPages}
+						className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md disabled:opacity-50"
+					>
+						Next
+					</button>
+				</div>
+			)}
 
 			{isModalOpen && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

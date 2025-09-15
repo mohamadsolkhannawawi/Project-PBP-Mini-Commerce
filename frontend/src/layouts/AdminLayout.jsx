@@ -1,10 +1,16 @@
 import React from "react";
-import { Outlet, Link, NavLink } from "react-router-dom";
+import { Outlet, Link, NavLink, useNavigate } from "react-router-dom";
 import { Package, ShoppingBag, LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 function AdminLayout() {
 	const { user, logout } = useAuth();
+	const navigate = useNavigate();
+
+	const handleLogout = async () => {
+		await logout();
+		navigate("/login");
+	};
 
 	// Kelas untuk styling link di sidebar
 	const baseLinkClass =
@@ -16,7 +22,7 @@ function AdminLayout() {
 		<div className="flex h-screen bg-gray-100 font-sans">
 			{/* Sidebar */}
 			<aside className="w-64 flex-shrink-0" aria-label="Sidebar">
-				<div className="overflow-y-auto py-4 px-3 h-full bg-[#001F3F] text-white">
+				<div className="relative overflow-y-auto py-4 px-3 h-full bg-[#001F3F] text-white">
 					{" "}
 					{/* Biru Tua */}
 					<Link to="/" className="flex items-center pl-2.5 mb-5">
@@ -25,7 +31,9 @@ function AdminLayout() {
 						</span>
 					</Link>
 					<div className="p-2 mb-4 border-t border-b border-gray-700">
-						<p className="text-sm font-semibold">Selamat Datang,</p>
+						<p className="text-sm font-semibold text-gray-400">
+							Selamat Datang,
+						</p>
 						<p className="font-bold">{user?.name || "Admin"}</p>
 					</div>
 					<ul className="space-y-2">
@@ -53,7 +61,10 @@ function AdminLayout() {
 						</li>
 					</ul>
 					<div className="absolute bottom-0 left-0 p-4 w-64">
-						<button onClick={logout} className={`w-full ${normalLinkClass}`}>
+						<button
+							onClick={handleLogout}
+							className={`w-full ${normalLinkClass}`}
+						>
 							<LogOut className="w-6 h-6" />
 							<span className="ml-3">Logout</span>
 						</button>
