@@ -1,77 +1,113 @@
-import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { mockProducts } from "../data/mockData";
-import { ShoppingCart, ArrowLeft } from "lucide-react";
-import { useCart } from "../context/CartContext"; // IMPORT CUSTOM HOOK
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import axiosClient from '../api/axiosClient'; // Impor klien API
+import { ShoppingCart, ArrowLeft } from 'lucide-react';
+import { useCart } from '../contexts/CartContext.jsx'; // PERBAIKAN: Jalur impor yang benar
 
 function ProductDetailPage() {
-	const { productId } = useParams();
-	const { addToCart } = useCart(); // <-- DAPATKAN FUNGSI DARI CONTEXT
-	const [quantity, setQuantity] = useState(1);
-	const product = mockProducts.find((p) => p.id === parseInt(productId));
+    // 'productId' di sini sebenarnya adalah slug produk dari URL
+    const { productId } = useParams(); 
+    const { addToCart } = useCart();
+    const [quantity, setQuantity] = useState(1);
 
-	const handleAddToCart = () => {
-		addToCart(product, quantity);
-		alert(`${quantity} ${product.name} telah ditambahkan ke keranjang!`);
-	};
+    // State untuk menyimpan data produk dari API
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-	if (!product) {
-		return (
-			<div className="text-center py-10">
-				<h2>Produk tidak ditemukan!</h2>
-			</div>
-		);
-	}
+    // useEffect untuk mengambil data saat komponen dimuat atau slug berubah
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                setLoading(true);
+                // Memanggil endpoint GET /products/{slug}
+                const response = await axiosClient.get(`/products/${productId}`);
+                setProduct(response.data);
+                setError(null);
+            } catch (err) {
+                setError('Produk tidak ditemukan atau gagal dimuat.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-	return (
-		<div className="container mx-auto px-4 py-8">
-			<Link
-				to="/"
-				className="inline-flex items-center text-blue-600 hover:underline mb-6"
-			>
-				<ArrowLeft size={20} className="mr-2" />
-				Kembali ke semua produk
-			</Link>
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-				<div>
-					<img
-						src={product.imageUrl}
-						alt={product.name}
-						className="w-full h-auto rounded-lg shadow-lg"
-					/>
-				</div>
-				<div>
-					<h1 className="text-4xl font-bold text-gray-800 mb-4">
-						{product.name}
-					</h1>
-					<p className="text-3xl font-light text-blue-600 mb-6">
-						Rp {product.price}
-					</p>
-					<p className="text-gray-600 mb-6">{product.description}</p>
-					<div className="flex items-center mb-6">
-						<label htmlFor="quantity" className="mr-4 font-semibold">
-							Jumlah:
-						</label>
-						<input
-							type="number"
-							id="quantity"
-							value={quantity}
-							onChange={(e) => setQuantity(parseInt(e.target.value))}
-							min="1"
-							className="w-20 p-2 border rounded-lg text-center"
-						/>
-					</div>
-					<button
-						onClick={handleAddToCart}
-						className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center"
-					>
-						<ShoppingCart size={20} className="mr-2" />
-						Tambah ke Keranjang
-					</button>
-				</div>
-			</div>
-		</div>
-	);
+        fetchProduct();
+    }, [productId]); // Efek ini akan berjalan kembali jika productId (slug) berubah
+
+    const handleAddToCart = () => {
+        if (product) {
+            addToCart(product, quantity);
+            alert(`${quantity} ${product.name} telah ditambahkan ke keranjang!`);
+        }
+    };
+
+    // Tampilkan pesan loading saat data sedang diambil
+    if (loading) {
+        return <div className="text-center py-10">Memuat detail produk...</div>;
+    }
+
+    // Tampilkan pesan error jika terjadi kegagalan
+    if (error) {
+        return <div className="text-center py-10 text-red-500">{error}</div>;
+    }
+    
+    // Tampilkan pesan jika produk tidak ditemukan setelah selesai loading
+    if (!product) {
+        return (
+            <div className="text-center py-10">
+                <h2 className="text-2xl font-bold">Produk tidak ditemukan!</h2>
+                <Link to="/" className="text-blue-600 hover:underline mt-4 inline-block">Kembali ke Beranda</Link>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <Link to="/" className="inline-flex items-center text-blue-600 hover:underline mb-6">
+                <ArrowLeft size={20} className="mr-2" />
+                Kembali ke semua produk
+            </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-auto rounded-lg shadow-lg object-cover"
+                    />
+                </div>
+                <div>
+                    <h1 className="text-4xl font-bold text-gray-800 mb-4">
+                        {product.name}
+                    </h1>
+                    <p className="text-3xl font-light text-blue-600 mb-6">
+                        Rp {new Intl.NumberFormat('id-ID').format(product.price)}
+                    </p>
+                    <p className="text-gray-600 mb-6">{product.description}</p>
+                    <div className="flex items-center mb-6">
+                        <label htmlFor="quantity" className="mr-4 font-semibold">
+                            Jumlah:
+                        </label>
+                        <input
+                            type="number"
+                            id="quantity"
+                            value={quantity}
+                            onChange={(e) => setQuantity(parseInt(e.target.value))}
+                            min="1"
+                            className="w-20 p-2 border rounded-lg text-center"
+                        />
+                    </div>
+                    <button
+                        onClick={handleAddToCart}
+                        className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                    >
+                        <ShoppingCart size={20} className="mr-2" />
+                        Tambah ke Keranjang
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export default ProductDetailPage;

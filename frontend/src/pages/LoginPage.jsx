@@ -1,15 +1,27 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function LoginPage() {
+	const navigate = useNavigate();
+	const { login } = useAuth();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState(null);
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		// TODO: Logika untuk mengirim data ke backend akan ditambahkan di sini
-		console.log("Mencoba login dengan:", { email, password });
-		alert("Fungsionalitas login sedang dalam pengembangan.");
+		setError(null);
+		try {
+			await login({ email, password });
+			navigate("/"); // Arahkan ke halaman utama setelah login berhasil
+		} catch (err) {
+			if (err.response && err.response.status === 401) {
+				setError("Email atau password salah.");
+			} else {
+				setError("Terjadi kesalahan. Silakan coba lagi.");
+			}
+		}
 	};
 
 	return (
@@ -33,6 +45,11 @@ function LoginPage() {
 					className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md"
 					onSubmit={handleSubmit}
 				>
+					{error && (
+						<div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+							{error}
+						</div>
+					)}
 					<div className="rounded-md shadow-sm -space-y-px">
 						<div>
 							<label htmlFor="email-address" className="sr-only">

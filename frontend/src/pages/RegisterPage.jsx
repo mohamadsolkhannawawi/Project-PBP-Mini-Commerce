@@ -1,20 +1,39 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function RegisterPage() {
+	const navigate = useNavigate();
+	const { register } = useAuth();
+	const [name, setName] = useState(""); // <-- Tambahkan state untuk nama
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
+	const [error, setError] = useState(null); // <-- Tambahkan state untuk error
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (password !== confirmPassword) {
-			alert("Password tidak cocok!");
+			setError("Password tidak cocok!");
 			return;
 		}
-		// TODO: Logika untuk mengirim data pendaftaran ke backend
-		console.log("Mencoba mendaftar dengan:", { email, password });
-		alert("Fungsionalitas pendaftaran sedang dalam pengembangan.");
+		setError(null);
+		try {
+			await register({
+				name,
+				email,
+				password,
+				password_confirmation: confirmPassword,
+			});
+			navigate("/");
+		} catch (err) {
+			if (err.response && err.response.data.errors) {
+				const messages = Object.values(err.response.data.errors).flat();
+				setError(messages.join(" "));
+			} else {
+				setError("Gagal mendaftar. Silakan coba lagi.");
+			}
+		}
 	};
 
 	return (
@@ -38,7 +57,25 @@ function RegisterPage() {
 					className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md"
 					onSubmit={handleSubmit}
 				>
+					{error && (
+						<div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+							{error}
+						</div>
+					)}
 					<div className="rounded-md shadow-sm space-y-4">
+						<div>
+							<label htmlFor="name">Nama Lengkap</label>
+							<input
+								id="name"
+								name="name"
+								type="text"
+								required
+								className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+								placeholder="Nama Lengkap Anda"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+							/>
+						</div>
 						<div>
 							<label htmlFor="email-address">Alamat Email</label>
 							<input
