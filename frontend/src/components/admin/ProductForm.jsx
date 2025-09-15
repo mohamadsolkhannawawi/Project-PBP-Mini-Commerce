@@ -13,12 +13,11 @@ function ProductForm({ product, onSave, onCancel }) {
 	const [categories, setCategories] = useState([]);
 	const [error, setError] = useState("");
 
-	// Ambil daftar kategori saat komponen dimuat
 	useEffect(() => {
 		const fetchCategories = async () => {
 			try {
-				// Asumsi Anda memiliki endpoint publik untuk mengambil kategori
-				const response = await axiosClient.get("/categories"); // Pastikan endpoint ini ada
+				// Endpoint publik untuk kategori, jadi tidak perlu token admin
+				const response = await axiosClient.get("/categories");
 				setCategories(response.data);
 			} catch (error) {
 				console.error("Gagal memuat kategori:", error);
@@ -28,7 +27,6 @@ function ProductForm({ product, onSave, onCancel }) {
 		fetchCategories();
 	}, []);
 
-	// Isi form dengan data produk jika sedang dalam mode edit
 	useEffect(() => {
 		if (product) {
 			setFormData({
@@ -46,7 +44,7 @@ function ProductForm({ product, onSave, onCancel }) {
 		const { name, value, type, checked } = e.target;
 		setFormData((prev) => ({
 			...prev,
-			[name]: type === "checkbox" ? checked : value,
+			[name]: type === "checkbox" ? (checked ? 1 : 0) : value,
 		}));
 	};
 
@@ -79,6 +77,7 @@ function ProductForm({ product, onSave, onCancel }) {
 					name="description"
 					value={formData.description}
 					onChange={handleChange}
+					rows="3"
 					className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
 				/>
 			</div>

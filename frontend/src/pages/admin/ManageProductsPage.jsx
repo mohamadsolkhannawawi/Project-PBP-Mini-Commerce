@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axiosClient from "../../api/axiosClient";
-import ProductForm from "../../components/admin/ProductForm"; // Impor komponen form
+import ProductForm from "../../components/admin/ProductForm";
 
 function ManageProductsPage() {
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	// State untuk modal form
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [selectedProduct, setSelectedProduct] = useState(null); // null untuk mode create, object untuk mode edit
+	const [selectedProduct, setSelectedProduct] = useState(null);
 
 	const fetchProducts = useCallback(async () => {
 		try {
@@ -29,24 +28,22 @@ function ManageProductsPage() {
 	}, [fetchProducts]);
 
 	const handleSave = async (productData) => {
+		const dataToSave = { ...productData, is_active: !!productData.is_active };
 		try {
 			if (selectedProduct) {
-				// Mode Update
 				await axiosClient.put(
 					`/admin/products/${selectedProduct.id}`,
-					productData
+					dataToSave
 				);
 			} else {
-				// Mode Create
-				await axiosClient.post("/admin/products", productData);
+				await axiosClient.post("/admin/products", dataToSave);
 			}
 			setIsModalOpen(false);
 			setSelectedProduct(null);
-			await fetchProducts(); // Muat ulang data
+			await fetchProducts();
 		} catch (err) {
-			console.error("Gagal menyimpan produk:", err);
 			const errorMessages = err.response?.data?.errors
-				? Object.values(err.response.data.errors).flat().join(" ")
+				? Object.values(err.response.data.errors).flat().join(" \n")
 				: "Gagal menyimpan produk. Periksa kembali data Anda.";
 			alert(errorMessages);
 		}
@@ -58,86 +55,91 @@ function ManageProductsPage() {
 				await axiosClient.delete(`/admin/products/${productId}`);
 				await fetchProducts();
 			} catch (err) {
-				console.error("Gagal menonaktifkan produk:", err);
 				alert("Gagal menonaktifkan produk.");
 			}
 		}
 	};
 
-	if (loading) return <div>Memuat data produk...</div>;
-	if (error) return <div className="text-red-500 p-4">{error}</div>;
+	if (loading)
+		return <div className="p-4 text-center">Memuat data produk...</div>;
+	if (error)
+		return (
+			<div className="text-red-500 bg-red-100 p-4 rounded-md">{error}</div>
+		);
 
 	return (
-		<div className="container mx-auto p-4">
-			<div className="flex justify-between items-center mb-4">
-				<h1 className="text-2xl font-bold">Manajemen Produk</h1>
+		<>
+			<div className="flex justify-between items-center mb-6">
+				<h1 className="text-3xl font-bold text-[#001F3F]">Manajemen Produk</h1>
 				<button
 					onClick={() => {
 						setSelectedProduct(null);
 						setIsModalOpen(true);
 					}}
-					className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+					className="bg-[#F07167] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
 				>
-					Tambah Produk
+					+ Tambah Produk
 				</button>
 			</div>
 
-			{/* Tabel Produk */}
-			<div className="bg-white shadow rounded-lg overflow-x-auto">
-				<table className="min-w-full leading-normal">
-					<thead>
+			<div className="bg-white shadow-md rounded-lg overflow-hidden">
+				<table className="min-w-full">
+					<thead className="bg-[#4D809E] text-white">
 						<tr>
-							<th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-								Nama
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+								Nama Produk
 							</th>
-							<th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+								Kategori
+							</th>
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								Harga
 							</th>
-							<th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								Stok
 							</th>
-							<th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								Status
 							</th>
-							<th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100"></th>
+							<th className="px-5 py-3"></th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody className="text-gray-700">
 						{products.map((product) => (
-							<tr key={product.id}>
-								<td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-									{product.name}
-								</td>
-								<td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+							<tr
+								key={product.id}
+								className="border-b border-gray-200 hover:bg-gray-50"
+							>
+								<td className="px-5 py-4">{product.name}</td>
+								<td className="px-5 py-4">{product.category?.name || "N/A"}</td>
+								<td className="px-5 py-4">
 									Rp {new Intl.NumberFormat("id-ID").format(product.price)}
 								</td>
-								<td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-									{product.stock}
-								</td>
-								<td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+								<td className="px-5 py-4">{product.stock}</td>
+								<td className="px-5 py-4">
 									<span
-										className={`px-2 py-1 font-semibold leading-tight ${
+										className={`px-2 py-1 text-xs font-semibold leading-tight ${
 											product.is_active
-												? "text-green-900 bg-green-200"
-												: "text-red-900 bg-red-200"
+												? "text-green-700 bg-green-100"
+												: "text-red-700 bg-red-100"
 										} rounded-full`}
 									>
 										{product.is_active ? "Aktif" : "Nonaktif"}
 									</span>
 								</td>
-								<td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right">
+								<td className="px-5 py-4 text-right">
 									<button
 										onClick={() => {
 											setSelectedProduct(product);
 											setIsModalOpen(true);
 										}}
-										className="text-blue-600 hover:text-blue-900 mr-3"
+										className="text-[#4D809E] hover:underline mr-4"
 									>
 										Edit
 									</button>
 									<button
 										onClick={() => handleDelete(product.id)}
-										className="text-red-600 hover:text-red-900"
+										className="text-[#F07167] hover:underline"
 									>
 										Nonaktifkan
 									</button>
@@ -148,10 +150,9 @@ function ManageProductsPage() {
 				</table>
 			</div>
 
-			{/* Modal untuk Form */}
 			{isModalOpen && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-					<div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+					<div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
 						<h2 className="text-xl font-bold mb-4">
 							{selectedProduct ? "Edit Produk" : "Tambah Produk Baru"}
 						</h2>
@@ -166,7 +167,7 @@ function ManageProductsPage() {
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	);
 }
 

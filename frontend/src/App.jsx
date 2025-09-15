@@ -11,32 +11,34 @@ import CheckoutPage from "./pages/CheckoutPage.jsx";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage.jsx";
 import ManageProductsPage from "./pages/admin/ManageProductsPage.jsx";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage.jsx";
+import AdminLayout from "./layouts/AdminLayout.jsx";
+import { Navigate } from "react-router-dom";
+
 
 function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <Routes>
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<HomePage />} />
-              <Route path="product/:productId" element={<ProductDetailPage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-              <Route path="cart" element={<CartPage />} />
-              <Route path="checkout" element={<CheckoutPage />} />
-            </Route>
+	return (
+		<BrowserRouter>
+			<AuthProvider>
+				<CartProvider>
+					<Routes>
+						{/* Rute Publik */}
+						<Route path="/" element={<MainLayout />}>
+							<Route index element={<HomePage />} />
+							{/* ... rute publik lainnya ... */}
+						</Route>
 
-            <Route path="/admin">
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="products" element={<ManageProductsPage />} />
-              <Route path="orders" element={<ManageOrdersPage />} />
-            </Route>
-          </Routes>
-        </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  );
+						{/* Rute Admin dengan Layout Khusus */}
+						<Route path="/admin" element={<AdminLayout />}>
+							<Route index element={<Navigate to="products" />} />{" "}
+							{/* Redirect /admin ke /admin/products */}
+							<Route path="products" element={<ManageProductsPage />} />
+							<Route path="orders" element={<ManageOrdersPage />} />
+						</Route>
+					</Routes>
+				</CartProvider>
+			</AuthProvider>
+		</BrowserRouter>
+	);
 }
 
 export default App;
