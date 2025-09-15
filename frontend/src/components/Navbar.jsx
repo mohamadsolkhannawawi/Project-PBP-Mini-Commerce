@@ -11,6 +11,8 @@ import {
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
 
+import SearchBar from "./SearchBar";
+
 function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const { cartCount } = useCart();
@@ -30,10 +32,8 @@ function Navbar() {
 						TokoKita
 					</Link>
 
-					<div className="hidden md:flex items-center space-x-6">
-						<Link to="/" className="text-gray-600 hover:text-blue-500">
-							Home
-						</Link>
+					<div className="flex-1 px-8">
+						<SearchBar />
 					</div>
 
 					<div className="flex items-center space-x-4">

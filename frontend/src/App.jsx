@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
+import SearchResultsPage from "./pages/SearchResultsPage.jsx";
 import ManageProductsPage from "./pages/admin/ManageProductsPage.jsx";
 import ManageOrdersPage from "./pages/admin/ManageOrdersPage.jsx";
 
@@ -29,6 +30,7 @@ function App() {
 							<Route path="register" element={<RegisterPage />} />
 							<Route path="cart" element={<CartPage />} />
 							<Route path="checkout" element={<CheckoutPage />} />
+							<Route path="search" element={<SearchResultsPage />} />
 						</Route>
 
 						<Route path="/admin" element={<AdminLayout />}>

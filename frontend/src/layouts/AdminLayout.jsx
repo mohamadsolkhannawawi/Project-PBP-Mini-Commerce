@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet, Link, NavLink, useNavigate } from "react-router-dom";
 import { Package, ShoppingBag, LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import SearchBar from "../components/SearchBar";
 
 function AdminLayout() {
 	const { user, logout } = useAuth();
@@ -74,8 +75,11 @@ function AdminLayout() {
 
 			{/* Main Content */}
 			<main className="flex-1 p-6 overflow-y-auto bg-[#FDFDFF]">
-				{" "}
-				{/* Abu-abu Cerah */}
+				<header className="flex justify-end items-center mb-6">
+					<div className="w-full max-w-md">
+						<SearchBar />
+					</div>
+				</header>
 				<Outlet />
 			</main>
 		</div>
