@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
-import { useAuth } from "../contexts/AuthContext"; // Impor useAuth
+import { useAuth } from "../contexts/AuthContext";
 
 function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const { cartCount } = useCart();
-	const { user, logout } = useAuth(); // Dapatkan user dan fungsi logout
+	const { user, logout } = useAuth();
 
 	return (
 		<nav className="bg-white shadow-md sticky top-0 z-50">
@@ -22,6 +22,16 @@ function Navbar() {
 						<Link to="/" className="text-gray-600 hover:text-blue-500">
 							Home
 						</Link>
+
+						{/* PERBAIKAN: Tautan ini hanya muncul jika user adalah admin */}
+						{user && user.role === "admin" && (
+							<Link
+								to="/admin"
+								className="text-gray-600 hover:text-blue-500 font-semibold"
+							>
+								Admin Dashboard
+							</Link>
+						)}
 					</div>
 
 					{/* Ikon dan Status Login */}
@@ -66,7 +76,29 @@ function Navbar() {
 					</div>
 				</div>
 			</div>
-			{/* ... (Menu Mobile bisa Anda lengkapi nanti) ... */}
+
+			{/* Menu Mobile (bisa Anda lengkapi nanti dengan logika yang sama) */}
+			{isOpen && (
+				<div className="md:hidden bg-white pb-4">
+					<Link
+						to="/"
+						className="block py-2 px-4"
+						onClick={() => setIsOpen(false)}
+					>
+						Home
+					</Link>
+					{user && user.role === "admin" && (
+						<Link
+							to="/admin"
+							className="block py-2 px-4 font-semibold"
+							onClick={() => setIsOpen(false)}
+						>
+							Admin Dashboard
+						</Link>
+					)}
+					{/* ... tambahkan link login/logout untuk mobile ... */}
+				</div>
+			)}
 		</nav>
 	);
 }
