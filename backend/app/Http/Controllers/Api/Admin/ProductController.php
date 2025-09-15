@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str; // <-- Tambahkan ini
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -19,14 +19,32 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $validatedData = $request->validated();
-        
-        // Secara otomatis membuat slug dari nama jika tidak disediakan
+
         if (empty($validatedData['slug'])) {
             $validatedData['slug'] = Str::slug($validatedData['name']);
         }
 
-        $product = Product::create($validatedData);
-        return response()->json($product, 201);
+        // Default is_active = true kalau tidak dikirim
+        $validatedData['is_active'] = $validatedData['is_active'] ?? true;
+
+        try {
+            $product = Product::create($validatedData);
+
+            if (!$product->exists) {
+                return response()->json([
+                    'message' => 'Gagal menyimpan produk karena alasan yang tidak diketahui.'
+                ], 500);
+            }
+
+            return response()->json($product, 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menyimpan produk ke database.',
+                'error'   => $e->getMessage(),
+                'data'    => $validatedData // tambahkan untuk debug
+            ], 500);
+        }
     }
 
     public function show(Product $product)
@@ -38,14 +56,11 @@ class ProductController extends Controller
     {
         $validatedData = $request->validated();
 
-        // PERBAIKAN: Secara otomatis membuat slug baru jika nama berubah
         if (isset($validatedData['name'])) {
             $validatedData['slug'] = Str::slug($validatedData['name']);
         }
         
         $product->update($validatedData);
-        
-        // Memuat ulang data dari database untuk memastikan respons adalah data terbaru
         return response()->json($product->fresh());
     }
 

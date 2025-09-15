@@ -13,6 +13,8 @@ class Product extends Model
 
     /**
      * The attributes that are mass assignable.
+     * Properti ini adalah "daftar putih" kolom yang boleh diisi
+     * menggunakan metode create() atau update().
      *
      * @var array<int, string>
      */
@@ -29,7 +31,6 @@ class Product extends Model
 
     /**
      * Mendefinisikan relasi "belongs-to" ke Category.
-     * Setiap produk (Product) dimiliki oleh satu kategori (Category).
      */
     public function category(): BelongsTo
     {
@@ -38,11 +39,9 @@ class Product extends Model
 
     /**
      * Mendefinisikan relasi "one-to-many" ke ProductImage.
-     * Satu produk (Product) bisa memiliki banyak gambar (images).
      */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
 }
-

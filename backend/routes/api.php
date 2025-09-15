@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function () {
     Route::apiResource('/products', AdminProductController::class);
     Route::get('/orders', [AdminOrderController::class, 'index']);
+    Route::get('/debug/categories', [ProductController::class, 'debugCategories'])->middleware('auth:sanctum');
     
     // PERBAIKAN: Mengembalikan ke Route::put yang benar secara semantik.
     // Ini akan bekerja setelah cache dibersihkan dan Postman disesuaikan.
