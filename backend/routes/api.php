@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CategoryController;
 
 // Import semua controller yang akan kita gunakan
 use App\Http\Controllers\Api\AuthController;
@@ -20,6 +21,8 @@ use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 // Rute Publik (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+// Rute Kategori
+Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product:slug}', [ProductController::class, 'show']);
 
