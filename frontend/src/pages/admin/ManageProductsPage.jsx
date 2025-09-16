@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axiosClient from "../../api/axiosClient";
 import ProductForm from "../../components/admin/ProductForm";
+import { Trash2 } from "lucide-react";
 
 function ManageProductsPage() {
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
+	const [searchTerm, setSearchTerm] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -59,7 +61,7 @@ function ManageProductsPage() {
 			);
 			setProducts((prevProducts) =>
 				prevProducts.map((p) =>
-						p.id === product.id ? response.data.product : p
+					p.id === product.id ? response.data.product : p
 				)
 			);
 		} catch (err) {
@@ -84,13 +86,23 @@ function ManageProductsPage() {
 		}
 	};
 
+	// Search logic
+	const filteredProducts = products.filter(
+		(product) =>
+			product.name &&
+			product.name.toLowerCase().includes(searchTerm.toLowerCase())
+	);
+
 	// Pagination logic
 	const indexOfLastProduct = currentPage * itemsPerPage;
 	const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
-	const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
-	const totalPages = Math.ceil(products.length / itemsPerPage);
+	const currentProducts = filteredProducts.slice(
+		indexOfFirstProduct,
+		indexOfLastProduct
+	);
+	const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-	if (loading) 
+	if (loading)
 		return <div className="p-4 text-center">Memuat data produk...</div>;
 	if (error)
 		return (
@@ -101,25 +113,44 @@ function ManageProductsPage() {
 		<>
 			<div className="flex justify-between items-center mb-6">
 				<div>
-					<h1 className="text-3xl font-bold text-[#001F3F]">Manajemen Produk</h1>
-					<p className="text-gray-600">Total Produk: {products.length}</p>
+					<h1 className="text-3xl font-bold text-[#001F3F]">
+						Manajemen Produk
+					</h1>
+					<p className="text-gray-600 mt-3">
+						Total Produk: {filteredProducts.length}
+					</p>
 				</div>
-				<button
-					onClick={() => {
-						setSelectedProduct(null);
-						setIsModalOpen(true);
-					}}
-					className="bg-[#F07167] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
-				>
-					+ Tambah Produk
-				</button>
+				<div className="flex gap-2 items-center">
+					<input
+						type="text"
+						placeholder="Cari Nama Produk..."
+						value={searchTerm}
+						onChange={(e) => {
+							setSearchTerm(e.target.value);
+							setCurrentPage(1);
+						}}
+						className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+						style={{ minWidth: 200 }}
+					/>
+					<button
+						onClick={() => {
+							setSelectedProduct(null);
+							setIsModalOpen(true);
+						}}
+						className="bg-[#F07167] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+					>
+						+ Tambah Produk
+					</button>
+				</div>
 			</div>
 
 			<div className="bg-white shadow-md rounded-lg overflow-hidden">
 				<table className="min-w-full">
 					<thead className="bg-[#4D809E] text-white">
 						<tr>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">No.</th>
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+								No.
+							</th>
 							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								Nama Produk
 							</th>
@@ -153,7 +184,8 @@ function ManageProductsPage() {
 								<td className="px-5 py-4">{product.stock}</td>
 								<td className="px-5 py-4">
 									<span
-										className={`px-2 py-1 text-xs font-semibold leading-tight ${product.is_active
+										className={`px-2 py-1 text-xs font-semibold leading-tight ${
+											product.is_active
 												? "text-green-700 bg-green-100"
 												: "text-red-700 bg-red-100"
 										}
@@ -174,9 +206,8 @@ function ManageProductsPage() {
 									</button>
 									<button
 										onClick={() => handleToggleStatus(product)}
-										className={`hover:underline mr-4 ${product.is_active
-												? "text-yellow-600"
-												: "text-green-600"
+										className={`hover:underline mr-4 ${
+											product.is_active ? "text-yellow-600" : "text-green-600"
 										}
 										`}
 									>
@@ -184,9 +215,9 @@ function ManageProductsPage() {
 									</button>
 									<button
 										onClick={() => handlePermanentDelete(product.id)}
-										className="text-red-600 hover:underline"
+										className="text-red-600"
 									>
-										🗑️
+										<Trash2 className="inline-block mr-1" size={16} />
 									</button>
 								</td>
 							</tr>

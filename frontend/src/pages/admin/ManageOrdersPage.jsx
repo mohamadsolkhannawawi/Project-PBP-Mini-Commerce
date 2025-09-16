@@ -6,6 +6,7 @@ function ManageOrdersPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
+	const [searchOrder, setSearchOrder] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(10);
 
@@ -41,11 +42,21 @@ function ManageOrdersPage() {
 		}
 	};
 
+	// Search logic
+	const filteredOrders = orders.filter(
+		(order) =>
+			order.order_number &&
+			order.order_number.toLowerCase().includes(searchOrder.toLowerCase())
+	);
+
 	// Pagination logic
 	const indexOfLastOrder = currentPage * itemsPerPage;
 	const indexOfFirstOrder = indexOfLastOrder - itemsPerPage;
-	const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
-	const totalPages = Math.ceil(orders.length / itemsPerPage);
+	const currentOrders = filteredOrders.slice(
+		indexOfFirstOrder,
+		indexOfLastOrder
+	);
+	const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
 	if (loading)
 		return <div className="p-4 text-center">Memuat data pesanan...</div>;
@@ -58,8 +69,25 @@ function ManageOrdersPage() {
 		<>
 			<div className="flex justify-between items-center mb-6">
 				<div>
-					<h1 className="text-3xl font-bold text-[#001F3F]">Manajemen Pesanan</h1>
-					<p className="text-gray-600">Total Pesanan: {orders.length}</p>
+					<h1 className="text-3xl font-bold text-[#001F3F]">
+						Manajemen Pesanan
+					</h1>
+					<p className="text-gray-600 mt-3">
+						Total Pesanan: {filteredOrders.length}
+					</p>
+				</div>
+				<div>
+					<input
+						type="text"
+						placeholder="Cari No. Pesanan..."
+						value={searchOrder}
+						onChange={(e) => {
+							setSearchOrder(e.target.value);
+							setCurrentPage(1);
+						}}
+						className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+						style={{ minWidth: 200 }}
+					/>
 				</div>
 			</div>
 
@@ -67,7 +95,9 @@ function ManageOrdersPage() {
 				<table className="min-w-full">
 					<thead className="bg-[#4D809E] text-white">
 						<tr>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">No.</th>
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+								No.
+							</th>
 							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								No. Pesanan
 							</th>
