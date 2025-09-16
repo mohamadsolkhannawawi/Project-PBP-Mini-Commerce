@@ -9,6 +9,8 @@ function ManageProductsPage() {
 	const [error, setError] = useState(null);
 
 	const [searchTerm, setSearchTerm] = useState("");
+	const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+	const [statusFilter, setStatusFilter] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -87,11 +89,32 @@ function ManageProductsPage() {
 	};
 
 	// Search logic
-	const filteredProducts = products.filter(
+	let filteredProducts = products.filter(
 		(product) =>
 			product.name &&
 			product.name.toLowerCase().includes(searchTerm.toLowerCase())
 	);
+	if (statusFilter) {
+		filteredProducts = filteredProducts.filter(product =>
+			statusFilter === "aktif" ? product.is_active : !product.is_active
+		);
+	}
+
+	if (sortConfig.key) {
+		filteredProducts = [...filteredProducts].sort((a, b) => {
+			let aValue = a[sortConfig.key];
+			let bValue = b[sortConfig.key];
+			if (sortConfig.key === "category") {
+				aValue = a.category?.name || "";
+				bValue = b.category?.name || "";
+			}
+			if (typeof aValue === "string") aValue = aValue.toLowerCase();
+			if (typeof bValue === "string") bValue = bValue.toLowerCase();
+			if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+			return 0;
+		});
+	}
 
 	// Pagination logic
 	const indexOfLastProduct = currentPage * itemsPerPage;
@@ -132,6 +155,18 @@ function ManageProductsPage() {
 						className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
 						style={{ minWidth: 200 }}
 					/>
+					<select
+						value={statusFilter}
+						onChange={e => {
+							setStatusFilter(e.target.value);
+							setCurrentPage(1);
+						}}
+						className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+					>
+						<option value="">Semua Status</option>
+						<option value="aktif">Aktif</option>
+						<option value="nonaktif">Nonaktif</option>
+					</select>
 					<button
 						onClick={() => {
 							setSelectedProduct(null);
@@ -148,23 +183,21 @@ function ManageProductsPage() {
 				<table className="min-w-full">
 					<thead className="bg-[#4D809E] text-white">
 						<tr>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								No.
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">No.</th>
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "name", direction: sortConfig.key === "name" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
+								Nama Produk {sortConfig.key === "name" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Nama Produk
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "category", direction: sortConfig.key === "category" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
+								Kategori {sortConfig.key === "category" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Kategori
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "price", direction: sortConfig.key === "price" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
+								Harga {sortConfig.key === "price" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Harga
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "stock", direction: sortConfig.key === "stock" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
+								Stok {sortConfig.key === "stock" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Stok
-							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Status
+							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "is_active", direction: sortConfig.key === "is_active" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
+								Status {sortConfig.key === "is_active" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
 							</th>
 							<th className="px-5 py-3"></th>
 						</tr>

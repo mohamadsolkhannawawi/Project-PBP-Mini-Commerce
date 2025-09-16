@@ -7,6 +7,8 @@ function ManageOrdersPage() {
 	const [error, setError] = useState(null);
 
 	const [searchOrder, setSearchOrder] = useState("");
+	const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+	const [statusFilter, setStatusFilter] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [itemsPerPage] = useState(10);
 
@@ -43,11 +45,28 @@ function ManageOrdersPage() {
 	};
 
 	// Search logic
-	const filteredOrders = orders.filter(
+	let filteredOrders = orders.filter(
 		(order) =>
 			order.order_number &&
 			order.order_number.toLowerCase().includes(searchOrder.toLowerCase())
 	);
+	if (statusFilter) {
+		filteredOrders = filteredOrders.filter(
+			(order) => order.status === statusFilter
+		);
+	}
+
+	if (sortConfig.key) {
+		filteredOrders = [...filteredOrders].sort((a, b) => {
+			let aValue = a[sortConfig.key];
+			let bValue = b[sortConfig.key];
+			if (typeof aValue === "string") aValue = aValue.toLowerCase();
+			if (typeof bValue === "string") bValue = bValue.toLowerCase();
+			if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+			if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+			return 0;
+		});
+	}
 
 	// Pagination logic
 	const indexOfLastOrder = currentPage * itemsPerPage;
@@ -65,6 +84,11 @@ function ManageOrdersPage() {
 			<div className="text-red-500 bg-red-100 p-4 rounded-md">{error}</div>
 		);
 
+	// Ambil status unik dari data
+	const statusOptions = Array.from(
+		new Set(orders.map((order) => order.status))
+	).filter(Boolean);
+
 	return (
 		<>
 			<div className="flex justify-between items-center mb-6">
@@ -76,7 +100,7 @@ function ManageOrdersPage() {
 						Total Pesanan: {filteredOrders.length}
 					</p>
 				</div>
-				<div>
+				<div className="flex gap-2 items-center">
 					<input
 						type="text"
 						placeholder="Cari No. Pesanan..."
@@ -88,6 +112,21 @@ function ManageOrdersPage() {
 						className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
 						style={{ minWidth: 200 }}
 					/>
+					<select
+						value={statusFilter}
+						onChange={(e) => {
+							setStatusFilter(e.target.value);
+							setCurrentPage(1);
+						}}
+						className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+					>
+						<option value="">Semua Status</option>
+						{statusOptions.map((status) => (
+							<option key={status} value={status}>
+								{status.charAt(0).toUpperCase() + status.slice(1)}
+							</option>
+						))}
+					</select>
 				</div>
 			</div>
 
@@ -98,20 +137,105 @@ function ManageOrdersPage() {
 							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
 								No.
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								No. Pesanan
+							<th
+								className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "order_number",
+										direction:
+											sortConfig.key === "order_number" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								No. Pesanan{" "}
+								{sortConfig.key === "order_number"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Pelanggan
+							<th
+								className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "user",
+										direction:
+											sortConfig.key === "user" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Pelanggan{" "}
+								{sortConfig.key === "user"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Total
+							<th
+								className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "total",
+										direction:
+											sortConfig.key === "total" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Total{" "}
+								{sortConfig.key === "total"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Tanggal
+							<th
+								className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "created_at",
+										direction:
+											sortConfig.key === "created_at" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Tanggal{" "}
+								{sortConfig.key === "created_at"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-								Status
+							<th
+								className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "status",
+										direction:
+											sortConfig.key === "status" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Status{" "}
+								{sortConfig.key === "status"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
 						</tr>
 					</thead>
