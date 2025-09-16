@@ -95,7 +95,7 @@ function ManageProductsPage() {
 			product.name.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 	if (statusFilter) {
-		filteredProducts = filteredProducts.filter(product =>
+		filteredProducts = filteredProducts.filter((product) =>
 			statusFilter === "aktif" ? product.is_active : !product.is_active
 		);
 	}
@@ -133,7 +133,7 @@ function ManageProductsPage() {
 		);
 
 	return (
-		<>
+		<div className="min-h-screen flex flex-col">
 			<div className="flex justify-between items-center mb-6">
 				<div>
 					<h1 className="text-3xl font-bold text-[#001F3F]">
@@ -157,7 +157,7 @@ function ManageProductsPage() {
 					/>
 					<select
 						value={statusFilter}
-						onChange={e => {
+						onChange={(e) => {
 							setStatusFilter(e.target.value);
 							setCurrentPage(1);
 						}}
@@ -179,43 +179,130 @@ function ManageProductsPage() {
 				</div>
 			</div>
 
-			<div className="bg-white shadow-md rounded-lg overflow-hidden">
-				<table className="min-w-full">
+			<div className="bg-white shadow-md rounded-lg overflow-hidden flex-1">
+				<table className="min-w-full text-sm">
 					<thead className="bg-[#4D809E] text-white">
 						<tr>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider">No.</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "name", direction: sortConfig.key === "name" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
-								Nama Produk {sortConfig.key === "name" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+							<th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider">
+								No.
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "category", direction: sortConfig.key === "category" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
-								Kategori {sortConfig.key === "category" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+							<th
+								className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "name",
+										direction:
+											sortConfig.key === "name" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Nama Produk{" "}
+								{sortConfig.key === "name"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "price", direction: sortConfig.key === "price" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
-								Harga {sortConfig.key === "price" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+							<th
+								className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "category",
+										direction:
+											sortConfig.key === "category" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Kategori{" "}
+								{sortConfig.key === "category"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "stock", direction: sortConfig.key === "stock" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
-								Stok {sortConfig.key === "stock" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+							<th
+								className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "price",
+										direction:
+											sortConfig.key === "price" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Harga{" "}
+								{sortConfig.key === "price"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer" onClick={() => setSortConfig({ key: "is_active", direction: sortConfig.key === "is_active" && sortConfig.direction === "asc" ? "desc" : "asc" })}>
-								Status {sortConfig.key === "is_active" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+							<th
+								className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "stock",
+										direction:
+											sortConfig.key === "stock" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Stok{" "}
+								{sortConfig.key === "stock"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
 							</th>
-							<th className="px-5 py-3"></th>
+							<th
+								className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
+								onClick={() =>
+									setSortConfig({
+										key: "is_active",
+										direction:
+											sortConfig.key === "is_active" &&
+											sortConfig.direction === "asc"
+												? "desc"
+												: "asc",
+									})
+								}
+							>
+								Status{" "}
+								{sortConfig.key === "is_active"
+									? sortConfig.direction === "asc"
+										? "▲"
+										: "▼"
+									: ""}
+							</th>
+							<th className="px-3 py-2"></th>
 						</tr>
 					</thead>
-					<tbody className="text-gray-700">
+					<tbody className="text-gray-700 text-xs">
 						{currentProducts.map((product, index) => (
 							<tr
 								key={product.id}
 								className="border-b border-gray-200 hover:bg-gray-50"
 							>
-								<td className="px-5 py-4">{indexOfFirstProduct + index + 1}</td>
-								<td className="px-5 py-4">{product.name}</td>
-								<td className="px-5 py-4">{product.category?.name || "N/A"}</td>
-								<td className="px-5 py-4">
+								<td className="px-3 py-2">{indexOfFirstProduct + index + 1}</td>
+								<td className="px-3 py-2">{product.name}</td>
+								<td className="px-3 py-2">{product.category?.name || "N/A"}</td>
+								<td className="px-3 py-2">
 									Rp {new Intl.NumberFormat("id-ID").format(product.price)}
 								</td>
-								<td className="px-5 py-4">{product.stock}</td>
-								<td className="px-5 py-4">
+								<td className="px-3 py-2">{product.stock}</td>
+								<td className="px-3 py-2">
 									<span
 										className={`px-2 py-1 text-xs font-semibold leading-tight ${
 											product.is_active
@@ -227,7 +314,7 @@ function ManageProductsPage() {
 										{product.is_active ? "Aktif" : "Nonaktif"}
 									</span>
 								</td>
-								<td className="px-5 py-4 text-right flex items-center">
+								<td className="px-3 py-2 text-right flex items-center">
 									<button
 										onClick={() => {
 											setSelectedProduct(product);
@@ -259,29 +346,27 @@ function ManageProductsPage() {
 				</table>
 			</div>
 
-			{totalPages > 1 && (
-				<div className="flex justify-between items-center mt-4">
-					<button
-						onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-						disabled={currentPage === 1}
-						className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md disabled:opacity-50"
-					>
-						Back
-					</button>
-					<span>
-						Halaman {currentPage} dari {totalPages}
-					</span>
-					<button
-						onClick={() =>
-							setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-						}
-						disabled={currentPage === totalPages}
-						className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md disabled:opacity-50"
-					>
-						Next
-					</button>
-				</div>
-			)}
+			<div className="w-full flex justify-center items-center mt-8 mb-8">
+				<button
+					onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+					disabled={currentPage === 1}
+					className="bg-gray-300 text-gray-700 px-6 py-3 rounded-md disabled:opacity-50 mx-2"
+				>
+					Back
+				</button>
+				<span className="mx-4 text-sm font-medium">
+					Halaman {currentPage} dari {totalPages}
+				</span>
+				<button
+					onClick={() =>
+						setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+					}
+					disabled={currentPage === totalPages}
+					className="bg-gray-300 text-gray-700 px-6 py-3 rounded-md disabled:opacity-50 mx-2"
+				>
+					Next
+				</button>
+			</div>
 
 			{isModalOpen && (
 				<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -300,7 +385,7 @@ function ManageProductsPage() {
 					</div>
 				</div>
 			)}
-		</>
+		</div>
 	);
 }
 
