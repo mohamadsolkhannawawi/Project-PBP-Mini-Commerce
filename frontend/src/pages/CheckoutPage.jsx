@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
 function CheckoutPage() {
-    const { cartItems, fetchCart } = useCart();
+    const { fetchCart } = useCart();
     const [address, setAddress] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const subtotal = cartItems.reduce((total, item) => {
+    const items = location.state?.items;
+
+    if (!items || items.length === 0) {
+        return <Navigate to="/cart" replace />;
+    }
+
+    const subtotal = items.reduce((total, item) => {
         const price = parseFloat(item.product.price);
         return total + price * item.quantity;
     }, 0);
@@ -23,8 +30,14 @@ function CheckoutPage() {
         }
         setLoading(true);
         setError('');
+
+        const selectedCartItemIds = items.map((item) => item.id);
+
         try {
-            await axiosClient.post('/checkout', { address_text: address });
+            await axiosClient.post('/checkout', {
+                address_text: address,
+                cart_item_ids: selectedCartItemIds,
+            });
             alert('Pesanan berhasil dibuat!');
             await fetchCart();
             navigate('/');
@@ -38,24 +51,7 @@ function CheckoutPage() {
             setLoading(false);
         }
     };
-
-    if (cartItems.length === 0 && !loading) {
-        return (
-            <div className="text-center py-20">
-                <h1 className="text-3xl font-bold mb-4">
-                    Keranjang Anda Kosong
-                </h1>
-                <p>Anda tidak bisa checkout dengan keranjang kosong.</p>
-                <Link
-                    to="/"
-                    className="text-blue-600 hover:underline mt-4 inline-block"
-                >
-                    Kembali Belanja
-                </Link>
-            </div>
-        );
-    }
-
+    
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-6">Checkout</h1>
@@ -77,7 +73,7 @@ function CheckoutPage() {
                     ></textarea>
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || items.length === 0}
                         className="w-full mt-6 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
                     >
                         {loading ? 'Memproses...' : 'Buat Pesanan'}
@@ -88,7 +84,7 @@ function CheckoutPage() {
                     <h2 className="text-xl font-bold mb-4">
                         Ringkasan Pesanan
                     </h2>
-                    {cartItems.map((item) => (
+                    {items.map((item) => (
                         <div
                             key={item.id}
                             className="flex justify-between text-sm mb-2"

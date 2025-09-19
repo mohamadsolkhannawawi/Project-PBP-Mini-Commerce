@@ -18,6 +18,8 @@ class OrderController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'address_text' => 'required|string|max:1000',
+            'cart_item_ids' => 'required|array',
+            'cart_item_ids.*' => 'integer|exists:cart_items,id',
         ]);
 
         if ($validator->fails()) {
@@ -25,15 +27,24 @@ class OrderController extends Controller
         }
 
         $user = Auth::user();
-        $cart = Cart::with('items.product')->where('user_id', $user->id)->first();
+        $cart = Cart::where('user_id', $user->id)->first();
 
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json(['message' => 'Keranjang Anda kosong.'], 400);
+        if (!$cart) {
+            return response()->json(['message' => 'Keranjang tidak ditemukan.'], 404);
+        }
+
+        $cartItems = $cart->items()->with('product')->whereIn('id', $request->cart_item_ids)->get();
+
+        if ($cartItems->isEmpty() || count($request->cart_item_ids) !== $cartItems->count()) {
+            return response()->json(['message' => 'Item yang dipilih tidak valid atau tidak ada di keranjang.'], 400);
         }
 
         try {
-            $order = DB::transaction(function () use ($user, $cart, $request) {
-                $total = $cart->items->reduce(function ($carry, $item) {
+            $order = DB::transaction(function () use ($user, $cartItems, $request) {
+                $total = $cartItems->reduce(function ($carry, $item) {
+                    if (!$item->product) {
+                        throw new \Exception('Produk tidak ditemukan untuk item keranjang ID: ' . $item->id);
+                    }
                     return $carry + ($item->product->price * $item->quantity);
                 }, 0);
 
@@ -45,7 +56,7 @@ class OrderController extends Controller
                     'address_text' => $request->address_text,
                 ]);
 
-                foreach ($cart->items as $item) {
+                foreach ($cartItems as $item) {
                     if ($item->product->stock < $item->quantity) {
                         throw new \Exception('Stok untuk produk ' . $item->product->name . ' tidak mencukupi.');
                     }
@@ -53,8 +64,8 @@ class OrderController extends Controller
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $item->product_id,
-                        'product_name' => $item->product->name, 
-                        'price' => $item->product->price,     
+                        'product_name' => $item->product->name,
+                        'price' => $item->product->price,
                         'quantity' => $item->quantity,
                         'subtotal' => $item->product->price * $item->quantity,
                     ]);
@@ -62,7 +73,7 @@ class OrderController extends Controller
                     $item->product->decrement('stock', $item->quantity);
                 }
 
-                $cart->items()->delete();
+                Cart::where('user_id', $user->id)->first()->items()->whereIn('id', $request->cart_item_ids)->delete();
 
                 return $order;
             });
