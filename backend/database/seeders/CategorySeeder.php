@@ -18,13 +18,32 @@ class CategorySeeder extends Seeder
             'Fashion Pria',
             'Fashion Wanita',
             'Buku',
-            'Olahraga'
+            'Olahraga',
+            'Makanan & Minuman',
+            'Kesehatan & Kecantikan',
+            'Peralatan Rumah Tangga',
+            'Mainan Anak',
+            'Otomotif',
+            'Komputer & Aksesoris',
+            'Gadget',
+            'Perhiasan & Aksesoris',
+            'Furniture',
+            'Hobi & Kerajinan',
+            'Musik & Audio'
         ];
 
         foreach ($categories as $categoryName) {
+            $slug = Str::slug($categoryName);
+            
+            $existingCategory = Category::where('slug', $slug)->first();
+            
+            if ($existingCategory) {
+                $slug = $slug . '-' . uniqid();
+            }
+
             Category::create([
                 'name' => $categoryName,
-                'slug' => Str::slug($categoryName),
+                'slug' => $slug,
             ]);
         }
     }
