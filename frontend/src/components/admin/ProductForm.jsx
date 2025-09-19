@@ -8,6 +8,7 @@ function ProductForm({ product, onSave, onCancel }) {
         price: '',
         stock: '',
         category_id: '',
+        image_url: '',
         is_active: true,
     });
     const [categories, setCategories] = useState([]);
@@ -34,6 +35,7 @@ function ProductForm({ product, onSave, onCancel }) {
                 price: product.price || '',
                 stock: product.stock || '',
                 category_id: product.category_id || '',
+                image_url: product.image_url || '',
                 is_active: product.is_active,
             });
         }
@@ -126,6 +128,19 @@ function ProductForm({ product, onSave, onCancel }) {
                         </option>
                     ))}
                 </select>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700">
+                    URL Gambar
+                </label>
+                <input
+                    type="url"
+                    name="image_url"
+                    value={formData.image_url}
+                    onChange={handleChange}
+                    placeholder="https://example.com/image.jpg"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                />
             </div>
             <div className="flex items-center">
                 <input

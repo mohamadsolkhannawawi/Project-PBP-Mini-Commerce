@@ -16,7 +16,6 @@ class StoreProductRequest extends FormRequest
         $productId = $this->route('product') ? $this->route('product')->id : null;
 
         if ($this->isMethod('post')) {
-            // Aturan untuk CREATE
             return [
                 'name'        => 'required|string|max:255',
                 'slug'        => 'nullable|string|max:255|unique:products,slug',
@@ -24,11 +23,10 @@ class StoreProductRequest extends FormRequest
                 'price'       => 'required|numeric|min:0',
                 'stock'       => 'required|integer|min:0',
                 'category_id' => 'required|exists:categories,id',
-                'image_url'   => 'nullable|string|max:500',
-                'is_active'   => 'sometimes|boolean', // <- pastikan boolean
+                'image_url'   => 'nullable|url|max:500',
+                'is_active'   => 'sometimes|boolean', 
             ];
         } else {
-            // Aturan untuk UPDATE
             return [
                 'name'        => 'sometimes|required|string|max:255',
                 'slug'        => 'sometimes|string|max:255|unique:products,slug,' . $productId,
@@ -36,8 +34,8 @@ class StoreProductRequest extends FormRequest
                 'price'       => 'sometimes|required|numeric|min:0',
                 'stock'       => 'sometimes|required|integer|min:0',
                 'category_id' => 'sometimes|required|exists:categories,id',
-                'image_url'   => 'nullable|string|max:500',
-                'is_active'   => 'sometimes|boolean', // <- tetap boolean
+                'image_url'   => 'nullable|url|max:500',
+                'is_active'   => 'sometimes|boolean', 
             ];
         }
     }
