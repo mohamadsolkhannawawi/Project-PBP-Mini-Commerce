@@ -20,10 +20,6 @@ class Category extends Model
         'slug',
     ];
 
-    /**
-     * Mendefinisikan relasi "one-to-many" ke Product.
-     * Satu kategori (Category) bisa memiliki banyak produk (products).
-     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

@@ -19,10 +19,6 @@ class Cart extends Model
         'user_id',
     ];
 
-    /**
-     * Mendefinisikan relasi "one-to-many" ke CartItem.
-     * Sebuah keranjang (Cart) bisa memiliki banyak item (items).
-     */
     public function items(): HasMany
     {
         return $this->hasMany(CartItem::class);

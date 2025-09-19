@@ -10,7 +10,6 @@ class ProductImage extends Model
 {
     use HasFactory;
 
-    // Tabel ini tidak memerlukan timestamps created_at dan updated_at
     public $timestamps = false;
 
     /**
@@ -25,10 +24,6 @@ class ProductImage extends Model
         'sort_order',
     ];
 
-    /**
-     * Mendefinisikan relasi "belongs-to" kembali ke Product.
-     * Setiap gambar (ProductImage) dimiliki oleh satu Produk (Product).
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

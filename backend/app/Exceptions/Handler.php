@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Auth\AuthenticationException; // <-- Tambahkan ini
+use Illuminate\Auth\AuthenticationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -33,7 +33,6 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
-        // PERBAIKAN: Tambahkan logika ini untuk menangani error otentikasi pada API
         $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([

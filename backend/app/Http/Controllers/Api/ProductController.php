@@ -8,10 +8,6 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Menampilkan daftar semua produk.
-     * Mendukung pencarian berdasarkan nama produk.
-     */
     public function index(Request $request)
     {
         $query = Product::query();
@@ -22,17 +18,11 @@ class ProductController extends Controller
             $query->where('name', 'like', '%' . $searchTerm . '%');
         }
 
-        // PERBAIKAN: Hanya ambil produk yang statusnya 'is_active' adalah true (atau 1).
-        // Ini memastikan produk yang dinonaktifkan oleh admin tidak akan tampil di frontend.
         $products = $query->where('is_active', true)->get();
 
         return response()->json($products);
     }
 
-    /**
-     * Menampilkan detail satu produk.
-     * Menggunakan Route Model Binding dari Laravel.
-     */
     public function show(Product $product)
     {
         if (!$product->is_active) {

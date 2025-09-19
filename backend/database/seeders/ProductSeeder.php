@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str; // <-- Tambahkan ini
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -44,7 +44,7 @@ class ProductSeeder extends Seeder
             Product::create([
                 'category_id' => $productData['category_id'],
                 'name' => $productData['name'],
-                'slug' => Str::slug($productData['name']), // <-- Tambahkan ini
+                'slug' => Str::slug($productData['name']),
                 'description' => $productData['description'],
                 'price' => $productData['price'],
                 'stock' => $productData['stock'],

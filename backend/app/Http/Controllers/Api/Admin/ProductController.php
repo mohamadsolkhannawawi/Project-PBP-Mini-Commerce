@@ -24,7 +24,6 @@ class ProductController extends Controller
             $validatedData['slug'] = Str::slug($validatedData['name']);
         }
 
-        // Default is_active = true kalau tidak dikirim
         $validatedData['is_active'] = $validatedData['is_active'] ?? true;
 
         try {
@@ -42,7 +41,7 @@ class ProductController extends Controller
             return response()->json([
                 'message' => 'Terjadi kesalahan saat menyimpan produk ke database.',
                 'error'   => $e->getMessage(),
-                'data'    => $validatedData // tambahkan untuk debug
+                'data'    => $validatedData
             ], 500);
         }
     }

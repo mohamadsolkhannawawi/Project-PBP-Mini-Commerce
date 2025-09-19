@@ -4,106 +4,127 @@ import { Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
 function SearchBar() {
-  const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const searchContainerRef = useRef(null);
+    const [query, setQuery] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const searchContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (query.length < 2) {
-      setSuggestions([]);
-      return;
-    }
+    useEffect(() => {
+        if (query.length < 2) {
+            setSuggestions([]);
+            return;
+        }
 
-    const debounceTimeout = setTimeout(() => {
-      fetchSuggestions();
-    }, 300); // Debounce to avoid rapid API calls
+        const debounceTimeout = setTimeout(() => {
+            fetchSuggestions();
+        }, 300);
 
-    return () => clearTimeout(debounceTimeout);
-  }, [query]);
+        return () => clearTimeout(debounceTimeout);
+    }, [query]);
 
-  useEffect(() => {
-    // Close suggestions when clicking outside
-    function handleClickOutside(event) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        setSuggestions([]);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (
+                searchContainerRef.current &&
+                !searchContainerRef.current.contains(event.target)
+            ) {
+                setSuggestions([]);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [searchContainerRef]);
+
+    const fetchSuggestions = async () => {
+        setLoading(true);
+        try {
+            const response = await axiosClient.get(`/products?search=${query}`);
+            setSuggestions(response.data.data || response.data);
+        } catch (error) {
+            console.error('Error fetching search suggestions:', error);
+            setSuggestions([]);
+        } finally {
+            setLoading(false);
+        }
     };
-  }, [searchContainerRef]);
 
+    const handleInputChange = (e) => {
+        setQuery(e.target.value);
+    };
 
-  const fetchSuggestions = async () => {
-    setLoading(true);
-    try {
-      // Assuming the endpoint is /products?search=... based on typical Laravel patterns
-      const response = await axiosClient.get(`/products?search=${query}`);
-      setSuggestions(response.data.data || response.data); // Adjust based on API response structure
-    } catch (error) {
-      console.error('Error fetching search suggestions:', error);
-      setSuggestions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleClear = () => {
+        setQuery('');
+        setSuggestions([]);
+    };
 
-  const handleInputChange = (e) => {
-    setQuery(e.target.value);
-  };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (query.trim()) {
+            setSuggestions([]);
+            navigate(`/search?q=${query}`);
+        }
+    };
 
-  const handleClear = () => {
-    setQuery('');
-    setSuggestions([]);
-  };
+    return (
+        <div
+            className="relative w-full max-w-md mx-auto"
+            ref={searchContainerRef}
+        >
+            <form onSubmit={handleSubmit} className="relative">
+                <input
+                    type="text"
+                    value={query}
+                    onChange={handleInputChange}
+                    placeholder="Cari produk..."
+                    className="w-full px-4 py-2 pr-10 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                <button
+                    type="submit"
+                    className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700"
+                >
+                    <Search size={24} />
+                </button>
+                {query && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600"
+                    >
+                        <X size={20} />
+                    </button>
+                )}
+            </form>
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (query.trim()) {
-      setSuggestions([]);
-      navigate(`/search?q=${query}`);
-    }
-  };
-
-  return (
-    <div className="relative w-full max-w-md mx-auto" ref={searchContainerRef}>
-      <form onSubmit={handleSubmit} className="relative">
-        <input
-          type="text"
-          value={query}
-          onChange={handleInputChange}
-          placeholder="Cari produk..."
-          className="w-full px-4 py-2 pr-10 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button type="submit" className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700">
-          <Search size={24} />
-        </button>
-        {query && (
-          <button type="button" onClick={handleClear} className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600">
-            <X size={20} />
-          </button>
-        )}
-      </form>
-
-      {suggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
-          <ul>
-            {suggestions.map((product) => (
-              <li key={product.id} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                <Link to={`/product/${product.slug}`} className="block" onClick={() => setSuggestions([])}>
-                  {product.name}
-                </Link>
-              </li>
-            ))}
-             {loading && <li className="px-4 py-2 text-gray-500">Mencari...</li>}
-          </ul>
+            {suggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <ul>
+                        {suggestions.map((product) => (
+                            <li
+                                key={product.id}
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            >
+                                <Link
+                                    to={`/product/${product.slug}`}
+                                    className="block"
+                                    onClick={() => setSuggestions([])}
+                                >
+                                    {product.name}
+                                </Link>
+                            </li>
+                        ))}
+                        {loading && (
+                            <li className="px-4 py-2 text-gray-500">
+                                Mencari...
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default SearchBar;

@@ -24,19 +24,11 @@ class Order extends Model
         'address_text',
     ];
 
-    /**
-     * Mendefinisikan relasi "one-to-many" ke OrderItem.
-     * Sebuah pesanan (Order) bisa memiliki banyak item (items).
-     */
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    /**
-     * Mendefinisikan relasi "belongs-to" ke User.
-     * Setiap pesanan (Order) dimiliki oleh satu pengguna (User).
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

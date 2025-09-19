@@ -10,7 +10,6 @@ class CartItem extends Model
 {
     use HasFactory;
 
-    // Tidak menggunakan timestamps default (created_at, updated_at)
     public $timestamps = false;
 
     /**
@@ -24,18 +23,11 @@ class CartItem extends Model
         'quantity',
     ];
 
-    /**
-     * Mendefinisikan relasi "belongs-to" ke Product.
-     * Setiap item keranjang (CartItem) merujuk ke satu Produk (Product).
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Mendefinisikan relasi "belongs-to" ke Cart.
-     */
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);

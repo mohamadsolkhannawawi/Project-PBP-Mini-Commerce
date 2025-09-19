@@ -12,13 +12,10 @@ use Illuminate\Support\Facades\Validator;
 
 class CartController extends Controller
 {
-    /**
-     * Menampilkan isi keranjang belanja milik pengguna yang sedang login.
-     */
     public function index()
     {
         $user = Auth::user();
-        $cart = Cart::with('items.product') // Eager load untuk efisiensi
+        $cart = Cart::with('items.product')
             ->where('user_id', $user->id)
             ->first();
 
@@ -29,9 +26,6 @@ class CartController extends Controller
         return response()->json($cart);
     }
 
-    /**
-     * Menambahkan produk ke keranjang belanja pengguna.
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -66,18 +60,12 @@ class CartController extends Controller
         return response()->json(['message' => 'Produk berhasil ditambahkan ke keranjang.'], 201);
     }
 
-    /**
-     * Mengubah jumlah item di dalam keranjang.
-     * Menggunakan Route Model Binding untuk mengambil CartItem.
-     */
     public function update(Request $request, CartItem $cartItem)
     {
-        // 1. Otorisasi: Pastikan pengguna hanya bisa mengubah item di keranjangnya sendiri.
         if ($cartItem->cart->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // 2. Validasi Input
         $validator = Validator::make($request->all(), [
             'quantity' => 'required|integer|min:1',
         ]);
@@ -86,30 +74,22 @@ class CartController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // 3. Cek Stok Produk
         if ($cartItem->product->stock < $request->quantity) {
             return response()->json(['message' => 'Stok produk tidak mencukupi.'], 400);
         }
 
-        // 4. Update Jumlah
         $cartItem->quantity = $request->quantity;
         $cartItem->save();
 
         return response()->json(['message' => 'Jumlah item berhasil diperbarui.', 'item' => $cartItem]);
     }
 
-    /**
-     * Menghapus item dari keranjang.
-     * Menggunakan Route Model Binding untuk mengambil CartItem.
-     */
     public function destroy(CartItem $cartItem)
     {
-        // 1. Otorisasi: Pastikan pengguna hanya bisa menghapus item dari keranjangnya sendiri.
         if ($cartItem->cart->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // 2. Hapus Item
         $cartItem->delete();
 
         return response()->json(['message' => 'Item berhasil dihapus dari keranjang.']);

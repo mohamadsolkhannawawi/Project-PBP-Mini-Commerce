@@ -10,7 +10,6 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Membuat Akun Admin
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
@@ -18,7 +17,6 @@ class UserSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        // Membuat Akun Pengguna Biasa
         User::create([
             'name' => 'Regular User',
             'email' => 'user@example.com',

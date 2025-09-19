@@ -29,17 +29,11 @@ class Product extends Model
         'is_active',
     ];
 
-    /**
-     * Mendefinisikan relasi "belongs-to" ke Category.
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    /**
-     * Mendefinisikan relasi "one-to-many" ke ProductImage.
-     */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
