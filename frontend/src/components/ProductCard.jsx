@@ -18,10 +18,17 @@ function ProductCard({ product }) {
                     <h3 className="text-lg font-semibold text-gray-800 truncate">
                         {product.name}
                     </h3>
-                    <p className="text-gray-600 mt-2">
-                        Rp{' '}
-                        {new Intl.NumberFormat('id-ID').format(product.price)}
-                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                        <p className="text-gray-600">
+                            Rp{' '}
+                            {new Intl.NumberFormat('id-ID').format(product.price)}
+                        </p>
+                        {product.sold_count > 0 && (
+                            <p className="text-sm text-gray-500">
+                                | {product.sold_count} Terjual
+                            </p>
+                        )}
+                    </div>
                 </div>
             </Link>
         </div>

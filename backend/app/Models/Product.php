@@ -13,8 +13,6 @@ class Product extends Model
 
     /**
      * The attributes that are mass assignable.
-     * Properti ini adalah "daftar putih" kolom yang boleh diisi
-     * menggunakan metode create() atau update().
      *
      * @var array<int, string>
      */
@@ -29,6 +27,8 @@ class Product extends Model
         'is_active',
     ];
 
+    protected $appends = ['sold_count'];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -37,5 +37,15 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function getSoldCountAttribute()
+    {
+        return $this->orderItems()->sum('quantity');
     }
 }
