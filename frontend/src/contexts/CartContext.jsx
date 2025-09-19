@@ -47,14 +47,18 @@ export function CartProvider({ children }) {
 
     const addToCart = async (product, quantity) => {
         try {
-            await axiosClient.post('/cart', {
+            const response = await axiosClient.post('/cart', {
                 product_id: product.id,
                 quantity,
             });
             await fetchCart();
+            return response.data; 
         } catch (error) {
             console.error('Gagal menambahkan ke keranjang:', error);
-            alert('Gagal menambahkan produk ke keranjang.');
+            
+            const errorMessage = error.response?.data?.message || 'Gagal menambahkan produk ke keranjang.';
+            alert(errorMessage);
+            throw new Error(errorMessage);
         }
     };
 

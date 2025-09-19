@@ -49,8 +49,7 @@ function ProductDetailPage() {
                     `${quantity} ${product.name} telah ditambahkan ke keranjang!`
                 );
             } catch (error) {
-                console.error('Gagal menambahkan ke keranjang:', error);
-                alert('Terjadi kesalahan saat menambahkan ke keranjang.');
+                console.error('Gagal menambahkan ke keranjang dari ProductDetailPage:', error);
             }
         }
     };
