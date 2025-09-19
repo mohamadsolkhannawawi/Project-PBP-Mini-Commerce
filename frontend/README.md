@@ -75,7 +75,6 @@ Folder ini berisi semua aset statis.
 Folder ini berisi komponen-komponen UI yang dapat digunakan kembali di berbagai halaman.
 
 -   **`CartItem.jsx`**: Komponen untuk menampilkan satu item di dalam keranjang belanja.
--   **`CartModal.jsx`**: Komponen modal yang muncul untuk menampilkan ringkasan keranjang.
 -   **`Footer.jsx`**: Komponen footer aplikasi.
 -   **`Navbar.jsx`**: Komponen navigasi utama aplikasi.
 -   **`ProductCard.jsx`**: Komponen kartu untuk menampilkan ringkasan satu produk di halaman daftar produk.
