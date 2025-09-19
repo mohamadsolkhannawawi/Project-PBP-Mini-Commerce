@@ -105,24 +105,51 @@ function ProductDetailPage() {
 
                     {user?.role !== 'admin' && (
                         <>
-                            <div className="flex items-center mb-6">
-                                <label
-                                    htmlFor="quantity"
-                                    className="mr-4 font-semibold"
-                                >
-                                    Jumlah:
-                                </label>
-                                <input
-                                    type="number"
-                                    id="quantity"
-                                    value={quantity}
-                                    onChange={(e) =>
-                                        setQuantity(parseInt(e.target.value))
-                                    }
-                                    min="1"
-                                    className="w-20 p-2 border rounded-lg text-center"
-                                />
+                            <div className="flex items-center mb-4">
+                                <div className="flex items-center">
+                                    <label
+                                        htmlFor="quantity"
+                                        className="mr-4 font-semibold"
+                                    >
+                                        Jumlah:
+                                    </label>
+                                    <div className="flex items-center border rounded-lg">
+                                        <button
+                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                            className="px-3 py-1 border-r bg-gray-100 hover:bg-gray-200 rounded-l-lg"
+                                        >
+                                            -
+                                        </button>
+                                        <input
+                                            type="number"
+                                            id="quantity"
+                                            value={quantity}
+                                            onChange={(e) => {
+                                                const value = parseInt(e.target.value);
+                                                if (isNaN(value)) {
+                                                    setQuantity(1);
+                                                } else if (value > product.stock) {
+                                                    setQuantity(product.stock);
+                                                } else {
+                                                    setQuantity(value);
+                                                }
+                                            }}
+                                            min="1"
+                                            max={product.stock}
+                                            className="w-16 p-2 text-center"
+                                        />
+                                        <button
+                                            onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                                            className="px-3 py-1 border-l bg-gray-100 hover:bg-gray-200 rounded-r-lg"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                            <p className="text-gray-600 mb-6">
+                                Stok: {product.stock}
+                            </p>
                             <button
                                 onClick={handleAddToCart}
                                 className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center"
