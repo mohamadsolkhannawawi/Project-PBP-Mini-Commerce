@@ -18,7 +18,6 @@ class IsAdmin
     public function handle(Request $request, Closure $next)
     {
         $user = $request->user();
-        // Asumsikan ada field 'role' pada tabel users, dan admin = 'admin'
         if (!$user || $user->role !== 'admin') {
             return response()->json([
                 'message' => 'Forbidden. Admin only.'

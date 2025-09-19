@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
 use App\Models\Cart;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -12,15 +14,12 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-    /**
-     * Memproses checkout dan membuat pesanan baru dari keranjang pengguna.
-     * Sesuai dengan User Story 5.
-     */
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $validator = Validator::make($request->all(), [
             'address_text' => 'required|string|max:1000',
+            'cart_item_ids' => 'required|array',
+            'cart_item_ids.*' => 'integer|exists:cart_items,id',
         ]);
 
         if ($validator->fails()) {
@@ -28,69 +27,61 @@ class OrderController extends Controller
         }
 
         $user = Auth::user();
-        
-        // 2. Dapatkan keranjang pengguna beserta isinya.
-        $cart = Cart::with('items.product')->where('user_id', $user->id)->first();
+        $cart = Cart::where('user_id', $user->id)->first();
 
-        // 3. Pastikan keranjang tidak kosong.
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json(['message' => 'Your cart is empty'], 400);
+        if (!$cart) {
+            return response()->json(['message' => 'Keranjang tidak ditemukan.'], 404);
+        }
+
+        $cartItems = $cart->items()->with('product')->whereIn('id', $request->cart_item_ids)->get();
+
+        if ($cartItems->isEmpty() || count($request->cart_item_ids) !== $cartItems->count()) {
+            return response()->json(['message' => 'Item yang dipilih tidak valid atau tidak ada di keranjang.'], 400);
         }
 
         try {
-            // 4. Mulai Database Transaction.
-            // Ini memastikan semua operasi DB di dalamnya berhasil, atau semuanya dibatalkan.
-            // Sangat penting untuk proses sekompleks checkout.
-            $order = DB::transaction(function () use ($cart, $user, $request) {
-                // a. Hitung total harga dari semua item di keranjang.
-                $totalPrice = $cart->items->sum(function ($item) {
-                    return $item->qty * $item->product->price;
-                });
+            $order = DB::transaction(function () use ($user, $cartItems, $request) {
+                $total = $cartItems->reduce(function ($carry, $item) {
+                    if (!$item->product) {
+                        throw new \Exception('Produk tidak ditemukan untuk item keranjang ID: ' . $item->id);
+                    }
+                    return $carry + ($item->product->price * $item->quantity);
+                }, 0);
 
-                // b. Buat entri baru di tabel 'orders'.
                 $order = Order::create([
                     'user_id' => $user->id,
-                    'total' => $totalPrice,
-                    'status' => 'diproses', // Status awal
+                    'order_number' => 'INV-' . time() . '-' . $user->id,
+                    'total' => $total,
+                    'status' => 'pending',
                     'address_text' => $request->address_text,
                 ]);
 
-                // c. Pindahkan setiap item dari keranjang ke 'order_items'.
-                foreach ($cart->items as $cartItem) {
-                    $order->items()->create([
-                        'product_id' => $cartItem->product_id,
-                        'price' => $cartItem->product->price, // Simpan harga saat ini
-                        'qty' => $cartItem->qty,
-                        'subtotal' => $cartItem->qty * $cartItem->product->price,
+                foreach ($cartItems as $item) {
+                    if ($item->product->stock < $item->quantity) {
+                        throw new \Exception('Stok untuk produk ' . $item->product->name . ' tidak mencukupi.');
+                    }
+
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $item->product_id,
+                        'product_name' => $item->product->name,
+                        'price' => $item->product->price,
+                        'quantity' => $item->quantity,
+                        'subtotal' => $item->product->price * $item->quantity,
                     ]);
 
-                    // d. (Opsional tapi best practice) Kurangi stok produk.
-                    $product = $cartItem->product;
-                    if ($product->stock < $cartItem->qty) {
-                        // Jika stok tidak cukup, batalkan transaksi.
-                        throw new \Exception('Product stock is not sufficient for ' . $product->name);
-                    }
-                    $product->stock -= $cartItem->qty;
-                    $product->save();
+                    $item->product->decrement('stock', $item->quantity);
                 }
 
-                // e. Kosongkan dan hapus keranjang belanja pengguna.
-                $cart->items()->delete();
-                $cart->delete();
+                Cart::where('user_id', $user->id)->first()->items()->whereIn('id', $request->cart_item_ids)->delete();
 
-                // f. Kembalikan data pesanan yang baru dibuat.
                 return $order;
             });
 
-            // 5. Jika transaksi berhasil, kirim respon sukses.
-            return response()->json([
-                'message' => 'Checkout successful, order has been created',
-                'order' => $order->load('items.product') // Muat relasi untuk ditampilkan
-            ], 201);
+            return response()->json($order->load('items.product'), 201);
 
         } catch (\Exception $e) {
-            // 6. Jika terjadi error di dalam transaksi, kirim respon error.
-            return response()->json(['message' => 'An error occurred during checkout: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Gagal memproses pesanan: ' . $e->getMessage()], 500);
         }
     }
 }

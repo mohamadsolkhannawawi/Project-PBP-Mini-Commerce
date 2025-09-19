@@ -6,28 +6,37 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProductRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        // Kita asumsikan otorisasi sudah ditangani oleh middleware 'is.admin' di rute.
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
-     */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'is_active' => 'sometimes|boolean',
-        ];
+        $productId = $this->route('product') ? $this->route('product')->id : null;
+
+        if ($this->isMethod('post')) {
+            return [
+                'name'        => 'required|string|max:255',
+                'slug'        => 'nullable|string|max:255|unique:products,slug',
+                'description' => 'nullable|string',
+                'price'       => 'required|numeric|min:0',
+                'stock'       => 'required|integer|min:0',
+                'category_id' => 'required|exists:categories,id',
+                'image_url'   => 'nullable|url|max:500',
+                'is_active'   => 'sometimes|boolean', 
+            ];
+        } else {
+            return [
+                'name'        => 'sometimes|required|string|max:255',
+                'slug'        => 'sometimes|string|max:255|unique:products,slug,' . $productId,
+                'description' => 'nullable|string',
+                'price'       => 'sometimes|required|numeric|min:0',
+                'stock'       => 'sometimes|required|integer|min:0',
+                'category_id' => 'sometimes|required|exists:categories,id',
+                'image_url'   => 'nullable|url|max:500',
+                'is_active'   => 'sometimes|boolean', 
+            ];
+        }
     }
 }

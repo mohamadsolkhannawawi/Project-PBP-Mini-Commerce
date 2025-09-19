@@ -1,61 +1,101 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Dokumentasi Backend UMKM-MiniCommerce (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dokumen ini menjelaskan struktur folder dan file dari aplikasi backend yang dibangun menggunakan framework Laravel. Memahami struktur ini penting untuk pengembangan dan pemeliharaan.
 
-## About Laravel
+## Struktur Folder Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Berikut adalah direktori-direktori utama dalam aplikasi Laravel dan fungsinya:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```
+/
+├── app/                 # Folder inti aplikasi (logika bisnis)
+├── bootstrap/           # Script untuk bootstraping aplikasi
+├── config/              # File-file konfigurasi
+├── database/            # Migrasi, seeder, dan factory database
+├── public/              # Document root, titik masuk aplikasi
+├── resources/           # View, aset mentah (CSS, JS), file bahasa
+├── routes/              # Definisi rute aplikasi
+├── storage/             # File cache, log, dan file yang di-upload
+├── tests/               # File-file pengujian (Unit & Feature)
+├── vendor/              # Dependensi dari Composer
+├── .env                 # Konfigurasi spesifik untuk environment
+├── artisan              # Command-line interface (CLI) Laravel
+└── composer.json        # Definisi dependensi proyek
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Penjelasan Detail
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Folder `app`
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Ini adalah folder utama yang berisi semua logika bisnis aplikasi Anda.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-   **`Http/`**: Berisi `Controllers`, `Middleware`, dan `Requests`. Semua logika yang menangani permintaan HTTP masuk ke sini.
+-   **`Models/`**: Berisi semua kelas Model Eloquent. Setiap model merepresentasikan satu tabel di database dan digunakan untuk berinteraksi dengan tabel tersebut.
+-   **`Providers/`**: Berisi semua Service Provider. Ini adalah tempat untuk me-bootstrap layanan, event listener, dll.
+-   **`Exceptions/`**: Berisi handler untuk semua eksepsi yang terjadi di aplikasi.
 
-## Laravel Sponsors
+### Folder `bootstrap`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Folder ini berisi script untuk memulai (bootstrap) framework Laravel.
 
-### Premium Partners
+-   **`app.php`**: File utama yang membuat instance dari aplikasi.
+-   **`cache/`**: Berisi file-file cache yang digenerate oleh framework untuk meningkatkan performa, seperti `packages.php` dan `services.php`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Folder `config`
 
-## Contributing
+Berisi semua file konfigurasi aplikasi, seperti koneksi database (`database.php`), konfigurasi aplikasi (`app.php`), email (`mail.php`), dll. Nilai di sini dapat di-override oleh file `.env`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Folder `database`
 
-## Code of Conduct
+Semua yang berhubungan dengan skema dan data database Anda ada di sini.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+-   **`factories/`**: Digunakan untuk mendefinisikan cara membuat data palsu (fake data) untuk model Anda. Sangat berguna untuk testing dan seeding.
+-   **`migrations/`**: Berisi file-file migrasi untuk mengelola skema database Anda secara version-controlled. Setiap file mendefinisikan perubahan pada struktur database.
+-   **`seeders/`**: Berisi kelas-kelas untuk mengisi database dengan data awal (seeding).
 
-## Security Vulnerabilities
+### Folder `public`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Ini adalah _document root_ untuk aplikasi Anda. Semua permintaan masuk melalui folder ini.
 
-## License
+-   **`index.php`**: Titik masuk (entry point) untuk semua permintaan HTTP.
+-   **Aset yang sudah di-compile**: Seperti file CSS dan JavaScript yang sudah diproses.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Folder `resources`
+
+Berisi file-file mentah yang akan di-compile atau digunakan untuk view.
+
+-   **`css/`**, **`js/`**: Berisi file mentah CSS (seperti Tailwind) dan JavaScript sebelum di-compile.
+-   **`views/`**: Berisi semua template Blade untuk aplikasi Anda.
+-   **`lang/`** (jika ada): Berisi file-file bahasa untuk lokalisasi.
+
+### Folder `routes`
+
+Tempat untuk mendefinisikan semua rute (URL) aplikasi.
+
+-   **`web.php`**: Untuk rute web yang menggunakan state seperti session dan CSRF protection.
+-   **`api.php`**: Untuk rute API yang bersifat stateless.
+-   **`console.php`**: Untuk mendefinisikan command Artisan kustom Anda.
+
+### Folder `storage`
+
+Folder ini digunakan oleh framework untuk menyimpan file yang digenerate, cache, log, dll.
+
+-   **`app/public/`**: Direktori ini digunakan untuk menyimpan file yang di-generate oleh pengguna (seperti avatar) yang harus dapat diakses secara publik. Anda perlu menjalankan `php artisan storage:link` untuk membuatnya dapat diakses dari web.
+-   **`framework/`**: Berisi file-file yang digenerate oleh framework seperti cache, session, dan view yang sudah di-compile.
+-   **`logs/`**: Berisi file log aplikasi, seperti `laravel.log`.
+
+### Folder `tests`
+
+Berisi semua file pengujian otomatis Anda.
+
+-   **`Feature/`**: Untuk pengujian fungsional yang menguji sebagian besar fungsionalitas aplikasi dari luar (misalnya, melalui request HTTP).
+-   **`Unit/`**: Untuk pengujian unit yang menguji bagian kecil dan terisolasi dari kode Anda.
+
+### File Penting di Root
+
+-   **`.env`**: File yang sangat penting ini berisi konfigurasi spesifik untuk environment tempat aplikasi berjalan (lokal, staging, produksi). File ini **tidak boleh** dimasukkan ke dalam version control.
+-   **`.env.example`**: File contoh yang menunjukkan variabel apa saja yang dibutuhkan oleh aplikasi.
+-   **`artisan`**: Script PHP yang menjadi entry point untuk semua command Artisan.
+-   **`composer.json`**: File yang mendefinisikan semua dependensi PHP (paket) yang dibutuhkan oleh proyek Anda.

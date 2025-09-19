@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class CategorySeeder extends Seeder
 {
@@ -12,9 +13,38 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        Category::create(['name' => 'Makanan']);
-        Category::create(['name' => 'Minuman']);
-        Category::create(['name' => 'Kerajinan Tangan']);
-        Category::create(['name' => 'Pakaian']);
+        $categories = [
+            'Elektronik',
+            'Fashion Pria',
+            'Fashion Wanita',
+            'Buku',
+            'Olahraga',
+            'Makanan & Minuman',
+            'Kesehatan & Kecantikan',
+            'Peralatan Rumah Tangga',
+            'Mainan Anak',
+            'Otomotif',
+            'Komputer & Aksesoris',
+            'Gadget',
+            'Perhiasan & Aksesoris',
+            'Furniture',
+            'Hobi & Kerajinan',
+            'Musik & Audio'
+        ];
+
+        foreach ($categories as $categoryName) {
+            $slug = Str::slug($categoryName);
+            
+            $existingCategory = Category::where('slug', $slug)->first();
+            
+            if ($existingCategory) {
+                $slug = $slug . '-' . uniqid();
+            }
+
+            Category::create([
+                'name' => $categoryName,
+                'slug' => $slug,
+            ]);
+        }
     }
 }
