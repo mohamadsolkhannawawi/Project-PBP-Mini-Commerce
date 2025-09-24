@@ -23,7 +23,7 @@ function RegisterPage() {
                 name,
                 email,
                 password,
-                password_confirmation: confirmPassword,
+                password_confirmation: password,
             });
             navigate('/');
         } catch (err) {
@@ -37,99 +37,112 @@ function RegisterPage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Buat Akun Baru
-                    </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
-                        Atau{' '}
-                        <Link
-                            to="/login"
-                            className="font-medium text-blue-600 hover:text-blue-500"
-                        >
-                            sudah punya akun? Masuk
-                        </Link>
-                    </p>
+        <div className="min-h-screen w-full bg-[#1B263B] font-montserrat flex items-center justify-center">
+            <div className="bg-[#EAEAEA] rounded-3xl flex flex-col md:flex-row w-full max-w-4xl shadow-xl p-4 md:p-0">
+                {/* Form Section */}
+                <div className="flex-1 flex items-center justify-center p-4">
+                    <div className="w-full max-w-md bg-white bg-opacity-60 rounded-2xl shadow-lg p-6">
+                        <h2 className="text-3xl font-bold text-center mb-6" style={{ color: '#1B263B' }}>
+                            Register
+                        </h2>
+                        <form className="space-y-5" onSubmit={handleSubmit}>
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-medium mb-1" style={{ color: '#1B263B' }}>
+                                    Full Name
+                                </label>
+                                <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                    placeholder="Enter your full name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium mb-1" style={{ color: '#1B263B' }}>
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    required
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                    placeholder="Enter your email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: '#1B263B' }}>
+                                    Password
+                                </label>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                    // DIUBAH: className ini diganti untuk menambahkan bingkai
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                    placeholder="Create a password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="confirm-password" className="block text-sm font-medium mb-1" style={{ color: '#1B263B' }}>
+                                    Confirm Password
+                                </label>
+                                <input
+                                    id="confirm-password"
+                                    name="confirm-password"
+                                    type="password"
+                                    required
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                    placeholder="Confirm your password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                            </div>
+                            {error && (
+                                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg">
+                                    {error}
+                                </div>
+                            )}
+                            <button
+                                type="submit"
+                                className="w-full py-3 rounded-lg font-semibold text-white bg-[#1B263B] hover:bg-[#16213A] transition"
+                            >
+                                CREATE ACCOUNT
+                            </button>
+                        </form>
+                        <p className="mt-6 text-center text-sm text-gray-500">
+                            Already have an account?{' '}
+                            <Link
+                                to="/login"
+                                className="font-medium"
+                                style={{ color: '#1B263B' }}
+                            >
+                                Sign in here
+                            </Link>
+                        </p>
+                    </div>
                 </div>
-                <form
-                    className="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md"
-                    onSubmit={handleSubmit}
-                >
-                    {error && (
-                        <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
-                            {error}
-                        </div>
-                    )}
-                    <div className="rounded-md shadow-sm space-y-4">
-                        <div>
-                            <label htmlFor="name">Nama Lengkap</label>
-                            <input
-                                id="name"
-                                name="name"
-                                type="text"
-                                required
-                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Nama Lengkap Anda"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="email-address">Alamat Email</label>
-                            <input
-                                id="email-address"
-                                name="email"
-                                type="email"
-                                required
-                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="contoh@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="password">Password</label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Minimal 6 karakter"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="confirm-password">
-                                Konfirmasi Password
-                            </label>
-                            <input
-                                id="confirm-password"
-                                name="confirm-password"
-                                type="password"
-                                required
-                                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Ulangi password Anda"
-                                value={confirmPassword}
-                                onChange={(e) =>
-                                    setConfirmPassword(e.target.value)
-                                }
-                            />
-                        </div>
-                    </div>
 
+                {/* Branding Section */}
+                <div className="hidden md:flex flex-1 flex-col items-center justify-center p-4">
                     <div>
-                        <button
-                            type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                            Daftar
-                        </button>
+                        <h1 className="text-6xl font-extrabold text-[#1B263B] drop-shadow-lg text-center leading-tight">
+                            Toko<br />Kita
+                        </h1>
+                        <p className="mt-4 text-2xl font-semibold text-[#415A77] text-center drop-shadow">
+                            Easy to shop!
+                        </p>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     );

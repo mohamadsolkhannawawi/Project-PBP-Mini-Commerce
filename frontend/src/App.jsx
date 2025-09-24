@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
 import MainLayout from './layouts/MainLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
+import AuthLayout from './layouts/AuthLayout.jsx'; // Ditambahkan: Mengimpor layout baru untuk halaman login/register.
 import HomePage from './pages/HomePage.jsx';
 import ProductDetailPage from './pages/ProductDetailPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -25,14 +26,19 @@ function App() {
                                 path="product/:productId"
                                 element={<ProductDetailPage />}
                             />
-                            <Route path="login" element={<LoginPage />} />
-                            <Route path="register" element={<RegisterPage />} />
+                            {/* Dihapus: Rute login dan register dipindahkan dari sini. */}
                             <Route path="keranjang" element={<CartPage />} />
                             <Route path="checkout" element={<CheckoutPage />} />
                             <Route
                                 path="search"
                                 element={<SearchResultsPage />}
                             />
+                        </Route>
+
+                        {/* Ditambahkan: Grup rute baru khusus untuk otentikasi. */}
+                        <Route element={<AuthLayout />}>
+                            <Route path="login" element={<LoginPage />} />
+                            <Route path="register" element={<RegisterPage />} />
                         </Route>
 
                         <Route path="/admin" element={<AdminLayout />}>
