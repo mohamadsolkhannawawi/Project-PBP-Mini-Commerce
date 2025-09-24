@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 function LoginPage() {
     const navigate = useNavigate();
-    const { login, user } = useAuth();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         try {
             const response = await login({ email, password });
-            // Cek role setelah login berhasil
             if (response.data.user.role === 'admin') {
                 navigate('/admin');
             } else {
@@ -26,8 +27,7 @@ function LoginPage() {
             } else if (err.response && err.response.data.errors) {
                 const messages = Object.values(err.response.data.errors).flat();
                 setError(messages.join(' '));
-            }
-            else {
+            } else {
                 setError('Terjadi kesalahan. Silakan coba lagi.');
             }
         }
@@ -62,16 +62,25 @@ function LoginPage() {
                                 <label htmlFor="password" className="block text-sm font-medium mb-1" style={{ color: '#1B263B' }}>
                                     Password
                                 </label>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    required
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
+                                <div className="relative">
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type={showPassword ? 'text' : 'password'}
+                                        required
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                                    >
+                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
+                                </div>
                             </div>
                             {error && (
                                 <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg">
