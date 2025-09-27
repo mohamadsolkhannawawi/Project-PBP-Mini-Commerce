@@ -1,15 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, ShoppingCart, LogOut, LayoutDashboard } from 'lucide-react';
+import { HashLink } from 'react-router-hash-link';
+import { Menu, X, ShoppingCart, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import SearchBar from './SearchBar';
+import axiosClient from '../api/axiosClient';
 
 function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const [isCategoryOpen, setCategoryOpen] = useState(false);
+    const [categories, setCategories] = useState([]);
     const { cartCount } = useCart();
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const categoryMenuRef = useRef(null);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axiosClient.get('/categories');
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target)) {
+                setCategoryOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleLogout = async () => {
         await logout();
@@ -20,7 +49,6 @@ function Navbar() {
         <nav className="bg-white shadow-md sticky top-0 z-50 font-montserrat">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center py-4">
-                    {/* Brand/Logo */}
                     <Link
                         to="/"
                         className="text-2xl font-bold font-montserrat"
@@ -29,15 +57,49 @@ function Navbar() {
                         TokoKita
                     </Link>
 
-                    {/* Search Bar di Tengah */}
-                    <div className="flex-1 px-8">
-                        <SearchBar />
+                    <div className="flex-1 flex justify-center items-center px-8">
+                        <div className="relative" ref={categoryMenuRef}> 
+                            <button
+                                onClick={() => setCategoryOpen(!isCategoryOpen)}
+                                className="flex items-center bg-gray-100 border border-gray-300 rounded-l-md px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none h-full"
+                            >
+                                <span>Categories</span>
+                                <ChevronDown size={20} className="ml-2" />
+                            </button>
+                            {isCategoryOpen && (
+                                <div className="absolute mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                    {categories.slice(0, 5).map((category) => (
+                                        <Link
+                                            key={category.id}
+                                            to={`/category/${category.id}`}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            onClick={() => setCategoryOpen(false)}
+                                        >
+                                            {category.name}
+                                        </Link>
+                                    ))}
+                                    {categories.length > 5 && (
+                                        <>
+                                            <div className="border-t border-gray-200 my-1"></div>
+                                            <HashLink
+                                                to="/#all-categories"
+                                                smooth
+                                                className="block px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-gray-100"
+                                                onClick={() => setCategoryOpen(false)}
+                                            >
+                                                More Categories...
+                                            </HashLink>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <SearchBar />
+                        </div>
                     </div>
 
-                    {/* Ikon dan Opsi Pengguna */}
                     <div className="flex items-center space-x-6">
-                        {' '}
-                        {/* Ikon Keranjang (hanya untuk user biasa) */}
                         {user?.role !== 'admin' && (
                             <button
                                 onClick={() => navigate('/keranjang')}
@@ -52,9 +114,7 @@ function Navbar() {
                             </button>
                         )}
                         {user ? (
-                            // Tampilan setelah login
                             <div className="hidden md:flex items-center space-x-4 text-base">
-                                {' '}
                                 {user.role === 'admin' && (
                                     <NavLink
                                         to="/admin"
@@ -67,26 +127,19 @@ function Navbar() {
                                         Admin
                                     </NavLink>
                                 )}
-                                {/* Pemisah yang lebih modern */}
                                 <span className="text-gray-300 h-6 w-px bg-gray-300"></span>
                                 <div className="text-gray-700">
-                                    Halo,{' '}
-                                    <span className="font-semibold">
-                                        {user.name}
-                                    </span>
+                                    Halo, <span className="font-semibold">{user.name}</span>
                                 </div>
                                 <button
                                     onClick={handleLogout}
                                     className="flex items-center text-red-500 hover:bg-red-50 rounded-md px-3 py-2 transition-colors"
                                 >
                                     <LogOut size={20} className="mr-2" />
-                                    <span className="font-semibold">
-                                        Logout
-                                    </span>
+                                    <span className="font-semibold">Logout</span>
                                 </button>
                             </div>
                         ) : (
-                            // Tampilan sebelum login
                             <div className="hidden md:flex items-center space-x-2">
                                 <button
                                     onClick={() => navigate('/login')}
@@ -103,7 +156,6 @@ function Navbar() {
                                 </button>
                             </div>
                         )}
-                        {/* Tombol Menu Mobile */}
                         <div className="md:hidden">
                             <button onClick={() => setIsOpen(!isOpen)}>
                                 {isOpen ? <X size={24} /> : <Menu size={24} />}
