@@ -38,7 +38,9 @@ function CartItem({
                 <div className="flex items-center">
                     <div className="flex items-center border rounded-lg">
                         <button
-                            onClick={() => handleQuantityChange(item.quantity - 1)}
+                            onClick={() =>
+                                handleQuantityChange(item.quantity - 1)
+                            }
                             className="px-3 py-1 border-r bg-gray-100 hover:bg-gray-200 rounded-l-lg"
                         >
                             -
@@ -59,7 +61,9 @@ function CartItem({
                             className="w-16 p-2 text-center"
                         />
                         <button
-                            onClick={() => handleQuantityChange(item.quantity + 1)}
+                            onClick={() =>
+                                handleQuantityChange(item.quantity + 1)
+                            }
                             className="px-3 py-1 border-l bg-gray-100 hover:bg-gray-200 rounded-r-lg"
                         >
                             +

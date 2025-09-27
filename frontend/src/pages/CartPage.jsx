@@ -85,9 +85,7 @@ function CartPage() {
                         Ringkasan Pesanan
                     </h2>
                     <div className="flex justify-between mb-4 border-b pb-4">
-                        <span>
-                            Subtotal ({itemsToCheckout.length} produk)
-                        </span>
+                        <span>Subtotal ({itemsToCheckout.length} produk)</span>
                         <span>
                             Rp {new Intl.NumberFormat('id-ID').format(subtotal)}
                         </span>

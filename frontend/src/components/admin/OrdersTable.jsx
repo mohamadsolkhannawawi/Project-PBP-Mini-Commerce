@@ -79,7 +79,9 @@ function OrdersTable({
                             </td>
                             <td className="px-3 py-2">
                                 Rp{' '}
-                                {new Intl.NumberFormat('id-ID').format(order.total)}
+                                {new Intl.NumberFormat('id-ID').format(
+                                    order.total
+                                )}
                             </td>
                             <td className="px-3 py-2">
                                 {new Date(order.created_at).toLocaleDateString(
@@ -90,7 +92,10 @@ function OrdersTable({
                                 <select
                                     value={order.status}
                                     onChange={(e) =>
-                                        handleStatusChange(order.id, e.target.value)
+                                        handleStatusChange(
+                                            order.id,
+                                            e.target.value
+                                        )
                                     }
                                     className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 >

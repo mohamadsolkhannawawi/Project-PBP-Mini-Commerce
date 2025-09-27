@@ -18,7 +18,7 @@ export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
     const [cartId, setCartId] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+
     const { token } = useAuth();
 
     const fetchCart = useCallback(async () => {
@@ -52,11 +52,13 @@ export function CartProvider({ children }) {
                 quantity,
             });
             await fetchCart();
-            return response.data; 
+            return response.data;
         } catch (error) {
             console.error('Gagal menambahkan ke keranjang:', error);
-            
-            const errorMessage = error.response?.data?.message || 'Gagal menambahkan produk ke keranjang.';
+
+            const errorMessage =
+                error.response?.data?.message ||
+                'Gagal menambahkan produk ke keranjang.';
             alert(errorMessage);
             throw new Error(errorMessage);
         }
@@ -81,8 +83,6 @@ export function CartProvider({ children }) {
             alert('Gagal menghapus item.');
         }
     };
-
-    
 
     const cartCount = cartItems.reduce(
         (count, item) => count + item.quantity,
