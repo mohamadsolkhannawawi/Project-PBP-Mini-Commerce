@@ -13,6 +13,7 @@ import CheckoutPage from './pages/CheckoutPage.jsx';
 import SearchResultsPage from './pages/SearchResultsPage.jsx';
 import ManageProductsPage from './pages/admin/ManageProductsPage.jsx';
 import ManageOrdersPage from './pages/admin/ManageOrdersPage.jsx';
+import CategoryPage from './pages/CategoryPage.jsx';
 
 function App() {
     return (
@@ -33,6 +34,7 @@ function App() {
                                 path="search"
                                 element={<SearchResultsPage />}
                             />
+                            <Route path="category/:categoryId" element={<CategoryPage />} />
                         </Route>
 
                         {/* Ditambahkan: Grup rute baru khusus untuk otentikasi. */}

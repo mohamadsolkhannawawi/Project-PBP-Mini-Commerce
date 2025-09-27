@@ -10,10 +10,15 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->get();
-        return response()->json($products);
+        $products = Product::with('category');
+
+        if ($request->has('category_id')) {
+            $products->where('category_id', $request->category_id);
+        }
+
+        return response()->json($products->get());
     }
 
     public function store(StoreProductRequest $request)
