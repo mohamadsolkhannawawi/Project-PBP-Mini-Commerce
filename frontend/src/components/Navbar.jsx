@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import {
-    Menu,
-    X,
-    ShoppingCart,
-    LogOut,
-    LayoutDashboard,
-} from 'lucide-react';
+import { Menu, X, ShoppingCart, LogOut, LayoutDashboard } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import SearchBar from './SearchBar';
@@ -27,7 +21,11 @@ function Navbar() {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center py-4">
                     {/* Brand/Logo */}
-                    <Link to="/" className="text-2xl font-bold font-montserrat" style={{ color: '#1B263B' }}>
+                    <Link
+                        to="/"
+                        className="text-2xl font-bold font-montserrat"
+                        style={{ color: '#1B263B' }}
+                    >
                         TokoKita
                     </Link>
 
@@ -37,7 +35,8 @@ function Navbar() {
                     </div>
 
                     {/* Ikon dan Opsi Pengguna */}
-                    <div className="flex items-center space-x-6"> {/* Jarak antar ikon sedikit diperbesar */}
+                    <div className="flex items-center space-x-6">
+                        {' '}
                         {/* Ikon Keranjang (hanya untuk user biasa) */}
                         {user?.role !== 'admin' && (
                             <button
@@ -52,44 +51,50 @@ function Navbar() {
                                 )}
                             </button>
                         )}
-
                         {user ? (
                             // Tampilan setelah login
-                            <div className="hidden md:flex items-center space-x-4 text-base"> {/* Ukuran font diubah ke 'text-base' (16px) */}
+                            <div className="hidden md:flex items-center space-x-4 text-base">
+                                {' '}
                                 {user.role === 'admin' && (
                                     <NavLink
                                         to="/admin"
                                         className="flex items-center text-gray-600 hover:text-[#1B263B] font-semibold transition-colors"
                                     >
-                                        <LayoutDashboard size={20} className="mr-2" />
+                                        <LayoutDashboard
+                                            size={20}
+                                            className="mr-2"
+                                        />
                                         Admin
                                     </NavLink>
                                 )}
-                                
                                 {/* Pemisah yang lebih modern */}
                                 <span className="text-gray-300 h-6 w-px bg-gray-300"></span>
-
                                 <div className="text-gray-700">
-                                    Halo, <span className="font-semibold">{user.name}</span>
+                                    Halo,{' '}
+                                    <span className="font-semibold">
+                                        {user.name}
+                                    </span>
                                 </div>
                                 <button
                                     onClick={handleLogout}
                                     className="flex items-center text-red-500 hover:bg-red-50 rounded-md px-3 py-2 transition-colors"
                                 >
-                                    <LogOut size={20} className="mr-2" /> 
-                                    <span className="font-semibold">Logout</span>
+                                    <LogOut size={20} className="mr-2" />
+                                    <span className="font-semibold">
+                                        Logout
+                                    </span>
                                 </button>
                             </div>
                         ) : (
                             // Tampilan sebelum login
                             <div className="hidden md:flex items-center space-x-2">
-                                <button 
+                                <button
                                     onClick={() => navigate('/login')}
                                     className="px-4 py-2 text-[#1B263B] font-semibold rounded-lg hover:bg-gray-100 transition-colors"
                                 >
                                     Login
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => navigate('/register')}
                                     className="px-4 py-2 text-white font-semibold rounded-lg transition-opacity hover:opacity-90"
                                     style={{ backgroundColor: '#1B263B' }}
@@ -98,8 +103,7 @@ function Navbar() {
                                 </button>
                             </div>
                         )}
-
-                        {/* Tombol Menu Mobile (jika perlu) */}
+                        {/* Tombol Menu Mobile */}
                         <div className="md:hidden">
                             <button onClick={() => setIsOpen(!isOpen)}>
                                 {isOpen ? <X size={24} /> : <Menu size={24} />}
