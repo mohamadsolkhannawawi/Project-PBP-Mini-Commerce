@@ -39,7 +39,7 @@ function AdminLayout() {
             <AdminSidebar user={user} handleLogout={handleLogout} />
 
             <main className="flex-1 p-6 overflow-y-auto bg-[#FDFDFF]">
-                // Header dengan SearchBar Disembunyikan untuk Admin
+                {/* Header dengan SearchBar Disembunyikan untuk Admin */}
                 {/* <header className="flex justify-end items-center mb-6">
                     <div className="w-full max-w-md">
                         <SearchBar />
