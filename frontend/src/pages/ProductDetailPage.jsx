@@ -1,168 +1,148 @@
+// src/pages/ProductDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import { ShoppingCart, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, ArrowLeft, Minus, Plus } from 'lucide-react';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
-function ProductDetailPage() {
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const { productId } = useParams();
-    const { addToCart } = useCart();
-    const [quantity, setQuantity] = useState(1);
+export default function ProductDetailPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { productId } = useParams();
+  const { addToCart } = useCart();
 
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [product, setProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
-                const response = await axiosClient.get(
-                    `/products/${productId}`
-                );
-                setProduct(response.data);
-                setError(null);
-            } catch (err) {
-                setError('Produk tidak ditemukan atau gagal dimuat.');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const { data } = await axiosClient.get(`/products/${productId}`);
+        setProduct(data);
+        setError(null);
+      } catch (e) {
+        setError('Produk tidak ditemukan atau gagal dimuat.');
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [productId]);
 
-        fetchProduct();
-    }, [productId]);
+  const dec = () => setQuantity(q => Math.max(1, q - 1));
+  const inc = () =>
+    setQuantity(q => Math.min((product?.stock ?? Infinity), q + 1));
 
-    const handleAddToCart = async () => {
-        if (!user) {
-            alert('Silakan login untuk menambahkan produk ke keranjang.');
-            navigate('/login');
-            return;
-        }
-        if (product) {
-            try {
-                await addToCart(product, quantity);
-                alert(
-                    `${quantity} ${product.name} telah ditambahkan ke keranjang!`
-                );
-            } catch (error) {
-                console.error('Gagal menambahkan ke keranjang dari ProductDetailPage:', error);
-            }
-        }
-    };
-
-    if (loading) {
-        return <div className="text-center py-10">Memuat detail produk...</div>;
+  const handleAddToCart = async () => {
+    if (!user) {
+      alert('Silakan login untuk menambahkan produk ke keranjang.');
+      navigate('/login');
+      return;
     }
-
-    if (error) {
-        return <div className="text-center py-10 text-red-500">{error}</div>;
+    if (product) {
+      try {
+        await addToCart(product, quantity);
+        alert(`${quantity} ${product.name} telah ditambahkan ke keranjang!`);
+      } catch (e) {
+        console.error('Gagal menambahkan ke keranjang:', e);
+      }
     }
+  };
 
-    if (!product) {
-        return (
-            <div className="text-center py-10">
-                <h2 className="text-2xl font-bold">Produk tidak ditemukan!</h2>
-                <Link
-                    to="/"
-                    className="text-blue-600 hover:underline mt-4 inline-block"
-                >
-                    Kembali ke Beranda
-                </Link>
+  if (loading) return <div className="text-center py-10">Memuat detail produk...</div>;
+  if (error)   return <div className="text-center py-10 text-red-500">{error}</div>;
+  if (!product) return null;
+
+  const imgSrc =
+    product.image_url ||
+    `https://via.placeholder.com/1600x1600.png?text=${encodeURIComponent(product.name || 'Produk')}`;
+
+  return (
+    <div className="container mx-auto px-4 md:px-8 py-6" style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui' }}>
+      <Link to="/" className="inline-flex items-center text-[#415A77] hover:underline mb-4">
+        <ArrowLeft size={18} className="mr-2" />
+        Kembali ke produk
+      </Link>
+
+      {/* 3/5 image + 2/5 details */}
+      <div className="grid grid-cols-1 md:grid-cols-5 md:gap-10 items-start">
+        {/* LEFT: image area (3/5) */}
+        <div className="md:col-span-3">
+          <div className="rounded-[14px] bg-gray-200 p-3 md:p-4 shadow-sm">
+            <div className="w-full min-h-[60vh] md:min-h-[70vh] rounded-[14px] bg-gray-300 overflow-hidden flex items-center justify-center">
+              <img src={imgSrc} alt={product.name} className="w-full h-full object-contain" loading="eager" />
             </div>
-        );
-    }
-
-    return (
-        <div className="container mx-auto px-4 py-8">
-            <Link
-                to="/"
-                className="inline-flex items-center text-blue-600 hover:underline mb-6"
-            >
-                <ArrowLeft size={20} className="mr-2" />
-                Kembali ke semua produk
-            </Link>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-auto rounded-lg shadow-lg object-cover"
-                    />
-                </div>
-                <div>
-                    <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                        {product.name}
-                    </h1>
-                    <p className="text-3xl font-light text-blue-600 mb-6">
-                        Rp{' '}
-                        {new Intl.NumberFormat('id-ID').format(product.price)}
-                    </p>
-                    <p className="text-gray-600 mb-6">{product.description}</p>
-
-                    {user?.role !== 'admin' && (
-                        <>
-                            <div className="flex items-center mb-4">
-                                <div className="flex items-center">
-                                    <label
-                                        htmlFor="quantity"
-                                        className="mr-4 font-semibold"
-                                    >
-                                        Jumlah:
-                                    </label>
-                                    <div className="flex items-center border rounded-lg">
-                                        <button
-                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                            className="px-3 py-1 border-r bg-gray-100 hover:bg-gray-200 rounded-l-lg"
-                                        >
-                                            -
-                                        </button>
-                                        <input
-                                            type="number"
-                                            id="quantity"
-                                            value={quantity}
-                                            onChange={(e) => {
-                                                const value = parseInt(e.target.value);
-                                                if (isNaN(value)) {
-                                                    setQuantity(1);
-                                                } else if (value > product.stock) {
-                                                    setQuantity(product.stock);
-                                                } else {
-                                                    setQuantity(value);
-                                                }
-                                            }}
-                                            min="1"
-                                            max={product.stock}
-                                            className="w-16 p-2 text-center"
-                                        />
-                                        <button
-                                            onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                                            className="px-3 py-1 border-l bg-gray-100 hover:bg-gray-200 rounded-r-lg"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <p className="text-gray-600 mb-6">
-                                Stok: {product.stock}
-                            </p>
-                            <button
-                                onClick={handleAddToCart}
-                                className="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 flex items-center justify-center"
-                            >
-                                <ShoppingCart size={20} className="mr-2" />
-                                Tambah ke Keranjang
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
+          </div>
         </div>
-    );
-}
 
-export default ProductDetailPage;
+        {/* RIGHT: details (2/5) */}
+        <div className="md:col-span-2 max-w-xl md:max-w-none mt-6 md:mt-0">
+          <h1 className="text-3xl md:text-5xl font-medium text-gray-900 mb-3">{product.name}</h1>
+
+          <p className="text-xl md:text-4xl font-bold text-[#415A77] mb-4">
+            Rp {new Intl.NumberFormat('id-ID').format(product.price)}
+          </p>
+
+          <p className="text-gray-700 md:text-m leading-relaxed mb-6">
+            {product.description ||
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'}
+          </p>
+
+          {user?.role !== 'admin' && (
+            <>
+                {/* Quantity UI — smaller */}
+                <div className="flex items-center gap-3 mb-2">
+                {/* Left: white square display (smaller) */}
+                <div className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 flex items-center justify-center">
+                    <span className="text-lg font-semibold text-black leading-none">{quantity}</span>
+                </div>
+
+                {/* Right: dark pill with minus | plus (smaller) */}
+                <div className="h-7 px-2 rounded-full bg-[#415A77] text-white flex items-center">
+                    <button
+                    type="button"
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    aria-label="Kurangi"
+                    className="h-4 w-4 rounded-full border border-white flex items-center justify-center  mr-4 hover:bg-white/10"
+                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    </button>
+
+                    <span className="h-4 w-px bg-white/80" />
+
+                    <button
+                    type="button"
+                    onClick={() => setQuantity(q => Math.min((product?.stock ?? Infinity), q + 1))}
+                    aria-label="Tambah"
+                    className="h-4 w-4 rounded-full border border-white flex items-center justify-center ml-4 hover:bg-white/10"
+                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    </button>
+                </div>
+                </div>
+              <p className="text-sm text-gray-500 mb-5">Stok: {product.stock ?? 0}</p>
+
+              {/* Add to Cart */}
+              <button
+                onClick={handleAddToCart}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#1B263B] text-white font-semibold py-3 px-6 hover:brightness-110 transition"
+              >
+                <ShoppingCart size={20} />
+                Tambahkan ke Keranjang
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
