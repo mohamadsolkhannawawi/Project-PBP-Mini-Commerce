@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';//pushcobalagi
+import React, { useState, useMemo } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import CartItem from '../components/CartItem';
