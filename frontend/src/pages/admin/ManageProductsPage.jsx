@@ -5,6 +5,7 @@ import { Trash2 } from 'lucide-react';
 
 function ManageProductsPage() {
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -14,6 +15,7 @@ function ManageProductsPage() {
         direction: 'asc',
     });
     const [statusFilter, setStatusFilter] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -23,7 +25,11 @@ function ManageProductsPage() {
     const fetchProducts = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await axiosClient.get('/admin/products');
+            const params = new URLSearchParams();
+            if (categoryFilter) {
+                params.append('category_id', categoryFilter);
+            }
+            const response = await axiosClient.get('/admin/products', { params });
             setProducts(response.data);
             setError(null);
         } catch (err) {
@@ -31,11 +37,24 @@ function ManageProductsPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [categoryFilter]);
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axiosClient.get('/categories');
+            setCategories(response.data);
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        }
+    };
 
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
 
     const handleSave = async (productData) => {
         const dataToSave = {
@@ -161,6 +180,21 @@ function ManageProductsPage() {
                         className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
                         style={{ minWidth: 200 }}
                     />
+                    <select
+                        value={categoryFilter}
+                        onChange={(e) => {
+                            setCategoryFilter(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                    >
+                        <option value="">Semua Kategori</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
                     <select
                         value={statusFilter}
                         onChange={(e) => {
@@ -317,12 +351,12 @@ function ManageProductsPage() {
                                 <td className="px-3 py-2">{product.stock}</td>
                                 <td className="px-3 py-2">
                                     <span
-                                        className={`px-2 py-1 text-xs font-semibold leading-tight ${
+                                        className={`px-2 py-1 text-xs font-semibold leading-tight ${ 
                                             product.is_active
                                                 ? 'text-green-700 bg-green-100'
                                                 : 'text-red-700 bg-red-100'
                                         }
-											rounded-full`}
+										rounded-full`}
                                     >
                                         {product.is_active
                                             ? 'Aktif'
@@ -343,7 +377,7 @@ function ManageProductsPage() {
                                         onClick={() =>
                                             handleToggleStatus(product)
                                         }
-                                        className={`hover:underline mr-4 ${
+                                        className={`hover:underline mr-4 ${ 
                                             product.is_active
                                                 ? 'text-yellow-600'
                                                 : 'text-green-600'

@@ -13,4 +13,12 @@ class CategoryController extends Controller
         $categories = Category::orderBy('name', 'asc')->get();
         return response()->json($categories);
     }
+
+    public function show(Category $category)
+    {
+        $category->load(['products' => function ($query) {
+            $query->where('is_active', true);
+        }]);
+        return response()->json($category);
+    }
 }

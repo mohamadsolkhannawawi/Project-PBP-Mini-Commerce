@@ -18,6 +18,10 @@ class ProductController extends Controller
             $query->where('name', 'like', '%' . $searchTerm . '%');
         }
 
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
         $products = $query->where('is_active', true)->get();
 
         return response()->json($products);
