@@ -14,13 +14,20 @@ function CategoryPage() {
             setLoading(true);
             try {
                 // First, get the category details to display the name
-                const categoryResponse = await axiosClient.get(`/categories/${categoryId}`);
+                const categoryResponse = await axiosClient.get(
+                    `/categories/${categoryId}`
+                );
                 setCategory(categoryResponse.data);
 
                 // Then, get the products for that category
-                const productsResponse = await axiosClient.get(`/products?category_id=${categoryId}`);
-                setProducts(productsResponse.data);
-                
+                const productsResponse = await axiosClient.get(
+                    `/products?category_id=${categoryId}&limit=100&all=1`
+                );
+                let arr =
+                    productsResponse.data?.data?.data ||
+                    productsResponse.data?.data ||
+                    productsResponse.data;
+                setProducts(Array.isArray(arr) ? arr : []);
                 setError(null);
             } catch (err) {
                 setError('Failed to fetch products for this category.');
@@ -39,14 +46,18 @@ function CategoryPage() {
             {error && <p className="text-center text-red-500">{error}</p>}
             {!loading && !error && category && (
                 <>
-                    <h1 className="text-3xl font-bold mb-6 text-center">{category.name}</h1>
+                    <h1 className="text-3xl font-bold mb-6 text-center">
+                        {category.name}
+                    </h1>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {products.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
                     {products.length === 0 && (
-                        <p className="text-center text-gray-500">No products found in this category.</p>
+                        <p className="text-center text-gray-500">
+                            No products found in this category.
+                        </p>
                     )}
                 </>
             )}

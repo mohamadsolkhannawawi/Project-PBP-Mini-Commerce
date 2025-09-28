@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
-import { Menu, X, ShoppingCart, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import {
+    Menu,
+    X,
+    ShoppingCart,
+    LogOut,
+    LayoutDashboard,
+    ChevronDown,
+    CircleUser,
+    ClipboardClock,
+} from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import SearchBar from './SearchBar';
@@ -10,11 +19,13 @@ import axiosClient from '../api/axiosClient';
 function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isCategoryOpen, setCategoryOpen] = useState(false);
+    const [isProfileOpen, setProfileOpen] = useState(false);
     const [categories, setCategories] = useState([]);
     const { cartCount } = useCart();
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const categoryMenuRef = useRef(null);
+    const profileMenuRef = useRef(null);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -30,8 +41,17 @@ function Navbar() {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target)) {
+            if (
+                categoryMenuRef.current &&
+                !categoryMenuRef.current.contains(event.target)
+            ) {
                 setCategoryOpen(false);
+            }
+            if (
+                profileMenuRef.current &&
+                !profileMenuRef.current.contains(event.target)
+            ) {
+                setProfileOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -58,7 +78,7 @@ function Navbar() {
                     </Link>
 
                     <div className="flex-1 flex justify-center items-center px-8">
-                        <div className="relative" ref={categoryMenuRef}> 
+                        <div className="relative" ref={categoryMenuRef}>
                             <button
                                 onClick={() => setCategoryOpen(!isCategoryOpen)}
                                 className="flex items-center bg-gray-100 border border-gray-300 rounded-l-md px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none h-full"
@@ -73,7 +93,9 @@ function Navbar() {
                                             key={category.id}
                                             to={`/category/${category.id}`}
                                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                            onClick={() => setCategoryOpen(false)}
+                                            onClick={() =>
+                                                setCategoryOpen(false)
+                                            }
                                         >
                                             {category.name}
                                         </Link>
@@ -85,7 +107,9 @@ function Navbar() {
                                                 to="/#all-categories"
                                                 smooth
                                                 className="block px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-gray-100"
-                                                onClick={() => setCategoryOpen(false)}
+                                                onClick={() =>
+                                                    setCategoryOpen(false)
+                                                }
                                             >
                                                 More Categories...
                                             </HashLink>
@@ -128,16 +152,52 @@ function Navbar() {
                                     </NavLink>
                                 )}
                                 <span className="text-gray-300 h-6 w-px bg-gray-300"></span>
-                                <div className="text-gray-700">
-                                    Halo, <span className="font-semibold">{user.name}</span>
+                                {/* Profile Dropdown - click based */}
+                                <div className="relative" ref={profileMenuRef}>
+                                    <button
+                                        className="flex items-center gap-2 text-gray-700 font-semibold focus:outline-none"
+                                        onClick={() =>
+                                            setProfileOpen((prev) => !prev)
+                                        }
+                                    >
+                                        <CircleUser size={24} />
+                                        <span>{user.name}</span>
+                                        <ChevronDown size={18} />
+                                    </button>
+                                    {isProfileOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                            {/* Only show Riwayat Pesanan for regular user */}
+                                            {user.role !== 'admin' && (
+                                                <Link
+                                                    to="/order-history"
+                                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                                    onClick={() =>
+                                                        setProfileOpen(false)
+                                                    }
+                                                >
+                                                    <ClipboardClock
+                                                        size={18}
+                                                        className="mr-2"
+                                                    />
+                                                    Riwayat Pesanan
+                                                </Link>
+                                            )}
+                                            <button
+                                                onClick={() => {
+                                                    setProfileOpen(false);
+                                                    handleLogout();
+                                                }}
+                                                className="flex items-center w-full px-4 py-2 text-red-500 hover:bg-red-50 rounded-md"
+                                            >
+                                                <LogOut
+                                                    size={18}
+                                                    className="mr-2"
+                                                />
+                                                Logout
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center text-red-500 hover:bg-red-50 rounded-md px-3 py-2 transition-colors"
-                                >
-                                    <LogOut size={20} className="mr-2" />
-                                    <span className="font-semibold">Logout</span>
-                                </button>
                             </div>
                         ) : (
                             <div className="hidden md:flex items-center space-x-2">
