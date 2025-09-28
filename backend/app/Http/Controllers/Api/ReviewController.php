@@ -17,9 +17,15 @@ class ReviewController extends Controller
             'comment' => 'nullable|string',
         ]);
 
-        $orderItem = OrderItem::find($request->order_item_id);
+
+        $orderItem = OrderItem::with('order')->find($request->order_item_id);
         if (!$orderItem || $orderItem->order->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        // Review gating: only allow review if order status is 'completed'
+        // Review gating: only allow review if order status is 'selesai'
+        if ($orderItem->order->status !== 'selesai') {
+            return response()->json(['message' => 'You can only review items from completed orders.'], 403);
         }
 
         $review = Review::create([
