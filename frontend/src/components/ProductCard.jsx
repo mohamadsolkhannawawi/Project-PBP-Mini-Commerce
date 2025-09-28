@@ -1,24 +1,27 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ShoppingCart } from 'lucide-react';
+
+import StarRating from './StarRating';
 
 function ProductCard({ product, onAddToCart }) {
     let imageUrl = '';
     if (product.primary_image && product.primary_image.image_path) {
-        // If image_path already starts with /storage or /public, use as is, else prepend
-        if (product.primary_image.image_path.startsWith('http')) {
-            imageUrl = product.primary_image.image_path;
-        } else if (product.primary_image.image_path.startsWith('/storage')) {
-            imageUrl = `http://localhost:8000${product.primary_image.image_path}`;
-        } else if (product.primary_image.image_path.startsWith('public/')) {
-            imageUrl = `http://localhost:8000/storage/${product.primary_image.image_path.replace(
+        const path = product.primary_image.image_path;
+        if (path.startsWith('http')) {
+            imageUrl = path;
+        } else if (path.startsWith('/storage')) {
+            imageUrl = `http://localhost:8000${path}`;
+        } else if (path.startsWith('public/')) {
+            imageUrl = `http://localhost:8000/storage/${path.replace(
                 'public/',
                 ''
             )}`;
         } else {
-            imageUrl = `/no-image.webp`;
+            imageUrl = '/no-image.webp';
         }
     } else {
-        imageUrl = `/no-image.webp`;
+        imageUrl = '/no-image.webp';
     }
 
     const handleAddToCart = (e) => {
@@ -65,7 +68,31 @@ function ProductCard({ product, onAddToCart }) {
                                 product.price
                             )}
                         </div>
+
+                        {/* Rating, review count, sold count */}
+                        <div className="flex items-center justify-center gap-3 mt-2">
+                            <StarRating
+                                rating={Math.round(
+                                    product.reviews_avg_rating || 0
+                                )}
+                            />
+                            <span className="text-sm text-yellow-200">
+                                ({product.reviews_count || 0})
+                            </span>
+                            <span className="text-xs text-gray-200 ml-2">
+                                Terjual: {product.order_items_count || 0}
+                            </span>
+                        </div>
                     </div>
+
+                    {/* Quick Add to Cart */}
+                    <button
+                        className="absolute top-4 right-4 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full p-2 shadow-lg"
+                        onClick={handleAddToCart}
+                        aria-label="Tambah ke Keranjang"
+                    >
+                        <ShoppingCart size={22} />
+                    </button>
                 </div>
             </div>
         </Link>

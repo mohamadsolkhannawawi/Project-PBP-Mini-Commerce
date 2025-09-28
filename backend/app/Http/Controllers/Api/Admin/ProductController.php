@@ -62,9 +62,12 @@ class ProductController extends Controller
     public function update(StoreProductRequest $request, Product $product)
     {
         $validatedData = $request->validated();
+
+        if ($request->has('is_active')) {
+            $validatedData['is_active'] = $request->input('is_active') === 'true';
+        }
+
         $product->update($validatedData);
-        $product->is_active = $request->input('is_active') === 'true';
-        $product->save();
 
         // Replace images ONLY if new ones are uploaded
         if ($request->hasFile('primary_image') || $request->hasFile('gallery_images')) {

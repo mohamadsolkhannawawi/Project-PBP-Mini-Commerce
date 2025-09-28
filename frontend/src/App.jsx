@@ -14,6 +14,7 @@ import SearchResultsPage from './pages/SearchResultsPage.jsx';
 import ManageProductsPage from './pages/admin/ManageProductsPage.jsx';
 import ManageOrdersPage from './pages/admin/ManageOrdersPage.jsx';
 import CategoryPage from './pages/CategoryPage.jsx';
+import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
 
 function App() {
     return (
@@ -34,7 +35,10 @@ function App() {
                                 path="search"
                                 element={<SearchResultsPage />}
                             />
-                            <Route path="category/:categoryId" element={<CategoryPage />} />
+                            <Route
+                                path="category/:categoryId"
+                                element={<CategoryPage />}
+                            />
                         </Route>
 
                         {/* Ditambahkan: Grup rute baru khusus untuk otentikasi. */}
@@ -57,6 +61,12 @@ function App() {
                                 element={<ManageOrdersPage />}
                             />
                         </Route>
+
+                        {/* User protected route group (contoh, pastikan sudah ada proteksi di AuthProvider) */}
+                        <Route
+                            path="/order-history"
+                            element={<OrderHistoryPage />}
+                        />
                     </Routes>
                 </CartProvider>
             </AuthProvider>

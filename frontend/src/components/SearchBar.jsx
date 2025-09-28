@@ -41,8 +41,16 @@ function SearchBar() {
     const fetchSuggestions = async () => {
         setLoading(true);
         try {
-            const response = await axiosClient.get(`/products?search=${query}`);
-            setSuggestions(response.data.data || response.data);
+            // Ambil semua produk yang cocok, non-paginated, limit 10
+            const response = await axiosClient.get(
+                `/products?search=${query}&limit=10&all=1`
+            );
+            // Cek jika response.data.data adalah paginated, ambil .data
+            let arr =
+                response.data?.data?.data ||
+                response.data?.data ||
+                response.data;
+            setSuggestions(Array.isArray(arr) ? arr : []);
         } catch (error) {
             console.error('Error fetching search suggestions:', error);
             setSuggestions([]);

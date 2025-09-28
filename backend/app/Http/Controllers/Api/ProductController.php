@@ -10,8 +10,10 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::query();
-        $query->with(['category', 'primaryImage', 'galleryImages']);
+        $query = Product::with(['category', 'primaryImage'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->where('is_active', true);
 
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
@@ -22,21 +24,25 @@ class ProductController extends Controller
             $query->where('category_id', $request->input('category_id'));
         }
 
-        $products = $query->where('is_active', true)->get();
+        // Hitung total units sold (jumlah orderItems untuk produk ini)
+        $products = $query->withCount('orderItems')->paginate(10);
 
-        return response()->json($products);
+        return response()->json(['success' => true, 'data' => $products]);
     }
 
     public function show($slug)
     {
         $product = Product::where('slug', $slug)
-            ->with(['category', 'primaryImage', 'galleryImages'])
+            ->with(['category', 'primaryImage', 'galleryImages', 'reviews.user'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->withCount('orderItems')
             ->where('is_active', true)
             ->first();
         if (!$product) {
             return response()->json(['message' => 'Product not found or not active'], 404);
         }
-        return response()->json($product);
+        return response()->json(['success' => true, 'data' => $product]);
     }
 }
 

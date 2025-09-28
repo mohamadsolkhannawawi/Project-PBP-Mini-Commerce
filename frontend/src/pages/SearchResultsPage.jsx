@@ -20,10 +20,15 @@ function SearchResultsPage() {
         const fetchSearchResults = async () => {
             setLoading(true);
             try {
+                // Ambil semua produk yang cocok, non-paginated
                 const response = await axiosClient.get(
-                    `/products?search=${query}`
+                    `/products?search=${query}&limit=100&all=1`
                 );
-                setSearchResults(response.data.data || response.data);
+                let arr =
+                    response.data?.data?.data ||
+                    response.data?.data ||
+                    response.data;
+                setSearchResults(Array.isArray(arr) ? arr : []);
                 setError(null);
             } catch (err) {
                 setError('Gagal memuat hasil pencarian.');
