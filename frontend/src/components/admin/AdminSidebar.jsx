@@ -1,11 +1,18 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Package, ShoppingBag, LogOut } from 'lucide-react';
+import {
+    Package,
+    ShoppingBag,
+    LogOut,
+    Gauge,
+    Home as House,
+} from 'lucide-react';
 
 function AdminSidebar({ user, handleLogout }) {
     const baseLinkClass =
         'flex items-center p-2 text-base font-normal rounded-lg transition-colors duration-150';
-    const activeLinkClass = `${baseLinkClass} bg-[#F07167] text-white`;
+    const activeLinkClass = `${baseLinkClass} bg-[#001F3F] text-white`; // biru gelap untuk active
+    const dashboardActiveClass = `${baseLinkClass} bg-[#F07167] text-white`; // orange khusus dashboard
     const normalLinkClass = `${baseLinkClass} text-gray-100 hover:bg-[#4D809E]`;
 
     return (
@@ -23,6 +30,28 @@ function AdminSidebar({ user, handleLogout }) {
                     <p className="font-bold">{user.name}</p>
                 </div>
                 <ul className="space-y-2">
+                    <li>
+                        <NavLink
+                            to="/"
+                            className={({ isActive }) =>
+                                isActive ? activeLinkClass : normalLinkClass
+                            }
+                        >
+                            <House className="w-6 h-6" />
+                            <span className="ml-3">Homepage</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink
+                            to="/admin/dashboard"
+                            className={({ isActive }) =>
+                                isActive ? dashboardActiveClass : normalLinkClass
+                            }
+                        >
+                            <Gauge className="w-6 h-6" />
+                            <span className="ml-3">Dashboard</span>
+                        </NavLink>
+                    </li>
                     <li>
                         <NavLink
                             to="/admin/products"

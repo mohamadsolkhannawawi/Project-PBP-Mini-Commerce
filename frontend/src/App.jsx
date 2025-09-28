@@ -3,7 +3,7 @@ import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
 import MainLayout from './layouts/MainLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
-import AuthLayout from './layouts/AuthLayout.jsx'; // Ditambahkan: Mengimpor layout baru untuk halaman login/register.
+import AuthLayout from './layouts/AuthLayout.jsx'; 
 import HomePage from './pages/HomePage.jsx';
 import ProductDetailPage from './pages/ProductDetailPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -15,6 +15,7 @@ import ManageProductsPage from './pages/admin/ManageProductsPage.jsx';
 import ManageOrdersPage from './pages/admin/ManageOrdersPage.jsx';
 import CategoryPage from './pages/CategoryPage.jsx';
 import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 
 function App() {
     return (
@@ -48,6 +49,14 @@ function App() {
                         </Route>
 
                         <Route path="/admin" element={<AdminLayout />}>
+                            <Route
+                                index
+                                element={<Navigate to="dashboard" replace />}
+                            />
+                            <Route
+                                path="dashboard"
+                                element={<AdminDashboardPage />}
+                            />
                             <Route
                                 index
                                 element={<Navigate to="products" replace />}
