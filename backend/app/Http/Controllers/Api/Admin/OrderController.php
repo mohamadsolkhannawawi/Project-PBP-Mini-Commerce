@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateOrderRequest;
+use Illuminate\Validation\Rule;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
@@ -18,11 +18,22 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    public function update(UpdateOrderRequest $request, Order $order)
+    public function update(Request $request, Order $order)
     {
-        $validatedData = $request->validated();
-        $order->update($validatedData);
-        
-        return response()->json($order->load(['user', 'items.product']));
+        $validated = $request->validate([
+            'status' => [
+                'required',
+                'string',
+                Rule::in(['pending', 'diproses', 'dikirim', 'selesai', 'batal']),
+            ],
+        ]);
+
+        $order->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order status updated successfully.',
+            'data' => $order
+        ]);
     }
 }

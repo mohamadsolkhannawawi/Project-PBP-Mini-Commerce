@@ -13,13 +13,19 @@ const OrderHistoryPage = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [activeStatus, setActiveStatus] = useState('all');
     const navigate = useNavigate();
 
+    // Fetch orders from backend every time tab changes
     useEffect(() => {
         const fetchOrders = async () => {
             setLoading(true);
             try {
-                const res = await axiosClient.get('/orders');
+                let url = '/orders';
+                if (activeStatus !== 'all') {
+                    url += `?status=${activeStatus}`;
+                }
+                const res = await axiosClient.get(url);
                 setOrders(res.data.data || []);
                 setFilteredOrders(res.data.data || []);
             } catch (err) {
@@ -29,21 +35,33 @@ const OrderHistoryPage = () => {
             }
         };
         fetchOrders();
-    }, []);
+        setSearchQuery('');
+    }, [activeStatus]);
+
+    // Reset search when tab changes
+    useEffect(() => {
+        setSearchQuery('');
+    }, [activeStatus]);
 
     const handleReviewSuccess = (review) => {
         setSelectedItem(null);
         window.location.reload();
     };
 
+    const [searchQuery, setSearchQuery] = useState('');
     const handleSearch = (query) => {
+        setSearchQuery(query);
+        let base = orders;
+        if (activeStatus !== 'all') {
+            base = orders.filter((order) => order.status === activeStatus);
+        }
         if (!query) {
-            setFilteredOrders(orders);
+            setFilteredOrders(base);
             return;
         }
         const lowerQuery = query.toLowerCase();
         setFilteredOrders(
-            orders.filter(
+            base.filter(
                 (order) =>
                     order.order_number.toLowerCase().includes(lowerQuery) ||
                     order.items.some((item) =>
@@ -53,11 +71,35 @@ const OrderHistoryPage = () => {
         );
     };
 
+    const statusTabs = [
+        { key: 'all', label: 'Semua' },
+        { key: 'pending', label: 'Pending' },
+        { key: 'diproses', label: 'Diproses' },
+        { key: 'dikirim', label: 'Dikirim' },
+        { key: 'selesai', label: 'Selesai' },
+        { key: 'batal', label: 'Batal' },
+    ];
+
     return (
         <>
             <Navbar />
             <div className="max-w-3xl mx-auto py-8 px-4 min-h-[70vh]">
                 <h1 className="text-2xl font-bold mb-6">Riwayat Pesanan</h1>
+                <div className="flex gap-2 mb-6">
+                    {statusTabs.map((tab) => (
+                        <button
+                            key={tab.key}
+                            className={`px-4 py-2 rounded font-semibold border transition-colors ${
+                                activeStatus === tab.key
+                                    ? 'bg-[#1B263B] text-white'
+                                    : 'bg-gray-100 text-[#1B263B] hover:bg-gray-200'
+                            }`}
+                            onClick={() => setActiveStatus(tab.key)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
                 <SearchOrderBar onSearch={handleSearch} />
                 <button
                     className="mb-6 bg-gray-100 text-[#1B263B] px-4 py-2 rounded hover:bg-gray-200 font-semibold"
@@ -68,7 +110,16 @@ const OrderHistoryPage = () => {
                 {loading && <div>Memuat...</div>}
                 {error && <div className="text-red-500">{error}</div>}
                 {filteredOrders.length === 0 && !loading && (
-                    <div>Tidak ada pesanan.</div>
+                    <div>
+                        Tidak ada pesanan untuk kategori{' '}
+                        <span className="font-semibold">
+                            {
+                                statusTabs.find((t) => t.key === activeStatus)
+                                    ?.label
+                            }
+                        </span>
+                        .
+                    </div>
                 )}
                 {filteredOrders.map((order) => (
                     <div
@@ -105,17 +156,20 @@ const OrderHistoryPage = () => {
                                             />
                                         </div>
                                     ) : (
-                                        <button
-                                            className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500"
-                                            onClick={() =>
-                                                setSelectedItem({
-                                                    productId: item.product_id,
-                                                    orderItemId: item.id,
-                                                })
-                                            }
-                                        >
-                                            Tulis Review
-                                        </button>
+                                        order.status === 'selesai' && (
+                                            <button
+                                                className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500"
+                                                onClick={() =>
+                                                    setSelectedItem({
+                                                        productId:
+                                                            item.product_id,
+                                                        orderItemId: item.id,
+                                                    })
+                                                }
+                                            >
+                                                Tulis Review
+                                            </button>
+                                        )
                                     )}
                                 </div>
                             ))}

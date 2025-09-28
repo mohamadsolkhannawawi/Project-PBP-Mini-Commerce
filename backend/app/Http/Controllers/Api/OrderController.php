@@ -17,10 +17,12 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $orders = Order::with(['items.product', 'items.review'])
-            ->where('user_id', $user->id)
-            ->latest()
-            ->get();
+        $query = Order::with(['items.product', 'items.review'])
+            ->where('user_id', $user->id);
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        $orders = $query->latest()->get();
         return response()->json(['data' => $orders]);
     }
 
