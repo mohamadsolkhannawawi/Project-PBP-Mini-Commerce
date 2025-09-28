@@ -16,6 +16,7 @@ export default function ProductDetailPage() {
     const [quantity, setQuantity] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeImage, setActiveImage] = useState(null);
 
     useEffect(() => {
         (async () => {
@@ -25,6 +26,9 @@ export default function ProductDetailPage() {
                     `/products/${productId}`
                 );
                 setProduct(data);
+                if (data.primary_image) {
+                    setActiveImage(data.primary_image);
+                }
                 setError(null);
             } catch (e) {
                 setError('Produk tidak ditemukan atau gagal dimuat.');
@@ -63,11 +67,28 @@ export default function ProductDetailPage() {
         return <div className="text-center py-10 text-red-500">{error}</div>;
     if (!product) return null;
 
-    const imgSrc =
-        product.image_url ||
-        `https://via.placeholder.com/1600x1600.png?text=${encodeURIComponent(
-            product.name || 'Produk'
-        )}`;
+    const allImages = [
+        product.primary_image,
+        ...(product.galleryImages || []),
+    ].filter(Boolean);
+
+    let imgSrc = '';
+    if (activeImage && activeImage.image_path) {
+        if (activeImage.image_path.startsWith('http')) {
+            imgSrc = activeImage.image_path;
+        } else if (activeImage.image_path.startsWith('/storage')) {
+            imgSrc = `http://localhost:8000${activeImage.image_path}`;
+        } else if (activeImage.image_path.startsWith('public/')) {
+            imgSrc = `http://localhost:8000/storage/${activeImage.image_path.replace(
+                'public/',
+                ''
+            )}`;
+        } else {
+            imgSrc = '/no-image.webp';
+        }
+    } else {
+        imgSrc = '/no-image.webp';
+    }
 
     return (
         <div
@@ -95,6 +116,42 @@ export default function ProductDetailPage() {
                                 loading="eager"
                             />
                         </div>
+                    </div>
+                    <div className="flex space-x-2 mt-2">
+                        {allImages.map((image) => {
+                            let thumb = '';
+                            if (image.image_path.startsWith('http')) {
+                                thumb = image.image_path;
+                            } else if (
+                                image.image_path.startsWith('/storage')
+                            ) {
+                                thumb = `http://localhost:8000${image.image_path}`;
+                            } else if (image.image_path.startsWith('public/')) {
+                                thumb = `http://localhost:8000/storage/${image.image_path.replace(
+                                    'public/',
+                                    ''
+                                )}`;
+                            } else {
+                                thumb = '/no-image.webp';
+                            }
+                            return (
+                                <div
+                                    key={image.id}
+                                    className={`w-20 h-20 rounded-md cursor-pointer overflow-hidden ${
+                                        activeImage.id === image.id
+                                            ? 'ring-2 ring-blue-500'
+                                            : ''
+                                    }`}
+                                    onClick={() => setActiveImage(image)}
+                                >
+                                    <img
+                                        src={thumb}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 

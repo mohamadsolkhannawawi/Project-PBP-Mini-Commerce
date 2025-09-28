@@ -2,11 +2,24 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function ProductCard({ product, onAddToCart }) {
-    const imageUrl =
-        product?.image_url ||
-        `https://via.placeholder.com/600x600.png?text=${encodeURIComponent(
-            product?.name || 'Produk'
-        )}`;
+    let imageUrl = '';
+    if (product.primary_image && product.primary_image.image_path) {
+        // If image_path already starts with /storage or /public, use as is, else prepend
+        if (product.primary_image.image_path.startsWith('http')) {
+            imageUrl = product.primary_image.image_path;
+        } else if (product.primary_image.image_path.startsWith('/storage')) {
+            imageUrl = `http://localhost:8000${product.primary_image.image_path}`;
+        } else if (product.primary_image.image_path.startsWith('public/')) {
+            imageUrl = `http://localhost:8000/storage/${product.primary_image.image_path.replace(
+                'public/',
+                ''
+            )}`;
+        } else {
+            imageUrl = `/no-image.webp`;
+        }
+    } else {
+        imageUrl = `/no-image.webp`;
+    }
 
     const handleAddToCart = (e) => {
         e.preventDefault();
@@ -33,9 +46,7 @@ function ProductCard({ product, onAddToCart }) {
                         loading="lazy"
                         onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = `https://via.placeholder.com/600x600.png?text=${encodeURIComponent(
-                                product?.name || 'Produk'
-                            )}`;
+                            e.currentTarget.src = '/no-image.webp';
                         }}
                     />
                 </div>

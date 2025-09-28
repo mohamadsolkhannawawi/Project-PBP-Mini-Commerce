@@ -14,6 +14,14 @@ function CartItem({
         }
     };
 
+    const imageUrl = item.product.primary_image?.image_path
+        ? `http://localhost:8000/storage/${item.product.primary_image.image_path.replace(
+              'public/',
+              ''
+          )}`
+        : `https://via.placeholder.com/600x600.png?text=${encodeURIComponent(
+              item.product.name || 'Produk'
+          )}`;
     return (
         <div className="flex items-center border-b py-4">
             <input
@@ -23,9 +31,15 @@ function CartItem({
                 onChange={() => onSelectItem(item.id)}
             />
             <img
-                src={item.product.image_url}
+                src={imageUrl}
                 alt={item.product.name}
                 className="w-24 h-24 object-cover rounded-lg mr-4"
+                onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://via.placeholder.com/600x600.png?text=${encodeURIComponent(
+                        item.product.name || 'Produk'
+                    )}`;
+                }}
             />
             <div className="flex-grow">
                 <h2 className="font-bold text-lg">{item.product.name}</h2>

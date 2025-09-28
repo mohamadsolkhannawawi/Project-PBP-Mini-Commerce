@@ -11,7 +11,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::query();
-        $query->with(['category', 'images']);
+        $query->with(['category', 'primaryImage', 'galleryImages']);
 
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
@@ -27,14 +27,15 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
-    public function show(Product $product)
+    public function show($slug)
     {
-        if (!$product->is_active) {
+        $product = Product::where('slug', $slug)
+            ->with(['category', 'primaryImage', 'galleryImages'])
+            ->where('is_active', true)
+            ->first();
+        if (!$product) {
             return response()->json(['message' => 'Product not found or not active'], 404);
         }
-
-        $product->load(['category', 'images']);
-        
         return response()->json($product);
     }
 }

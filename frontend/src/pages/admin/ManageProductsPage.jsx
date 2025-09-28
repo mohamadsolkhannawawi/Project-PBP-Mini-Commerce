@@ -29,7 +29,9 @@ function ManageProductsPage() {
             if (categoryFilter) {
                 params.append('category_id', categoryFilter);
             }
-            const response = await axiosClient.get('/admin/products', { params });
+            const response = await axiosClient.get('/admin/products', {
+                params,
+            });
             setProducts(response.data);
             setError(null);
         } catch (err) {
@@ -57,18 +59,17 @@ function ManageProductsPage() {
     }, []);
 
     const handleSave = async (productData) => {
-        const dataToSave = {
-            ...productData,
-            is_active: !!productData.is_active,
-        };
         try {
             if (selectedProduct) {
-                await axiosClient.put(
+                await axiosClient.post(
                     `/admin/products/${selectedProduct.id}`,
-                    dataToSave
+                    productData,
+                    { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
             } else {
-                await axiosClient.post('/admin/products', dataToSave);
+                await axiosClient.post('/admin/products', productData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
             }
             setIsModalOpen(false);
             setSelectedProduct(null);
@@ -351,7 +352,7 @@ function ManageProductsPage() {
                                 <td className="px-3 py-2">{product.stock}</td>
                                 <td className="px-3 py-2">
                                     <span
-                                        className={`px-2 py-1 text-xs font-semibold leading-tight ${ 
+                                        className={`px-2 py-1 text-xs font-semibold leading-tight ${
                                             product.is_active
                                                 ? 'text-green-700 bg-green-100'
                                                 : 'text-red-700 bg-red-100'
@@ -377,7 +378,7 @@ function ManageProductsPage() {
                                         onClick={() =>
                                             handleToggleStatus(product)
                                         }
-                                        className={`hover:underline mr-4 ${ 
+                                        className={`hover:underline mr-4 ${
                                             product.is_active
                                                 ? 'text-yellow-600'
                                                 : 'text-green-600'
