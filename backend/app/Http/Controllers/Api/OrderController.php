@@ -14,6 +14,16 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $orders = Order::with(['items.product', 'items.review'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+        return response()->json(['data' => $orders]);
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -78,7 +88,7 @@ class OrderController extends Controller
                 return $order;
             });
 
-            return response()->json($order->load('items.product'), 201);
+            return response()->json($order->load(['items.product', 'items.review']), 201);
 
         } catch (\Exception $e) {
             return response()->json(['message' => 'Gagal memproses pesanan: ' . $e->getMessage()], 500);

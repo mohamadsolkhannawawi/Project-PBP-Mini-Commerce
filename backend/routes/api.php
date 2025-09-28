@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CategoryController;
@@ -33,7 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart', [CartController::class, 'store']);
     Route::put('/cart-items/{cartItem}', [CartController::class, 'update']);
     Route::delete('/cart-items/{cartItem}', [CartController::class, 'destroy']);
-    
+
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
     Route::post('/checkout', [OrderController::class, 'store']);
 });
 

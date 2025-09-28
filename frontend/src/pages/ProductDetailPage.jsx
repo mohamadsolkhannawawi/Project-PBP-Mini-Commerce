@@ -5,6 +5,7 @@ import axiosClient from '../api/axiosClient';
 import { ShoppingCart, ArrowLeft, Minus, Plus } from 'lucide-react';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import StarRating from '../components/StarRating';
 
 export default function ProductDetailPage() {
     const { user } = useAuth();
@@ -22,9 +23,9 @@ export default function ProductDetailPage() {
         (async () => {
             try {
                 setLoading(true);
-                const { data } = await axiosClient.get(
-                    `/products/${productId}`
-                );
+                const res = await axiosClient.get(`/products/${productId}`);
+                // Pastikan ambil data dari res.data.data
+                const data = res.data?.data || res.data;
                 setProduct(data);
                 if (data.primary_image) {
                     setActiveImage(data.primary_image);
@@ -67,6 +68,13 @@ export default function ProductDetailPage() {
         return <div className="text-center py-10 text-red-500">{error}</div>;
     if (!product) return null;
 
+    // Ambil rating dan review count
+    const avgRating = Math.round(product.reviews_avg_rating || 0);
+    const reviewCount = product.reviews_count || 0;
+
+    // Ambil array review
+    const reviews = product.reviews || [];
+
     const allImages = [
         product.primary_image,
         ...(product.galleryImages || []),
@@ -74,12 +82,13 @@ export default function ProductDetailPage() {
 
     let imgSrc = '';
     if (activeImage && activeImage.image_path) {
-        if (activeImage.image_path.startsWith('http')) {
-            imgSrc = activeImage.image_path;
-        } else if (activeImage.image_path.startsWith('/storage')) {
-            imgSrc = `http://localhost:8000${activeImage.image_path}`;
-        } else if (activeImage.image_path.startsWith('public/')) {
-            imgSrc = `http://localhost:8000/storage/${activeImage.image_path.replace(
+        const path = activeImage.image_path;
+        if (path.startsWith('http')) {
+            imgSrc = path;
+        } else if (path.startsWith('/storage')) {
+            imgSrc = `http://localhost:8000${path}`;
+        } else if (path.startsWith('public/')) {
+            imgSrc = `http://localhost:8000/storage/${path.replace(
                 'public/',
                 ''
             )}`;
@@ -114,6 +123,10 @@ export default function ProductDetailPage() {
                                 alt={product.name}
                                 className="w-full h-full object-contain"
                                 loading="eager"
+                                onError={(e) => {
+                                    e.currentTarget.onerror = null;
+                                    e.currentTarget.src = '/no-image.webp';
+                                }}
                             />
                         </div>
                     </div>
@@ -160,6 +173,13 @@ export default function ProductDetailPage() {
                     <h1 className="text-3xl md:text-5xl font-medium text-gray-900 mb-3">
                         {product.name}
                     </h1>
+                    {/* Rating dan jumlah review */}
+                    <div className="flex items-center gap-2 mb-2">
+                        <StarRating rating={avgRating} />
+                        <span className="text-sm text-yellow-600">
+                            ({reviewCount} ulasan)
+                        </span>
+                    </div>
 
                     <p className="text-xl md:text-4xl font-bold text-[#415A77] mb-4">
                         Rp{' '}
@@ -269,6 +289,34 @@ export default function ProductDetailPage() {
                         </>
                     )}
                 </div>
+            </div>
+            {/* Customer Reviews Section */}
+            <div className="mt-10">
+                <h2 className="text-xl font-bold mb-4">Customer Reviews</h2>
+                {reviews.length === 0 ? (
+                    <div className="text-gray-500">
+                        Belum ada ulasan untuk produk ini.
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {reviews.map((review) => (
+                            <div
+                                key={review.id}
+                                className="border rounded-lg p-4 bg-white shadow"
+                            >
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-semibold text-gray-800">
+                                        {review.user?.name || 'User'}
+                                    </span>
+                                    <StarRating rating={review.rating} />
+                                </div>
+                                <div className="text-gray-700 text-sm">
+                                    {review.comment}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

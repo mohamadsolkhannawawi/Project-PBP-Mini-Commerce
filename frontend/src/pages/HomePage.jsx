@@ -22,12 +22,23 @@ export default function HomePage() {
         const fetchHomePageData = async () => {
             try {
                 setLoading(true);
-                const [productsResponse, categoriesResponse] = await Promise.all([
-                    axiosClient.get('/products'),
-                    axiosClient.get('/categories')
-                ]);
-                setProducts(productsResponse.data);
-                setCategories(categoriesResponse.data);
+                const [productsResponse, categoriesResponse] =
+                    await Promise.all([
+                        axiosClient.get('/products'),
+                        axiosClient.get('/categories'),
+                    ]);
+                // Ambil array produk dari berbagai kemungkinan struktur response
+                let arr =
+                    productsResponse.data?.data?.data ||
+                    productsResponse.data?.data ||
+                    productsResponse.data ||
+                    [];
+                setProducts(Array.isArray(arr) ? arr : []);
+                setCategories(
+                    Array.isArray(categoriesResponse.data)
+                        ? categoriesResponse.data
+                        : categoriesResponse.data.data || []
+                );
                 setError(null);
             } catch (err) {
                 let msg = 'Terjadi kesalahan yang tidak diketahui.';
@@ -57,18 +68,19 @@ export default function HomePage() {
                 <BannerSlider height={`calc(80vh)`} />
             </section>
 
-            <section id="all-categories" className="mb-8 mt-6 flex flex-wrap gap-4 justify-center">
+            <section
+                id="all-categories"
+                className="mb-8 mt-6 flex flex-wrap gap-4 justify-center"
+            >
                 {/* Static "All Categories" Button */}
                 <Link to="/">
-                    <button
-                        className="px-5 py-2 rounded-full text-base font-semibold text-white bg-[#0D1B2A] transition-transform transform hover:scale-105 shadow-md"
-                    >
+                    <button className="px-5 py-2 rounded-full text-base font-semibold text-white bg-[#0D1B2A] transition-transform transform hover:scale-105 shadow-md">
                         All Categories
                     </button>
                 </Link>
 
                 {/* Dynamic Category Buttons */}
-                {categories.map((cat) => (
+                {(Array.isArray(categories) ? categories : []).map((cat) => (
                     <Link key={cat.id} to={`/category/${cat.id}`}>
                         <button className="px-5 py-2 rounded-full text-base font-medium text-white bg-[#415A77] hover:bg-[#1B263B] transition-colors shadow-sm">
                             {cat.name}
@@ -84,7 +96,11 @@ export default function HomePage() {
                         Error: {error}
                     </p>
                 )}
-                {!loading && !error && <ProductList products={products} />}
+                {!loading && !error && (
+                    <ProductList
+                        products={Array.isArray(products) ? products : []}
+                    />
+                )}
             </section>
         </div>
     );
