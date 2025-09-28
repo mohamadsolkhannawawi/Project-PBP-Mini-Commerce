@@ -8,11 +8,13 @@ function ProductForm({ product, onSave, onCancel }) {
         price: '',
         stock: '',
         category_id: '',
-        image_url: '',
         is_active: true,
     });
+    const [primaryImage, setPrimaryImage] = useState(null);
+    const [galleryImages, setGalleryImages] = useState([]);
+    const [existingGalleryImages, setExistingGalleryImages] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -21,7 +23,7 @@ function ProductForm({ product, onSave, onCancel }) {
                 setCategories(response.data);
             } catch (error) {
                 console.error('Gagal memuat kategori:', error);
-                setError('Gagal memuat daftar kategori.');
+                setErrors({ general: 'Gagal memuat daftar kategori.' });
             }
         };
         fetchCategories();
@@ -35,9 +37,16 @@ function ProductForm({ product, onSave, onCancel }) {
                 price: product.price || '',
                 stock: product.stock || '',
                 category_id: product.category_id || '',
-                image_url: product.image_url || '',
-                is_active: product.is_active,
+                is_active: product.is_active == 1,
             });
+            // Always show preview for existing images after save
+            setPrimaryImage(null);
+            setGalleryImages([]);
+            setExistingGalleryImages(product.galleryImages || []);
+        } else {
+            setPrimaryImage(null);
+            setGalleryImages([]);
+            setExistingGalleryImages([]);
         }
     }, [product]);
 
@@ -45,126 +54,323 @@ function ProductForm({ product, onSave, onCancel }) {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: type === 'checkbox' ? (checked ? 1 : 0) : value,
+            [name]: type === 'checkbox' ? checked : value,
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handlePrimaryImageChange = (e) => {
+        setPrimaryImage(e.target.files[0]);
+    };
+
+    const handleGalleryImagesChange = (e) => {
+        setGalleryImages((prev) => [...prev, ...e.target.files]);
+    };
+
+    const handleRemoveGalleryImage = (idx) => {
+        setGalleryImages((prev) => prev.filter((_, i) => i !== idx));
+    };
+
+    const handleRemoveExistingGalleryImage = (imgId) => {
+        setExistingGalleryImages((prev) =>
+            prev.filter((img) => img.id !== imgId)
+        );
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave(formData);
+        const data = new FormData();
+
+        for (const key in formData) {
+            if (key === 'is_active') {
+                data.append(key, formData[key] ? 'true' : 'false');
+            } else {
+                data.append(key, formData[key]);
+            }
+        }
+
+        if (primaryImage) {
+            data.append('primary_image', primaryImage);
+        }
+        if (galleryImages.length > 0) {
+            galleryImages.forEach((image) => {
+                data.append('gallery_images[]', image);
+            });
+        }
+        // Send IDs of gallery images to keep (for edit mode)
+        if (existingGalleryImages.length > 0) {
+            existingGalleryImages.forEach((img) => {
+                data.append('keep_gallery_image_ids[]', img.id);
+            });
+        }
+
+        setErrors({});
+
+        try {
+            await onSave(data);
+            setPrimaryImage(null);
+            setGalleryImages([]);
+        } catch (error) {
+            if (error.response && error.response.status === 422) {
+                setErrors(error.response.data.errors);
+            } else {
+                setErrors({
+                    general: 'Terjadi kesalahan saat menyimpan produk.',
+                });
+                console.error(error);
+            }
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <p className="text-red-500">{error}</p>}
-            <div>
-                <label className="block text-sm font-medium text-gray-700">
-                    Nama Produk
-                </label>
-                <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                    required
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">
-                    Deskripsi
-                </label>
-                <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows="3"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+        <form
+            onSubmit={handleSubmit}
+            className="space-y-6 bg-white p-6 rounded-lg shadow-sm max-w-4xl mx-auto"
+        >
+            {errors.general && (
+                <p className="text-red-500 text-sm">{errors.general}</p>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                        Harga
-                    </label>
-                    <input
-                        type="number"
-                        name="price"
-                        value={formData.price}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        required
-                    />
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600">
+                            Nama Produk
+                        </label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                        />
+                        {errors.name && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.name[0]}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mt-4">
+                        <label className="block text-xs font-medium text-gray-600">
+                            Deskripsi
+                        </label>
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            rows="4"
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                        />
+                        {errors.description && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.description[0]}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600">
+                                Harga
+                            </label>
+                            <input
+                                type="number"
+                                name="price"
+                                value={formData.price}
+                                onChange={handleChange}
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                            />
+                            {errors.price && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.price[0]}
+                                </p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600">
+                                Stok
+                            </label>
+                            <input
+                                type="number"
+                                name="stock"
+                                value={formData.stock}
+                                onChange={handleChange}
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                            />
+                            {errors.stock && (
+                                <p className="text-red-500 text-xs mt-1">
+                                    {errors.stock[0]}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-4">
+                        <label className="block text-xs font-medium text-gray-600">
+                            Kategori
+                        </label>
+                        <select
+                            name="category_id"
+                            value={formData.category_id}
+                            onChange={handleChange}
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                        >
+                            <option value="">Pilih Kategori</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.category_id && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.category_id[0]}
+                            </p>
+                        )}
+                    </div>
                 </div>
+
+                {/* Right Column */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                        Stok
-                    </label>
-                    <input
-                        type="number"
-                        name="stock"
-                        value={formData.stock}
-                        onChange={handleChange}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                        required
-                    />
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600">
+                            Primary Image / Thumbnail
+                        </label>
+                        <input
+                            type="file"
+                            name="primary_image"
+                            onChange={handlePrimaryImageChange}
+                            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            accept="image/*"
+                        />
+                        {/* Preview existing or selected primary image */}
+                        {primaryImage ? (
+                            <img
+                                src={URL.createObjectURL(primaryImage)}
+                                alt="Primary Preview"
+                                className="mt-2 w-32 h-32 object-cover rounded border"
+                            />
+                        ) : product?.primary_image?.image_path ? (
+                            <img
+                                src={
+                                    product.primary_image.image_path.startsWith(
+                                        'http'
+                                    )
+                                        ? product.primary_image.image_path
+                                        : `http://localhost:8000${product.primary_image.image_path}`
+                                }
+                                alt="Primary"
+                                className="mt-2 w-32 h-32 object-cover rounded border"
+                            />
+                        ) : null}
+                        {errors.primary_image && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.primary_image[0]}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mt-4">
+                        <label className="block text-xs font-medium text-gray-600">
+                            Gallery Images
+                        </label>
+                        <input
+                            type="file"
+                            name="gallery_images"
+                            onChange={handleGalleryImagesChange}
+                            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            accept="image/*"
+                            multiple
+                        />
+                        {/* Preview selected and existing gallery images with remove button */}
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {existingGalleryImages.map((img, idx) => (
+                                <div
+                                    key={img.id || idx}
+                                    className="relative group"
+                                >
+                                    <img
+                                        src={
+                                            img.image_path.startsWith('http')
+                                                ? img.image_path
+                                                : `http://localhost:8000${img.image_path}`
+                                        }
+                                        alt={`Gallery ${idx}`}
+                                        className="w-20 h-20 object-cover rounded border"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleRemoveExistingGalleryImage(
+                                                img.id
+                                            )
+                                        }
+                                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 group-hover:opacity-100"
+                                        title="Remove"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            ))}
+                            {galleryImages.map((img, idx) => (
+                                <div key={idx} className="relative group">
+                                    <img
+                                        src={URL.createObjectURL(img)}
+                                        alt={`Gallery Preview ${idx}`}
+                                        className="w-20 h-20 object-cover rounded border"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleRemoveGalleryImage(idx)
+                                        }
+                                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 group-hover:opacity-100"
+                                        title="Remove"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        {errors.gallery_images && (
+                            <p className="text-red-500 text-xs mt-1">
+                                {errors.gallery_images[0]}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mt-6 flex items-center">
+                        <input
+                            type="checkbox"
+                            name="is_active"
+                            checked={formData.is_active}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <label className="ml-2 block text-sm text-gray-900">
+                            Aktifkan Produk
+                        </label>
+                    </div>
+                    {errors.is_active && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.is_active[0]}
+                        </p>
+                    )}
                 </div>
             </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">
-                    Kategori
-                </label>
-                <select
-                    name="category_id"
-                    value={formData.category_id}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                    required
-                >
-                    <option value="">Pilih Kategori</option>
-                    {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700">
-                    URL Gambar
-                </label>
-                <input
-                    type="url"
-                    name="image_url"
-                    value={formData.image_url}
-                    onChange={handleChange}
-                    placeholder="https://example.com/image.jpg"
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                />
-            </div>
-            <div className="flex items-center">
-                <input
-                    type="checkbox"
-                    name="is_active"
-                    checked={formData.is_active}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
-                <label className="ml-2 block text-sm text-gray-900">
-                    Aktifkan Produk
-                </label>
-            </div>
-            <div className="flex justify-end space-x-2 pt-4">
+
+            <div className="flex justify-end space-x-3 pt-4">
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-sm font-medium"
                 >
                     Batal
                 </button>
                 <button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-medium"
                 >
                     Simpan
                 </button>

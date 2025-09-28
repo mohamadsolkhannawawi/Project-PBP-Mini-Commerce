@@ -23,8 +23,16 @@ class Product extends Model
         'description',
         'price',
         'stock',
-        'image_url',
         'is_active',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     protected $appends = ['sold_count'];
@@ -37,6 +45,16 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
+
+    public function galleryImages()
+    {
+        return $this->hasMany(ProductImage::class)->where('is_primary', false);
     }
 
     public function orderItems(): HasMany
