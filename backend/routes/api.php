@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Api\Admin\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,5 +49,6 @@ Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function
     Route::get('/debug/categories', [ProductController::class, 'debugCategories'])->middleware('auth:sanctum');
     
     Route::put('/orders/{order}', [AdminOrderController::class, 'update']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 });
 
