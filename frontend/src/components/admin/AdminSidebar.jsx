@@ -11,8 +11,7 @@ import {
 function AdminSidebar({ user, handleLogout }) {
     const baseLinkClass =
         'flex items-center p-2 text-base font-normal rounded-lg transition-colors duration-150';
-    const activeLinkClass = `${baseLinkClass} bg-[#001F3F] text-white`; // biru gelap untuk active
-    const dashboardActiveClass = `${baseLinkClass} bg-[#F07167] text-white`; // orange khusus dashboard
+    const activeLinkClass = `${baseLinkClass} bg-[#F07167] text-white`; // orange untuk active
     const normalLinkClass = `${baseLinkClass} text-gray-100 hover:bg-[#4D809E]`;
 
     return (
@@ -45,7 +44,7 @@ function AdminSidebar({ user, handleLogout }) {
                         <NavLink
                             to="/admin/dashboard"
                             className={({ isActive }) =>
-                                isActive ? dashboardActiveClass : normalLinkClass
+                                isActive ? activeLinkClass : normalLinkClass
                             }
                         >
                             <Gauge className="w-6 h-6" />
