@@ -72,9 +72,7 @@ function ProductCard({ product, onAddToCart }) {
                         {/* Rating, review count, sold count */}
                         <div className="flex items-center justify-center gap-3 mt-2">
                             <StarRating
-                                rating={Math.round(
-                                    product.reviews_avg_rating || 0
-                                )}
+                                rating={product.reviews_avg_rating || 0}
                             />
                             <span className="text-sm text-yellow-200">
                                 ({product.reviews_count || 0})

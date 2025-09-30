@@ -73,7 +73,7 @@ function CartPage() {
         );
     }
 
-    // Empty Cart State (Gambar 1)
+    // Empty Cart State
     if (cartItems.length === 0) {
         return (
             <div className="min-h-screen bg-gray-100 font-montserrat">
@@ -112,7 +112,7 @@ function CartPage() {
         );
     }
 
-    // Cart with Items State (Gambar 2)
+    // Cart with Items State
     return (
         <div className="min-h-screen bg-gray-100 font-montserrat pb-24">
             <div className="container mx-auto px-4 py-6">

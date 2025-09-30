@@ -13,8 +13,8 @@ class ReviewController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'order_item_id' => 'required|exists:order_items,id|unique:reviews,order_item_id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string',
+            'rating' => 'required|numeric|min:1|max:5',
+            'comment' => 'nullable|string'|'max:1000',
         ]);
 
 
@@ -22,7 +22,6 @@ class ReviewController extends Controller
         if (!$orderItem || $orderItem->order->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-        // Review gating: only allow review if order status is 'completed'
         // Review gating: only allow review if order status is 'selesai'
         if ($orderItem->order->status !== 'selesai') {
             return response()->json(['message' => 'You can only review items from completed orders.'], 403);
