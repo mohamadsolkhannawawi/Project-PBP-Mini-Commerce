@@ -69,7 +69,7 @@ export default function ProductDetailPage() {
     if (!product) return null;
 
     // Ambil rating dan review count
-    const avgRating = Math.round(product.reviews_avg_rating || 0);
+    const avgRating = product.reviews_avg_rating || 0;
     const reviewCount = product.reviews_count || 0;
 
     // Ambil array review
