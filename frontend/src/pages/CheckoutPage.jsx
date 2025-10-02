@@ -134,9 +134,6 @@ function CheckoutPage() {
                                                 <h3 className="font-medium text-black text-base">
                                                     {item.product.name}
                                                 </h3>
-                                                <p className="text-gray-600 text-sm">
-                                                    *****
-                                                </p>
                                                 <p className="text-sm text-gray-700">
                                                     Kuantitas : {item.quantity}
                                                 </p>
