@@ -3,26 +3,10 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 
 import StarRating from './StarRating';
+import { getProductImageUrl } from '../utils/imageUtils';
 
 function ProductCard({ product, onAddToCart }) {
-    let imageUrl = '';
-    if (product.primary_image && product.primary_image.image_path) {
-        const path = product.primary_image.image_path;
-        if (path.startsWith('http')) {
-            imageUrl = path;
-        } else if (path.startsWith('/storage')) {
-            imageUrl = `http://localhost:8000${path}`;
-        } else if (path.startsWith('public/')) {
-            imageUrl = `http://localhost:8000/storage/${path.replace(
-                'public/',
-                ''
-            )}`;
-        } else {
-            imageUrl = '/no-image.webp';
-        }
-    } else {
-        imageUrl = '/no-image.webp';
-    }
+    const imageUrl = getProductImageUrl(product);
 
     const handleAddToCart = (e) => {
         e.preventDefault();

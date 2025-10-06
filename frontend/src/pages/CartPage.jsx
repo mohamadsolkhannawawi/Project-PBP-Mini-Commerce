@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
+import { getProductImageUrl } from '../utils/imageUtils';
 
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
@@ -175,23 +176,30 @@ function CartPage() {
                                 {/* Product Image & Info */}
                                 <div className="flex-1 flex items-center">
                                     <div className="w-16 h-16 bg-white rounded-lg border-2 border-black flex items-center justify-center mr-4 flex-shrink-0">
-                                        {item.product.image_url ? (
-                                            <img
-                                                src={item.product.image_url}
-                                                alt={item.product.name}
-                                                className="w-full h-full object-cover rounded-md"
-                                            />
-                                        ) : (
-                                            <div className="text-gray-600 text-center">
-                                                <svg
-                                                    className="w-6 h-6"
-                                                    viewBox="0 0 24 24"
-                                                    fill="currentColor"
-                                                >
-                                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-                                                </svg>
-                                            </div>
-                                        )}
+                                        <img
+                                            src={getProductImageUrl(
+                                                item.product
+                                            )}
+                                            alt={item.product.name}
+                                            className="w-full h-full object-cover rounded-md"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                e.target.nextSibling.style.display =
+                                                    'block';
+                                            }}
+                                        />
+                                        <div
+                                            className="text-gray-600 text-center"
+                                            style={{ display: 'none' }}
+                                        >
+                                            <svg
+                                                className="w-6 h-6"
+                                                viewBox="0 0 24 24"
+                                                fill="currentColor"
+                                            >
+                                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                                            </svg>
+                                        </div>
                                     </div>
                                     <div>
                                         <h3 className="font-medium text-black text-base leading-tight mb-1">

@@ -2,10 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import { ShoppingCart, ArrowLeft, Minus, Plus } from 'lucide-react';
+import {
+    ShoppingCart,
+    ArrowLeft,
+    Minus,
+    Plus,
+    CircleArrowLeft,
+    CircleArrowRight,
+} from 'lucide-react';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import StarRating from '../components/StarRating';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function ProductDetailPage() {
     const { user } = useAuth();
@@ -18,7 +26,10 @@ export default function ProductDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeImage, setActiveImage] = useState(null);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
 
+    // Fetch product data
     useEffect(() => {
         (async () => {
             try {
@@ -39,6 +50,58 @@ export default function ProductDetailPage() {
             }
         })();
     }, [productId]);
+
+    // Set active image when product loads
+    useEffect(() => {
+        if (product && !activeImage) {
+            const allImages = [
+                product.primary_image,
+                ...(product.gallery_images || []),
+            ].filter(Boolean);
+
+            if (allImages.length > 0) {
+                setActiveImage(product.primary_image || allImages[0]);
+            }
+        }
+    }, [product, activeImage]);
+
+    // Keyboard navigation untuk gallery
+    useEffect(() => {
+        if (!product) return;
+
+        const allImages = [
+            product.primary_image,
+            ...(product.gallery_images || []),
+        ].filter(Boolean);
+
+        const handleKeyPress = (e) => {
+            if (allImages.length <= 1) return;
+
+            const currentIndex = allImages.findIndex(
+                (img) => img.id === activeImage?.id
+            );
+            if (currentIndex === -1) return;
+
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const prevIndex =
+                    currentIndex === 0
+                        ? allImages.length - 1
+                        : currentIndex - 1;
+                setActiveImage(allImages[prevIndex]);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const nextIndex =
+                    currentIndex === allImages.length - 1
+                        ? 0
+                        : currentIndex + 1;
+                setActiveImage(allImages[nextIndex]);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [product, activeImage]);
 
     const dec = () => setQuantity((q) => Math.max(1, q - 1));
     const inc = () =>
@@ -62,6 +125,53 @@ export default function ProductDetailPage() {
         }
     };
 
+    // Navigation functions for gallery
+    const goToPreviousImage = () => {
+        if (allImages.length <= 1) return;
+        const currentIndex = allImages.findIndex(
+            (img) => img.id === activeImage?.id
+        );
+        if (currentIndex === -1) return;
+        const prevIndex =
+            currentIndex === 0 ? allImages.length - 1 : currentIndex - 1;
+        setActiveImage(allImages[prevIndex]);
+    };
+
+    const goToNextImage = () => {
+        if (allImages.length <= 1) return;
+        const currentIndex = allImages.findIndex(
+            (img) => img.id === activeImage?.id
+        );
+        if (currentIndex === -1) return;
+        const nextIndex =
+            currentIndex === allImages.length - 1 ? 0 : currentIndex + 1;
+        setActiveImage(allImages[nextIndex]);
+    };
+
+    // Touch gesture handlers
+    const handleTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe && allImages.length > 1) {
+            goToNextImage();
+        }
+        if (isRightSwipe && allImages.length > 1) {
+            goToPreviousImage();
+        }
+    };
+
     if (loading)
         return <div className="text-center py-10">Memuat detail produk...</div>;
     if (error)
@@ -75,29 +185,13 @@ export default function ProductDetailPage() {
     // Ambil array review
     const reviews = product.reviews || [];
 
+    // Gabungkan primary image dengan gallery images
     const allImages = [
         product.primary_image,
-        ...(product.galleryImages || []),
+        ...(product.gallery_images || []),
     ].filter(Boolean);
 
-    let imgSrc = '';
-    if (activeImage && activeImage.image_path) {
-        const path = activeImage.image_path;
-        if (path.startsWith('http')) {
-            imgSrc = path;
-        } else if (path.startsWith('/storage')) {
-            imgSrc = `http://localhost:8000${path}`;
-        } else if (path.startsWith('public/')) {
-            imgSrc = `http://localhost:8000/storage/${path.replace(
-                'public/',
-                ''
-            )}`;
-        } else {
-            imgSrc = '/no-image.webp';
-        }
-    } else {
-        imgSrc = '/no-image.webp';
-    }
+    const imgSrc = getImageUrl(activeImage);
 
     return (
         <div
@@ -106,74 +200,137 @@ export default function ProductDetailPage() {
         >
             {/* Tombol Kembali ke Home di pojok kiri atas */}
             <div className="mb-6">
-            <button
-                onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 px-5 py-2.5
+                <button
+                    onClick={() => navigate('/')}
+                    className="inline-flex items-center gap-2 px-5 py-2.5
                         bg-[#1B263B] text-white rounded-lg
                         font-montserrat font-medium
                         hover:bg-[#131D2F] transition-all"
-                style={{ fontFamily: 'Montserrat, sans-serif' }}
-            >
-                <ArrowLeft size={20} />
-                Kembali ke Home
-            </button>
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                >
+                    <ArrowLeft size={20} />
+                    Kembali ke Home
+                </button>
             </div>
-
 
             {/* 3/5 image + 2/5 details */}
             <div className="grid grid-cols-1 md:grid-cols-5 md:gap-10 items-start">
                 {/* LEFT: image area (3/5) */}
                 <div className="md:col-span-3">
-                    <div className="rounded-[14px] bg-gray-200 p-3 md:p-4 shadow-sm">
-                        <div className="w-full min-h-[60vh] md:min-h-[70vh] rounded-[14px] bg-gray-300 overflow-hidden flex items-center justify-center">
+                    <div className="rounded-[14px] bg-gray-200 p-3 md:p-4 shadow-sm relative">
+                        <div
+                            className="w-full min-h-[60vh] md:min-h-[70vh] rounded-[14px] bg-gray-300 overflow-hidden flex items-center justify-center relative group"
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                        >
                             <img
                                 src={imgSrc}
                                 alt={product.name}
-                                className="w-full h-full object-contain"
+                                className="w-full h-full object-contain transition-opacity duration-300"
                                 loading="eager"
                                 onError={(e) => {
                                     e.currentTarget.onerror = null;
                                     e.currentTarget.src = '/no-image.webp';
                                 }}
                             />
+
+                            {/* Navigation Buttons - Only show if there are multiple images */}
+                            {allImages.length > 1 && (
+                                <>
+                                    {/* Previous Button */}
+                                    <button
+                                        onClick={goToPreviousImage}
+                                        className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 
+                                                 bg-white bg-opacity-90 hover:bg-opacity-100 
+                                                 text-gray-800 rounded-full p-1.5 md:p-2 
+                                                 shadow-lg transition-all duration-200 
+                                                 opacity-70 md:opacity-0 md:group-hover:opacity-100
+                                                 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                                 z-10"
+                                        aria-label="Previous Image"
+                                        title="Previous Image (Arrow Left)"
+                                    >
+                                        <CircleArrowLeft
+                                            size={28}
+                                            className="text-gray-700 md:w-8 md:h-8"
+                                        />
+                                    </button>
+
+                                    {/* Next Button */}
+                                    <button
+                                        onClick={goToNextImage}
+                                        className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 
+                                                 bg-white bg-opacity-90 hover:bg-opacity-100 
+                                                 text-gray-800 rounded-full p-1.5 md:p-2 
+                                                 shadow-lg transition-all duration-200 
+                                                 opacity-70 md:opacity-0 md:group-hover:opacity-100
+                                                 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                                 z-10"
+                                        aria-label="Next Image"
+                                        title="Next Image (Arrow Right)"
+                                    >
+                                        <CircleArrowRight
+                                            size={28}
+                                            className="text-gray-700 md:w-8 md:h-8"
+                                        />
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Image Counter */}
+                            {allImages.length > 1 && (
+                                <div className="absolute top-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                    {activeImage
+                                        ? allImages.findIndex(
+                                              (img) => img.id === activeImage.id
+                                          ) + 1
+                                        : 1}{' '}
+                                    / {allImages.length}
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="flex space-x-2 mt-2">
-                        {allImages.map((image) => {
-                            let thumb = '';
-                            if (image.image_path.startsWith('http')) {
-                                thumb = image.image_path;
-                            } else if (
-                                image.image_path.startsWith('/storage')
-                            ) {
-                                thumb = `http://localhost:8000${image.image_path}`;
-                            } else if (image.image_path.startsWith('public/')) {
-                                thumb = `http://localhost:8000/storage/${image.image_path.replace(
-                                    'public/',
-                                    ''
-                                )}`;
-                            } else {
-                                thumb = '/no-image.webp';
-                            }
-                            return (
-                                <div
-                                    key={image.id}
-                                    className={`w-20 h-20 rounded-md cursor-pointer overflow-hidden ${
-                                        activeImage.id === image.id
-                                            ? 'ring-2 ring-blue-500'
-                                            : ''
-                                    }`}
-                                    onClick={() => setActiveImage(image)}
-                                >
-                                    <img
-                                        src={thumb}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
+                    {/* Thumbnail Gallery */}
+                    {allImages.length > 1 && (
+                        <div className="mt-4">
+                            <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+                                {allImages.map((image, index) => {
+                                    const thumb = getImageUrl(image);
+                                    const isActive =
+                                        activeImage &&
+                                        activeImage.id === image.id;
+                                    return (
+                                        <div
+                                            key={image.id || index}
+                                            className={`flex-shrink-0 w-20 h-20 rounded-lg cursor-pointer overflow-hidden border-2 transition-all duration-200 ${
+                                                isActive
+                                                    ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg'
+                                                    : 'border-gray-300 hover:border-gray-400 hover:shadow-md'
+                                            }`}
+                                            onClick={() =>
+                                                setActiveImage(image)
+                                            }
+                                        >
+                                            <img
+                                                src={thumb}
+                                                alt={`${product.name} - Image ${
+                                                    index + 1
+                                                }`}
+                                                className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+                                                onError={(e) => {
+                                                    e.currentTarget.onerror =
+                                                        null;
+                                                    e.currentTarget.src =
+                                                        '/no-image.webp';
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* RIGHT: details (2/5) */}
