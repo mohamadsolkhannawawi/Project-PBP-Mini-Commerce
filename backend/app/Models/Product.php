@@ -35,31 +35,36 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    protected $appends = ['sold_count'];
+    protected $appends = ['sold_count', 'primary_image', 'gallery_images'];
 
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-        public function reviews()
-        {
-            return $this->hasMany(Review::class);
-        }
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
 
-    public function primaryImage()
+    public function getPrimaryImageAttribute()
     {
-        return $this->hasOne(ProductImage::class)->where('is_primary', true);
+        $primaryImage = $this->images()->where('is_primary', true)->first();
+        if ($primaryImage) {
+            return $primaryImage;
+        }
+
+        return $this->images()->first();
     }
 
-    public function galleryImages()
+    public function getGalleryImagesAttribute()
     {
-        return $this->hasMany(ProductImage::class)->where('is_primary', false);
+        return $this->images()->where('is_primary', false)->get();
     }
 
     public function orderItems(): HasMany

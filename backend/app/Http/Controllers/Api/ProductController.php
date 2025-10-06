@@ -10,7 +10,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'primaryImage'])
+        $query = Product::with(['category'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('is_active', true);
@@ -25,7 +25,7 @@ class ProductController extends Controller
         }
 
         // Hitung total units sold (jumlah orderItems untuk produk ini)
-        $products = $query->withCount('orderItems')->paginate(10);
+        $products = $query->withCount('orderItems')->paginate(12);
 
         return response()->json(['success' => true, 'data' => $products]);
     }
@@ -33,7 +33,7 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::where('slug', $slug)
-            ->with(['category', 'primaryImage', 'galleryImages', 'reviews.user'])
+            ->with(['category', 'reviews.user'])
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->withCount('orderItems')

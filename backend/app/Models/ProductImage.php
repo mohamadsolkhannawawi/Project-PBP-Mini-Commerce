@@ -23,8 +23,23 @@ class ProductImage extends Model
         'is_primary',
     ];
 
+    protected $appends = ['url'];
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Get the full URL for the image.
+     *
+     * @return string
+     */
+    public function getUrlAttribute()
+    {
+        if ($this->image_path) {
+            return asset('storage/' . $this->image_path);
+        }
+        return null;
     }
 }
