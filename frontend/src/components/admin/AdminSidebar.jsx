@@ -11,19 +11,24 @@ import {
 function AdminSidebar({ user, handleLogout }) {
     const baseLinkClass =
         'flex items-center p-2 text-base font-normal rounded-lg transition-colors duration-150';
-    const activeLinkClass = `${baseLinkClass} bg-[#F07167] text-white`; // orange untuk active
+    const activeLinkClass = `${baseLinkClass} bg-[#415A77] text-white`; // abu kebiruan untuk active
     const normalLinkClass = `${baseLinkClass} text-gray-100 hover:bg-[#4D809E]`;
 
     return (
         <aside className="w-64 flex-shrink-0" aria-label="Sidebar">
-            <div className="relative overflow-y-auto py-4 px-3 h-full bg-[#001F3F] text-white">
-                <Link to="/" className="flex items-center pl-2.5 mb-5">
-                    <span className="self-center text-xl font-semibold whitespace-nowrap">
-                        Admin Panel
-                    </span>
+            <div className="relative overflow-y-auto py-4 px-3 h-full bg-[#1B263B] text-white font-montserrat">
+                <Link to="/" className="flex items-center justify-center mb-5">
+                    <div className="text-center">
+                        <div className="text-6xl font-bold text-white leading-none">
+                            Toko
+                        </div>
+                        <div className="text-4xl font-bold text-white -mt-2 leading-none">
+                            Kita
+                        </div>
+                    </div>
                 </Link>
                 <div className="p-2 mb-4 border-t border-b border-gray-700">
-                    <p className="text-sm font-semibold text-gray-400">
+                    <p className="text-sm font-semibold text-gray-200">
                         Selamat Datang,
                     </p>
                     <p className="font-bold">{user.name}</p>

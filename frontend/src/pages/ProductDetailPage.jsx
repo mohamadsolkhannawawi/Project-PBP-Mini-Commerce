@@ -69,7 +69,7 @@ export default function ProductDetailPage() {
     if (!product) return null;
 
     // Ambil rating dan review count
-    const avgRating = Math.round(product.reviews_avg_rating || 0);
+    const avgRating = product.reviews_avg_rating || 0;
     const reviewCount = product.reviews_count || 0;
 
     // Ambil array review
@@ -104,13 +104,21 @@ export default function ProductDetailPage() {
             className="container mx-auto px-4 md:px-8 py-6"
             style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui' }}
         >
-            <Link
-                to="/"
-                className="inline-flex items-center text-[#415A77] hover:underline mb-4"
+            {/* Tombol Kembali ke Home di pojok kiri atas */}
+            <div className="mb-6">
+            <button
+                onClick={() => navigate("/")}
+                className="inline-flex items-center gap-2 px-5 py-2.5
+                        bg-[#1B263B] text-white rounded-lg
+                        font-montserrat font-medium
+                        hover:bg-[#131D2F] transition-all"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
             >
-                <ArrowLeft size={18} className="mr-2" />
-                Kembali ke produk
-            </Link>
+                <ArrowLeft size={20} />
+                Kembali ke Home
+            </button>
+            </div>
+
 
             {/* 3/5 image + 2/5 details */}
             <div className="grid grid-cols-1 md:grid-cols-5 md:gap-10 items-start">

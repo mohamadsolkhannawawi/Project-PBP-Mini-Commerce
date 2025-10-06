@@ -130,14 +130,13 @@ function LoginPage() {
 
                 {/* Branding Section */}
                 <div className="hidden md:flex flex-1 flex-col items-center justify-center p-4">
-                    <div>
-                        <h1 className="text-6xl font-extrabold text-[#1B263B] drop-shadow-lg text-center leading-tight">
-                            Toko
-                            <br />
-                            Kita
+                    <div className="text-center">
+                        <h1 className="font-extrabold text-[#1B263B] drop-shadow-lg leading-tight">
+                            <span className="block text-7xl">Toko</span>
+                            <span className="block text-5xl -mt-2">Kita</span>
                         </h1>
-                        <p className="mt-4 text-2xl font-semibold text-[#415A77] text-center drop-shadow">
-                            Easy to shop!
+                        <p className="mt-3 text-2xl font-semibold text-[#415A77] drop-shadow">
+                        Easy to shop!
                         </p>
                     </div>
                 </div>

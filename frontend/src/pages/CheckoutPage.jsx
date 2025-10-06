@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
 function CheckoutPage() {
@@ -14,7 +14,7 @@ function CheckoutPage() {
     const items = location.state?.items;
 
     if (!items || items.length === 0) {
-        return <Navigate to="/cart" replace />;
+        return <Navigate to="/keranjang" replace />;
     }
 
     const subtotal = items.reduce((total, item) => {
@@ -53,58 +53,122 @@ function CheckoutPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">Checkout</h1>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <form
-                    onSubmit={handleSubmit}
-                    className="lg:col-span-2 bg-white p-6 rounded-lg shadow"
-                >
-                    <h2 className="text-xl font-bold mb-4">
-                        Alamat Pengiriman
-                    </h2>
-                    {error && <p className="text-red-500 mb-4">{error}</p>}
-                    <textarea
-                        className="w-full p-2 border rounded"
-                        rows="4"
-                        placeholder="Masukkan alamat lengkap Anda, termasuk kota dan kode pos."
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                    ></textarea>
-                    <button
-                        type="submit"
-                        disabled={loading || items.length === 0}
-                        className="w-full mt-6 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-                    >
-                        {loading ? 'Memproses...' : 'Buat Pesanan'}
-                    </button>
-                </form>
+        <div className="min-h-screen bg-white font-montserrat py-8">
+            <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+                    {/* Left Column - Form Alamat */}
+                    <div>
+                        <form onSubmit={handleSubmit}>
+                            <h1 className="text-3xl font-bold mb-6 text-black">
+                                Detail Alamat
+                            </h1>
+                            
+                            {error && (
+                                <p className="text-red-500 mb-4 text-sm">{error}</p>
+                            )}
+                            
+                            <div className="mb-2">
+                                <label className="block text-sm text-gray-700 mb-2">
+                                    No. Telepon & Alamat Lengkap Penerima
+                                </label>
+                                <textarea
+                                    className="w-full border border-gray-400 rounded-md p-3 text-sm focus:outline-none focus:border-gray-600"
+                                    rows="7"
+                                    placeholder="(08XXXXXXXXXX, Jalan, Kelurahan, Kecamatan, Kota, Kode Pos)"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    style={{ 
+                                        maxWidth: '537px',
+                                        minHeight: '180px'
+                                    }}
+                                ></textarea>
+                            </div>
+                        </form>
+                    </div>
 
-                <div className="bg-gray-100 p-6 rounded-lg h-fit shadow">
-                    <h2 className="text-xl font-bold mb-4">
-                        Ringkasan Pesanan
-                    </h2>
-                    {items.map((item) => (
-                        <div
-                            key={item.id}
-                            className="flex justify-between text-sm mb-2"
-                        >
-                            <span>
-                                {item.product.name} x {item.quantity}
-                            </span>
-                            <span>
-                                Rp{' '}
-                                {new Intl.NumberFormat('id-ID').format(
-                                    item.product.price * item.quantity
-                                )}
-                            </span>
+                    {/* Right Column - Ringkasan Pesanan */}
+                    <div 
+                        className="rounded-lg p-6 shadow-lg"
+                        style={{
+                            background: 'linear-gradient(180deg, #E8E8E8 0%, #FFFFFF 30%)',
+                            maxWidth: '654px'
+                        }}
+                    >
+                        <div className="space-y-4">
+                            {/* Product Items */}
+                            {items.map((item) => {
+                                let imageUrl = '';
+                                if (item.product.primary_image && item.product.primary_image.image_path) {
+                                    const path = item.product.primary_image.image_path;
+                                    if (path.startsWith('http')) {
+                                        imageUrl = path;
+                                    } else if (path.startsWith('/storage')) {
+                                        imageUrl = `http://localhost:8000${path}`;
+                                    } else if (path.startsWith('public/')) {
+                                        imageUrl = `http://localhost:8000/storage/${path.replace('public/', '')}`;
+                                    } else {
+                                        imageUrl = '/no-image.webp';
+                                    }
+                                } else {
+                                    imageUrl = '/no-image.webp';
+                                }
+
+                                return (
+                                    <div 
+                                        key={item.id} 
+                                        className="bg-white rounded-lg p-4 flex items-center justify-between"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-20 h-20 bg-gray-100 rounded-lg border-2 border-black flex items-center justify-center flex-shrink-0">
+                                                <img
+                                                    src={imageUrl}
+                                                    alt={item.product.name}
+                                                    className="w-full h-full object-cover rounded-md"
+                                                    onError={(e) => {
+                                                        e.currentTarget.onerror = null;
+                                                        e.currentTarget.src = '/no-image.webp';
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-medium text-black text-base">
+                                                    {item.product.name}
+                                                </h3>
+                                                <p className="text-sm text-gray-700">
+                                                    Kuantitas : {item.quantity}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="font-semibold text-black text-lg">
+                                            Rp{new Intl.NumberFormat('id-ID').format(item.product.price * item.quantity)}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {/* Summary */}
+                            <div className="pt-4 space-y-2">
+                                <div className="flex justify-between text-sm text-gray-700">
+                                    <span>Subtotal • {items.length} Produk</span>
+                                </div>
+                                <div className="border-t border-gray-400 pt-3 flex justify-between items-center">
+                                    <span className="font-medium text-black">Total Pembayaran</span>
+                                    <span className="font-bold text-black text-xl">
+                                        Rp{new Intl.NumberFormat('id-ID').format(subtotal)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Order Button */}
+                            <button
+                                onClick={handleSubmit}
+                                disabled={loading || items.length === 0}
+                                className="w-full py-4 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                                style={{ backgroundColor: '#1B263B' }}
+                            >
+                                {loading ? 'Memproses...' : 'Order Sekarang'}
+                            </button>
                         </div>
-                    ))}
-                    <div className="border-t pt-4 mt-4 flex justify-between font-bold text-lg">
-                        <span>Total</span>
-                        <span>
-                            Rp {new Intl.NumberFormat('id-ID').format(subtotal)}
-                        </span>
                     </div>
                 </div>
             </div>

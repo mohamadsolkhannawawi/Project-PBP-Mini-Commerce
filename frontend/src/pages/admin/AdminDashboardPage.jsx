@@ -13,10 +13,10 @@ import {
 import { Home, ShoppingCart, Users, Package } from 'lucide-react';
 
 const kpiIcons = {
-    totalRevenue: <ShoppingCart className="w-8 h-8 text-[#F07167]" />,
-    totalOrders: <Package className="w-8 h-8 text-[#F07167]" />,
-    totalProducts: <Home className="w-8 h-8 text-[#F07167]" />,
-    totalCustomers: <Users className="w-8 h-8 text-[#F07167]" />,
+    totalRevenue: <ShoppingCart className="w-14 h-14 text-[#1B263B]" />,
+    totalOrders: <Package className="w-14 h-14 text-[#1B263B]" />,
+    totalProducts: <Home className="w-14 h-14 text-[#1B263B]" />,
+    totalCustomers: <Users className="w-14 h-14 text-[#1B263B]" />,
 };
 
 const kpiLabels = {
@@ -52,7 +52,7 @@ export default function AdminDashboardPage() {
     const { kpi, recentOrders, salesOverTime, topSellingProducts } = dashboard;
 
     return (
-        <div className="p-6 bg-[#EAEAEA] min-h-screen">
+        <div className="p-6 bg-[#D3D7DD] min-h-screen">
             <h1 className="text-3xl font-bold mb-6 text-[#1B263B]">
                 Admin Dashboard
             </h1>
@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
                 {Object.entries(kpi).map(([key, value]) => (
                     <div
                         key={key}
-                        className="bg-[#1B263B] rounded-xl p-6 flex flex-col items-center text-white shadow"
+                        className="bg-[#415A77] rounded-xl p-6 flex flex-col items-center text-white shadow"
                     >
                         {kpiIcons[key]}
                         <div className="mt-2 text-lg font-semibold">
@@ -81,7 +81,10 @@ export default function AdminDashboardPage() {
                     Sales (Last 7 Days)
                 </h2>
                 <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={salesOverTime} margin={{ top: 5, right: 20, left: 30, bottom: 5 }}>
+                    <LineChart
+                        data={salesOverTime}
+                        margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
+                    >
                         <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
                         <XAxis dataKey="date" />
                         <YAxis />
