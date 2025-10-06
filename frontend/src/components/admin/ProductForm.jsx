@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
+import { getImageUrl } from '../../utils/imageUtils';
 
 function ProductForm({ product, onSave, onCancel }) {
     const [formData, setFormData] = useState({
@@ -42,7 +43,17 @@ function ProductForm({ product, onSave, onCancel }) {
             // Always show preview for existing images after save
             setPrimaryImage(null);
             setGalleryImages([]);
-            setExistingGalleryImages(product.galleryImages || []);
+
+            // Handle different data structures for gallery images
+            let galleryImages = [];
+            if (product.galleryImages && Array.isArray(product.galleryImages)) {
+                galleryImages = product.galleryImages;
+            } else if (product.images && Array.isArray(product.images)) {
+                // Filter non-primary images from images array
+                galleryImages = product.images.filter((img) => !img.is_primary);
+            }
+
+            setExistingGalleryImages(galleryImages);
         } else {
             setPrimaryImage(null);
             setGalleryImages([]);
@@ -97,10 +108,15 @@ function ProductForm({ product, onSave, onCancel }) {
             });
         }
         // Send IDs of gallery images to keep (for edit mode)
-        if (existingGalleryImages.length > 0) {
+        // Always send this array in edit mode, even if empty, to signal gallery update
+        if (product) {
             existingGalleryImages.forEach((img) => {
                 data.append('keep_gallery_image_ids[]', img.id);
             });
+            // If no existing gallery images to keep, send empty indicator
+            if (existingGalleryImages.length === 0) {
+                data.append('keep_gallery_image_ids[]', '');
+            }
         }
 
         setErrors({});
@@ -251,15 +267,9 @@ function ProductForm({ product, onSave, onCancel }) {
                                 alt="Primary Preview"
                                 className="mt-2 w-32 h-32 object-cover rounded border"
                             />
-                        ) : product?.primary_image?.image_path ? (
+                        ) : product?.primary_image ? (
                             <img
-                                src={
-                                    product.primary_image.image_path.startsWith(
-                                        'http'
-                                    )
-                                        ? product.primary_image.image_path
-                                        : `http://localhost:8000${product.primary_image.image_path}`
-                                }
+                                src={getImageUrl(product.primary_image)}
                                 alt="Primary"
                                 className="mt-2 w-32 h-32 object-cover rounded border"
                             />
@@ -283,56 +293,81 @@ function ProductForm({ product, onSave, onCancel }) {
                             accept="image/*"
                             multiple
                         />
-                        {/* Preview selected and existing gallery images with remove button */}
-                        <div className="flex flex-wrap gap-2 mt-2">
-                            {existingGalleryImages.map((img, idx) => (
-                                <div
-                                    key={img.id || idx}
-                                    className="relative group"
-                                >
-                                    <img
-                                        src={
-                                            img.image_path.startsWith('http')
-                                                ? img.image_path
-                                                : `http://localhost:8000${img.image_path}`
-                                        }
-                                        alt={`Gallery ${idx}`}
-                                        className="w-20 h-20 object-cover rounded border"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            handleRemoveExistingGalleryImage(
-                                                img.id
-                                            )
-                                        }
-                                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 group-hover:opacity-100"
-                                        title="Remove"
-                                    >
-                                        &times;
-                                    </button>
+                        {/* Existing Gallery Images Section */}
+                        {existingGalleryImages.length > 0 && (
+                            <div className="mt-3">
+                                <p className="text-xs text-gray-500 mb-2">
+                                    Gambar Gallery yang ada:
+                                </p>
+                                <div className="flex flex-wrap gap-3">
+                                    {existingGalleryImages.map((img, idx) => (
+                                        <div
+                                            key={img.id || idx}
+                                            className="relative group"
+                                        >
+                                            <img
+                                                src={getImageUrl(img)}
+                                                alt={`Existing Gallery ${
+                                                    idx + 1
+                                                }`}
+                                                className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleRemoveExistingGalleryImage(
+                                                        img.id
+                                                    )
+                                                }
+                                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow-lg transition-colors"
+                                                title="Hapus gambar ini"
+                                            >
+                                                ×
+                                            </button>
+                                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all"></div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                            {galleryImages.map((img, idx) => (
-                                <div key={idx} className="relative group">
-                                    <img
-                                        src={URL.createObjectURL(img)}
-                                        alt={`Gallery Preview ${idx}`}
-                                        className="w-20 h-20 object-cover rounded border"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            handleRemoveGalleryImage(idx)
-                                        }
-                                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-80 group-hover:opacity-100"
-                                        title="Remove"
-                                    >
-                                        &times;
-                                    </button>
+                            </div>
+                        )}
+
+                        {/* New Gallery Images Preview */}
+                        {galleryImages.length > 0 && (
+                            <div className="mt-3">
+                                <p className="text-xs text-gray-500 mb-2">
+                                    Gambar baru yang akan ditambahkan:
+                                </p>
+                                <div className="flex flex-wrap gap-3">
+                                    {galleryImages.map((img, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="relative group"
+                                        >
+                                            <img
+                                                src={URL.createObjectURL(img)}
+                                                alt={`New Gallery Preview ${
+                                                    idx + 1
+                                                }`}
+                                                className="w-20 h-20 object-cover rounded-lg border-2 border-blue-200 shadow-sm"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleRemoveGalleryImage(
+                                                        idx
+                                                    )
+                                                }
+                                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow-lg transition-colors"
+                                                title="Hapus gambar ini"
+                                            >
+                                                ×
+                                            </button>
+                                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all"></div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        )}
                         {errors.gallery_images && (
                             <p className="text-red-500 text-xs mt-1">
                                 {errors.gallery_images[0]}
