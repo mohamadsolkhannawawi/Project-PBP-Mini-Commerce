@@ -33,9 +33,9 @@ class ProductController extends Controller
 
         // Handle Primary Image
         if ($request->hasFile('primary_image')) {
-            $path = $request->file('primary_image')->store('public/products');
+            $path = $request->file('primary_image')->store('products', 'public');
             $product->images()->create([
-                'image_path' => Storage::url($path),
+                'image_path' => $path,
                 'is_primary' => true
             ]);
         }
@@ -43,15 +43,15 @@ class ProductController extends Controller
         // Handle Gallery Images
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $image) {
-                $path = $image->store('public/products');
+                $path = $image->store('products', 'public');
                 $product->images()->create([
-                    'image_path' => Storage::url($path),
+                    'image_path' => $path,
                     'is_primary' => false
                 ]);
             }
         }
 
-        return response()->json(['success' => true, 'data' => $product->load(['primaryImage', 'galleryImages'])], 201);
+        return response()->json(['success' => true, 'data' => $product->load('category', 'images')], 201);
     }
 
     public function show(Product $product)
@@ -69,43 +69,61 @@ class ProductController extends Controller
 
         $product->update($validatedData);
 
-        // Replace images ONLY if new ones are uploaded
-        if ($request->hasFile('primary_image') || $request->hasFile('gallery_images')) {
-            // Delete old images from storage and DB
-            foreach ($product->images as $image) {
-                Storage::delete(str_replace('/storage', 'public', $image->image_path));
-                $image->delete();
+        // Handle primary image update
+        if ($request->hasFile('primary_image')) {
+            // Delete old primary image
+            $oldPrimaryImage = $product->images()->where('is_primary', true)->first();
+            if ($oldPrimaryImage) {
+                Storage::disk('public')->delete($oldPrimaryImage->image_path);
+                $oldPrimaryImage->delete();
             }
-
+            
             // Upload new primary image
-            if ($request->hasFile('primary_image')) {
-                $path = $request->file('primary_image')->store('public/products');
-                $product->images()->create([
-                    'image_path' => Storage::url($path),
-                    'is_primary' => true
-                ]);
+            $path = $request->file('primary_image')->store('products', 'public');
+            $product->images()->create([
+                'image_path' => $path,
+                'is_primary' => true
+            ]);
+        }
+
+        // Handle gallery images update
+        if ($request->hasFile('gallery_images') || $request->has('keep_gallery_image_ids')) {
+            // Get IDs of gallery images to keep, filter out empty values
+            $keepImageIds = array_filter($request->input('keep_gallery_image_ids', []), function($id) {
+                return !empty($id);
+            });
+            
+            // Delete gallery images that are not in the keep list
+            $galleryImagesToDelete = $product->images()
+                ->where('is_primary', false)
+                ->whereNotIn('id', $keepImageIds)
+                ->get();
+                
+            foreach ($galleryImagesToDelete as $image) {
+                Storage::disk('public')->delete($image->image_path);
+                $image->delete();
             }
 
             // Upload new gallery images
             if ($request->hasFile('gallery_images')) {
                 foreach ($request->file('gallery_images') as $image) {
-                    $path = $image->store('public/products');
+                    $path = $image->store('products', 'public');
                     $product->images()->create([
-                        'image_path' => Storage::url($path),
+                        'image_path' => $path,
                         'is_primary' => false
                     ]);
                 }
             }
         }
 
-        return response()->json(['success' => true, 'data' => $product->load(['primaryImage', 'galleryImages'])]);
+        return response()->json(['success' => true, 'data' => $product->load('category', 'images')]);
     }
 
     public function destroy(Product $product)
     {
         // Delete all associated images from storage
         foreach ($product->images as $image) {
-            Storage::delete($image->image_path);
+            Storage::disk('public')->delete($image->image_path);
         }
         // Images in DB will be deleted automatically due to cascade on delete constraint
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import { getProductImageUrl } from '../utils/imageUtils';
 
 function CheckoutPage() {
     const { fetchCart } = useCart();
@@ -62,11 +63,13 @@ function CheckoutPage() {
                             <h1 className="text-3xl font-bold mb-6 text-black">
                                 Detail Alamat
                             </h1>
-                            
+
                             {error && (
-                                <p className="text-red-500 mb-4 text-sm">{error}</p>
+                                <p className="text-red-500 mb-4 text-sm">
+                                    {error}
+                                </p>
                             )}
-                            
+
                             <div className="mb-2">
                                 <label className="block text-sm text-gray-700 mb-2">
                                     No. Telepon & Alamat Lengkap Penerima
@@ -77,9 +80,9 @@ function CheckoutPage() {
                                     placeholder="(08XXXXXXXXXX, Jalan, Kelurahan, Kecamatan, Kota, Kode Pos)"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
-                                    style={{ 
+                                    style={{
                                         maxWidth: '537px',
-                                        minHeight: '180px'
+                                        minHeight: '180px',
                                     }}
                                 ></textarea>
                             </div>
@@ -87,35 +90,24 @@ function CheckoutPage() {
                     </div>
 
                     {/* Right Column - Ringkasan Pesanan */}
-                    <div 
+                    <div
                         className="rounded-lg p-6 shadow-lg"
                         style={{
-                            background: 'linear-gradient(180deg, #E8E8E8 0%, #FFFFFF 30%)',
-                            maxWidth: '654px'
+                            background:
+                                'linear-gradient(180deg, #E8E8E8 0%, #FFFFFF 30%)',
+                            maxWidth: '654px',
                         }}
                     >
                         <div className="space-y-4">
                             {/* Product Items */}
                             {items.map((item) => {
-                                let imageUrl = '';
-                                if (item.product.primary_image && item.product.primary_image.image_path) {
-                                    const path = item.product.primary_image.image_path;
-                                    if (path.startsWith('http')) {
-                                        imageUrl = path;
-                                    } else if (path.startsWith('/storage')) {
-                                        imageUrl = `http://localhost:8000${path}`;
-                                    } else if (path.startsWith('public/')) {
-                                        imageUrl = `http://localhost:8000/storage/${path.replace('public/', '')}`;
-                                    } else {
-                                        imageUrl = '/no-image.webp';
-                                    }
-                                } else {
-                                    imageUrl = '/no-image.webp';
-                                }
+                                const imageUrl = getProductImageUrl(
+                                    item.product
+                                );
 
                                 return (
-                                    <div 
-                                        key={item.id} 
+                                    <div
+                                        key={item.id}
                                         className="bg-white rounded-lg p-4 flex items-center justify-between"
                                     >
                                         <div className="flex items-center gap-4">
@@ -125,8 +117,10 @@ function CheckoutPage() {
                                                     alt={item.product.name}
                                                     className="w-full h-full object-cover rounded-md"
                                                     onError={(e) => {
-                                                        e.currentTarget.onerror = null;
-                                                        e.currentTarget.src = '/no-image.webp';
+                                                        e.currentTarget.onerror =
+                                                            null;
+                                                        e.currentTarget.src =
+                                                            '/no-image.webp';
                                                     }}
                                                 />
                                             </div>
@@ -140,7 +134,13 @@ function CheckoutPage() {
                                             </div>
                                         </div>
                                         <div className="font-semibold text-black text-lg">
-                                            Rp{new Intl.NumberFormat('id-ID').format(item.product.price * item.quantity)}
+                                            Rp
+                                            {new Intl.NumberFormat(
+                                                'id-ID'
+                                            ).format(
+                                                item.product.price *
+                                                    item.quantity
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -149,12 +149,19 @@ function CheckoutPage() {
                             {/* Summary */}
                             <div className="pt-4 space-y-2">
                                 <div className="flex justify-between text-sm text-gray-700">
-                                    <span>Subtotal • {items.length} Produk</span>
+                                    <span>
+                                        Subtotal • {items.length} Produk
+                                    </span>
                                 </div>
                                 <div className="border-t border-gray-400 pt-3 flex justify-between items-center">
-                                    <span className="font-medium text-black">Total Pembayaran</span>
+                                    <span className="font-medium text-black">
+                                        Total Pembayaran
+                                    </span>
                                     <span className="font-bold text-black text-xl">
-                                        Rp{new Intl.NumberFormat('id-ID').format(subtotal)}
+                                        Rp
+                                        {new Intl.NumberFormat('id-ID').format(
+                                            subtotal
+                                        )}
                                     </span>
                                 </div>
                             </div>
