@@ -16,6 +16,7 @@ class DashboardController extends Controller
     public function index()
     {
         // KPI Cards
+        // Only include completed orders in revenue (status = 'selesai')
         $totalRevenue = Order::where('status', 'selesai')->sum('total');
         $totalOrders = Order::count();
         $totalProducts = Product::count();

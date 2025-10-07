@@ -1,0 +1,90 @@
+[1mdiff --git a/backend/app/Http/Controllers/Api/ProductController.php b/backend/app/Http/Controllers/Api/ProductController.php[m
+[1mindex d557949..10356a4 100644[m
+[1m--- a/backend/app/Http/Controllers/Api/ProductController.php[m
+[1m+++ b/backend/app/Http/Controllers/Api/ProductController.php[m
+[36m@@ -44,5 +44,85 @@[m [mpublic function show($slug)[m
+         }[m
+         return response()->json(['success' => true, 'data' => $product]);[m
+     }[m
+[32m+[m
+[32m+[m[32m    // GET /products/{id}/summary[m
+[32m+[m[32m    public function summary($id)[m
+[32m+[m[32m    {[m
+[32m+[m[32m        $product = Product::find($id);[m
+[32m+[m[32m        if (!$product) {[m
+[32m+[m[32m            return response()->json(['message' => 'Product not found'], 404);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        // total sold (sum quantity)[m
+[32m+[m[32m        $totalSold = $product->orderItems()->sum('quantity');[m
+[32m+[m
+[32m+[m[32m        // total orders (distinct order_id)[m
+[32m+[m[32m        $totalOrders = $product->orderItems()->distinct('order_id')->count('order_id');[m
+[32m+[m
+[32m+[m[32m        // total buyers (distinct user_id via orders)[m
+[32m+[m[32m        $totalBuyers = $product->orderItems()[m
+[32m+[m[32m            ->join('orders', 'order_items.order_id', '=', 'orders.id')[m
+[32m+[m[32m            ->distinct('orders.user_id')[m
+[32m+[m[32m            ->count('orders.user_id');[m
+[32m+[m
+[32m+[m[32m        // revenue[m
+[32m+[m[32m        $revenue = $product->orderItems()->sum(\DB::raw('quantity * price'));[m
+[32m+[m
+[32m+[m[32m        return response()->json([[m
+[32m+[m[32m            'product_id' => $product->id,[m
+[32m+[m[32m            'product_name' => $product->name,[m
+[32m+[m[32m            'stock' => $product->stock,[m
+[32m+[m[32m            'total_sold' => (int) $totalSold,[m
+[32m+[m[32m            'total_orders' => (int) $totalOrders,[m
+[32m+[m[32m            'total_buyers' => (int) $totalBuyers,[m
+[32m+[m[32m            'revenue' => (float) $revenue,[m
+[32m+[m[32m        ]);[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Extended summary with recent orders and top buyers[m
+[32m+[m[32m    public function summaryV2($id)[m
+[32m+[m[32m    {[m
+[32m+[m[32m        $product = Product::find($id);[m
+[32m+[m[32m        if (!$product) {[m
+[32m+[m[32m            return response()->json(['message' => 'Product not found'], 404);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        $totalSold = $product->orderItems()->sum('quantity');[m
+[32m+[m[32m        $totalOrders = $product->orderItems()->distinct('order_id')->count('order_id');[m
+[32m+[m[32m        $totalBuyers = $product->orderItems()[m
+[32m+[m[32m            ->join('orders', 'order_items.order_id', '=', 'orders.id')[m
+[32m+[m[32m            ->distinct('orders.user_id')[m
+[32m+[m[32m            ->count('orders.user_id');[m
+[32m+[m[32m        $revenue = $product->orderItems()->sum(\DB::raw('quantity * price'));[m
+[32m+[m
+[32m+[m[32m        $recentOrders = \App\Models\Order::select('orders.*')[m
+[32m+[m[32m            ->join('order_items', 'order_items.order_id', '=', 'orders.id')[m
+[32m+[m[32m            ->where('order_items.product_id', $product->id)[m
+[32m+[m[32m            ->with('user')[m
+[32m+[m[32m            ->latest()[m
+[32m+[m[32m            ->take(5)[m
+[32m+[m[32m            ->get();[m
+[32m+[m
+[32m+[m[32m        $topBuyers = \DB::table('order_items')[m
+[32m+[m[32m            ->join('orders', 'order_items.order_id', '=', 'orders.id')[m
+[32m+[m[32m            ->select('orders.user_id', \DB::raw('sum(order_items.quantity) as qty'))[m
+[32m+[m[32m            ->where('order_items.product_id', $product->id)[m
+[32m+[m[32m            ->groupBy('orders.user_id')[m
+[32m+[m[32m            ->orderByDesc('qty')[m
+[32m+[m[32m            ->take(5)[m
+[32m+[m[32m            ->get();[m
+[32m+[m
+[32m+[m[32m        return response()->json([[m
+[32m+[m[32m            'product_id' => $product->id,[m
+[32m+[m[32m            'product_name' => $product->name,[m
+[32m+[m[32m            'stock' => $product->stock,[m
+[32m+[m[32m            'total_sold' => (int) $totalSold,[m
+[32m+[m[32m            'total_orders' => (int) $totalOrders,[m
+[32m+[m[32m            'total_buyers' => (int) $totalBuyers,[m
+[32m+[m[32m            'revenue' => (float) $revenue,[m
+[32m+[m[32m            'recent_orders' => $recentOrders,[m
+[32m+[m[32m            'top_buyers' => $topBuyers,[m
+[32m+[m[32m        ]);[m
+[32m+[m[32m    }[m
+ }[m
+ [m
