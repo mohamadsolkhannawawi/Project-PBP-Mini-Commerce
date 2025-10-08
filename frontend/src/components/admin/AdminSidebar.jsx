@@ -22,17 +22,19 @@ function AdminSidebar({ user, handleLogout }) {
                         <div className="text-6xl font-bold text-white leading-none">
                             Toko
                         </div>
-                        <div className="text-4xl font-bold text-white -mt-2 leading-none">
+                        <div className="text-5xl font-bold text-white -mt-2 leading-none">
                             Kita
                         </div>
                     </div>
                 </Link>
-                <div className="p-2 mb-4 border-t border-b border-gray-700">
-                    <p className="text-sm font-semibold text-gray-200">
-                        Selamat Datang,
-                    </p>
-                    <p className="font-bold">{user.name}</p>
+                {/* separator + small label */}
+                <div className="border-t border-white/20 mt-2 mb-4" />
+                <div className="px-3 mb-2">
+                    <div className="text-xs uppercase text-white/60 font-semibold">
+                        General
+                    </div>
                 </div>
+
                 <ul className="space-y-2">
                     <li>
                         <NavLink

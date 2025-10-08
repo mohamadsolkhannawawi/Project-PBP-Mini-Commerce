@@ -3,16 +3,25 @@ import { Search, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
-function SearchBar() {
+function SearchBar({ onSelect, onSubmit, onClear }) {
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const searchContainerRef = useRef(null);
+    const justSelectedRef = useRef(false);
 
     useEffect(() => {
         if (query.length < 2) {
             setSuggestions([]);
+            return;
+        }
+
+        // If a suggestion was just clicked, skip one fetch to avoid the
+        // dropdown reappearing with the same value (the input was filled
+        // with the product name).
+        if (justSelectedRef.current) {
+            justSelectedRef.current = false;
             return;
         }
 
@@ -60,19 +69,30 @@ function SearchBar() {
     };
 
     const handleInputChange = (e) => {
-        setQuery(e.target.value);
+        const v = e.target.value;
+        setQuery(v);
+        // If the user erased the input completely, treat it as a clear action so
+        // the dashboard can reset (onClear provided by AdminLayout).
+        if ((v || '').trim().length === 0 && onClear) {
+            onClear();
+        }
     };
 
     const handleClear = () => {
         setQuery('');
         setSuggestions([]);
+        if (onClear) onClear();
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (query.trim()) {
             setSuggestions([]);
-            navigate(`/search?q=${query}`);
+            if (onSubmit) {
+                onSubmit(query);
+            } else {
+                navigate(`/search?q=${query}`);
+            }
         }
     };
 
@@ -113,14 +133,21 @@ function SearchBar() {
                             <li
                                 key={product.id}
                                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                    // fill the input with the full product name
+                                    setQuery(product.name || '');
+                                    // mark that we just selected so the useEffect will skip
+                                    // the next fetch and keep the dropdown closed.
+                                    justSelectedRef.current = true;
+                                    setSuggestions([]);
+                                    if (onSelect) {
+                                        onSelect(product);
+                                    } else {
+                                        navigate(`/product/${product.slug}`);
+                                    }
+                                }}
                             >
-                                <Link
-                                    to={`/product/${product.slug}`}
-                                    className="block"
-                                    onClick={() => setSuggestions([])}
-                                >
-                                    {product.name}
-                                </Link>
+                                <div className="block">{product.name}</div>
                             </li>
                         ))}
                         {loading && (
