@@ -53,20 +53,33 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        // total sold (sum quantity)
-        $totalSold = $product->orderItems()->sum('quantity');
-
-        // total orders (distinct order_id)
-        $totalOrders = $product->orderItems()->distinct('order_id')->count('order_id');
-
-        // total buyers (distinct user_id via orders)
-        $totalBuyers = $product->orderItems()
+        // Use explicit DB queries so aggregations are unambiguous.
+        $totalSold = (int) \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai')
+            ->sum('order_items.quantity');
+
+        $totalOrders = (int) \DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai')
+            ->distinct('order_items.order_id')
+            ->count('order_items.order_id');
+
+        $totalBuyers = (int) \DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai')
             ->distinct('orders.user_id')
             ->count('orders.user_id');
 
-        // revenue
-        $revenue = $product->orderItems()->sum(\DB::raw('quantity * price'));
+        $revenue = (float) \DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai')
+            ->select(\DB::raw('COALESCE(SUM(order_items.quantity * order_items.price), 0) as revenue'))
+            ->value('revenue');
 
         return response()->json([
             'product_id' => $product->id,
@@ -87,29 +100,63 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        $totalSold = $product->orderItems()->sum('quantity');
-        $totalOrders = $product->orderItems()->distinct('order_id')->count('order_id');
-        $totalBuyers = $product->orderItems()
+        // Use only completed orders (status = 'selesai') for metrics
+        $completed = \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->distinct('orders.user_id')
-            ->count('orders.user_id');
-        $revenue = $product->orderItems()->sum(\DB::raw('quantity * price'));
+            ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai');
+
+        $totalSold = (int) $completed->sum('order_items.quantity');
+
+        // distinct completed orders containing this product
+        $totalOrders = (int) $completed->distinct('order_items.order_id')->count('order_items.order_id');
+
+        // distinct buyers (users) from completed orders
+        $totalBuyers = (int) $completed->distinct('orders.user_id')->count('orders.user_id');
+
+        $revenue = (float) \DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai')
+            ->select(\DB::raw('COALESCE(SUM(order_items.quantity * order_items.price), 0) as revenue'))
+            ->value('revenue');
 
         $recentOrders = \App\Models\Order::select('orders.*')
             ->join('order_items', 'order_items.order_id', '=', 'orders.id')
             ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai')
             ->with('user')
             ->latest()
             ->take(5)
             ->get();
 
+        // Top buyers with user name and qty
         $topBuyers = \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->select('orders.user_id', \DB::raw('sum(order_items.quantity) as qty'))
+            ->join('users', 'orders.user_id', '=', 'users.id')
+            ->select('users.id as user_id', 'users.name', \DB::raw('sum(order_items.quantity) as qty'))
             ->where('order_items.product_id', $product->id)
-            ->groupBy('orders.user_id')
+            ->where('orders.status', 'selesai')
+            ->groupBy('users.id', 'users.name')
             ->orderByDesc('qty')
             ->take(5)
+            ->get();
+
+        // Recent order_items lines for debugging revenue (quantity, price, line_total)
+        $lineItems = \DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->select(
+                'order_items.id',
+                'order_items.order_id',
+                'order_items.quantity',
+                'order_items.price',
+                \DB::raw('order_items.quantity * order_items.price as line_total'),
+                'orders.created_at'
+            )
+            ->where('order_items.product_id', $product->id)
+            ->where('orders.status', 'selesai')
+            ->orderByDesc('orders.created_at')
+            ->take(10)
             ->get();
 
         return response()->json([
@@ -122,6 +169,7 @@ class ProductController extends Controller
             'revenue' => (float) $revenue,
             'recent_orders' => $recentOrders,
             'top_buyers' => $topBuyers,
+            'line_items' => $lineItems,
         ]);
     }
 }

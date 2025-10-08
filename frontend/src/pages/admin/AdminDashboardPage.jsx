@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../../api/axiosClient';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import SearchBar from '../../components/SearchBar';
+import NotificationBell from '../../components/NotificationBell';
+import ProfileMenu from '../../components/ProfileMenu';
+import { useAuth } from '../../contexts/AuthContext';
 
 import {
     LineChart,
@@ -14,11 +18,43 @@ import {
 import { Home, ShoppingCart, Users, Package } from 'lucide-react';
 
 const kpiIcons = {
-    totalRevenue: <ShoppingCart className="w-14 h-14 text-[#1B263B]" />,
-    totalOrders: <Package className="w-14 h-14 text-[#1B263B]" />,
-    totalProducts: <Home className="w-14 h-14 text-[#1B263B]" />,
-    sold: <Package className="w-14 h-14 text-[#1B263B]" />,
-    totalCustomers: <Users className="w-14 h-14 text-[#1B263B]" />,
+    totalRevenue: (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-12 h-12 text-[#1B263B]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <rect
+                x="1"
+                y="4"
+                width="22"
+                height="16"
+                rx="2"
+                ry="2"
+                fill="none"
+            />
+            {/* centered dollar sign */}
+            <text
+                x="12"
+                y="15"
+                textAnchor="middle"
+                fontSize="8"
+                fontWeight="700"
+                fill="currentColor"
+            >
+                $
+            </text>
+        </svg>
+    ),
+    totalOrders: <ShoppingCart className="w-12 h-12 text-[#1B263B]" />,
+    totalProducts: <Home className="w-12 h-12 text-[#1B263B]" />,
+    sold: <Package className="w-12 h-12 text-[#1B263B]" />,
+    totalCustomers: <Users className="w-12 h-12 text-[#1B263B]" />,
 };
 
 const kpiLabels = {
@@ -34,27 +70,45 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true);
     const [productSummary, setProductSummary] = useState(null);
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const { user } = useAuth();
 
     const getQuery = (name) => {
         const params = new URLSearchParams(location.search);
         return params.get(name);
     };
 
+    // On mount: fetch global dashboard
     useEffect(() => {
         axiosClient
             .get('/admin/dashboard')
             .then((res) => {
-                setDashboard(res.data);
+                // normalize response shape: some endpoints return payload under res.data.data
+                const payload = res.data?.data ?? res.data ?? {};
+                setDashboard(payload);
                 setLoading(false);
             })
             .catch(() => setLoading(false));
     }, []);
 
+    // If location search contains product_id and navigation state matches, fetch product summary
     useEffect(() => {
         const productId = getQuery('product_id');
-        // If there's no product_id in the query, clear any product-specific summary
-        // so the dashboard shows global data again.
         if (!productId) {
+            setProductSummary(null);
+            return;
+        }
+
+        const navState =
+            window.history.state && window.history.state.usr
+                ? window.history.state.usr
+                : null;
+        const navMarker =
+            navState && navState.admin_product_selected
+                ? String(navState.admin_product_selected)
+                : null;
+        if (!navMarker || String(navMarker) !== String(productId)) {
             setProductSummary(null);
             return;
         }
@@ -74,6 +128,13 @@ export default function AdminDashboardPage() {
         return () => (mounted = false);
     }, [location.search]);
 
+    // Listen for explicit clear events from the header SearchBar
+    useEffect(() => {
+        const handler = () => setProductSummary(null);
+        window.addEventListener('clearProductSummary', handler);
+        return () => window.removeEventListener('clearProductSummary', handler);
+    }, []);
+
     if (loading)
         return <div className="p-8 text-center">Loading dashboard...</div>;
     if (!dashboard)
@@ -83,15 +144,170 @@ export default function AdminDashboardPage() {
             </div>
         );
 
-    const { kpi, recentOrders, salesOverTime, topSellingProducts } = dashboard;
+    const {
+        kpi = {},
+        recentOrders = [],
+        salesOverTime = [],
+        topSellingProducts = [],
+    } = dashboard || {};
 
     return (
         <div className="p-6 bg-[#D3D7DD] min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-[#1B263B]">
+            {/* Dashboard top header: Welcome, centered search, notif + profile on right */}
+            <div className="flex items-center justify-between -mt-10 mb-6">
+                <div className="pl-0">
+                    <div className="text-3xl font-bold text-[#1B263B] flex items-center">
+                        <span className="mr-3">Welcome!</span>
+                        <span
+                            className="wave inline-block"
+                            style={{
+                                display: 'inline-block',
+                                transformOrigin: '70% 70%',
+                            }}
+                        >
+                            👋
+                        </span>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                        <span>Welcome back, </span>
+                        <p className="font-bold inline">
+                            {user?.name || 'Admin'}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex-1 flex justify-center px-4">
+                    <div className="w-full max-w-2xl mt-2">
+                        <SearchBar
+                            onSelect={(product) => {
+                                navigate(
+                                    `/admin/dashboard?product_id=${product.id}`,
+                                    {
+                                        state: {
+                                            admin_product_selected: String(
+                                                product.id
+                                            ),
+                                        },
+                                    }
+                                );
+                            }}
+                            onSubmit={async (q) => {
+                                try {
+                                    const res = await axiosClient.get(
+                                        `/products?search=${encodeURIComponent(
+                                            q
+                                        )}&limit=10&all=1`
+                                    );
+                                    let arr =
+                                        res.data?.data?.data ||
+                                        res.data?.data ||
+                                        res.data;
+                                    arr = Array.isArray(arr) ? arr : [];
+                                    const trimmed = (q || '')
+                                        .trim()
+                                        .toLowerCase();
+                                    const exact = arr.find(
+                                        (p) =>
+                                            p.name &&
+                                            p.name.toLowerCase() === trimmed
+                                    );
+
+                                    if (exact) {
+                                        navigate(
+                                            `/admin/dashboard?product_id=${exact.id}`,
+                                            {
+                                                state: {
+                                                    admin_product_selected:
+                                                        String(exact.id),
+                                                },
+                                            }
+                                        );
+                                    } else if (arr.length === 1) {
+                                        navigate(
+                                            `/admin/dashboard?product_id=${arr[0].id}`,
+                                            {
+                                                state: {
+                                                    admin_product_selected:
+                                                        String(arr[0].id),
+                                                },
+                                            }
+                                        );
+                                    } else {
+                                        navigate('/admin/dashboard', {
+                                            state: {
+                                                product_not_found: true,
+                                                search_query: q,
+                                            },
+                                        });
+                                    }
+                                } catch (err) {
+                                    console.error('Search submit error', err);
+                                    navigate('/admin/dashboard', {
+                                        state: {
+                                            product_not_found: true,
+                                            search_query: q,
+                                        },
+                                    });
+                                }
+                            }}
+                            onClear={() => {
+                                try {
+                                    sessionStorage.removeItem(
+                                        'admin_product_selected'
+                                    );
+                                } catch (e) {}
+                                try {
+                                    window.dispatchEvent(
+                                        new CustomEvent('clearProductSummary')
+                                    );
+                                } catch (e) {}
+                                navigate('/admin/dashboard', { replace: true });
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-4 mt-2">
+                    <NotificationBell />
+                    <ProfileMenu />
+                </div>
+            </div>
+
+            <style>{`@keyframes wave {0%{transform:rotate(0deg)}15%{transform:rotate(14deg)}30%{transform:rotate(-8deg)}40%{transform:rotate(14deg)}50%{transform:rotate(-4deg)}60%{transform:rotate(10deg)}70%{transform:rotate(0deg)}100%{transform:rotate(0deg)}} .wave{animation:wave 2s infinite;}`}</style>
+
+            <h1 className="text-3xl font-bold mb-4 text-[#1B263B]">
                 Admin Dashboard
             </h1>
+
+            {/* Show product summary bar or 'not found' based on navigation state or productSummary */}
+            {window.history.state &&
+            window.history.state.usr &&
+            window.history.state.usr.product_not_found ? (
+                <div className="flex items-center justify-between bg-white rounded-md p-3 mb-6 shadow">
+                    <div>
+                        <div className="text-sm text-gray-600">
+                            Viewing product
+                        </div>
+                        <div className="text-lg font-semibold text-[#1B263B]">
+                            Produk tidak ditemukan
+                        </div>
+                    </div>
+                </div>
+            ) : productSummary ? (
+                <div className="flex items-center justify-between bg-white rounded-md p-3 mb-6 shadow">
+                    <div>
+                        <div className="text-sm text-gray-600">
+                            Viewing product
+                        </div>
+                        <div className="text-lg font-semibold text-[#1B263B]">
+                            {productSummary.product_name}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                 {[
                     'totalRevenue',
                     'totalOrders',
@@ -110,8 +326,7 @@ export default function AdminDashboardPage() {
                                 0;
                         else if (key === 'sold')
                             displayValue = productSummary.total_sold ?? 0;
-                        else if (key === 'totalProducts')
-                            displayValue = 1; // when viewing a single product
+                        else if (key === 'totalProducts') displayValue = 1;
                         else if (key === 'totalCustomers')
                             displayValue = productSummary.total_buyers ?? 0;
                     }
@@ -119,13 +334,13 @@ export default function AdminDashboardPage() {
                     return (
                         <div
                             key={key}
-                            className="bg-[#415A77] rounded-xl p-6 flex flex-col items-center text-white shadow"
+                            className="bg-[#415A77] rounded-xl p-4 flex flex-col items-center text-white shadow"
                         >
                             {kpiIcons[key]}
-                            <div className="mt-2 text-lg font-semibold">
+                            <div className="mt-1 text-sm font-semibold">
                                 {kpiLabels[key]}
                             </div>
-                            <div className="mt-1 text-2xl font-bold">
+                            <div className="mt-1 text-xl font-bold">
                                 {key === 'totalRevenue'
                                     ? `Rp ${Number(displayValue).toLocaleString(
                                           'id-ID'
@@ -136,6 +351,7 @@ export default function AdminDashboardPage() {
                     );
                 })}
             </div>
+
             {/* Sales Chart */}
             <div className="bg-white rounded-xl p-6 mb-8 shadow">
                 <h2 className="text-xl font-bold mb-4 text-[#415A77]">
@@ -153,16 +369,16 @@ export default function AdminDashboardPage() {
                         <Line
                             type="monotone"
                             dataKey="revenue"
-                            stroke="#F07167"
-                            strokeWidth={3}
+                            stroke="#415A77"
+                            strokeWidth={2}
+                            dot={{ r: 3 }}
                         />
                     </LineChart>
                 </ResponsiveContainer>
             </div>
             {/* Top Selling Products & Recent Orders */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Top Selling Products or Top Buyers for product */}
-                <div className="bg-white rounded-xl p-6 shadow">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-xl p-6 shadow md:col-span-1">
                     <h2 className="text-lg font-bold mb-4 text-[#415A77]">
                         {productSummary ? 'Top Buyers' : 'Top Selling Products'}
                     </h2>
@@ -205,8 +421,8 @@ export default function AdminDashboardPage() {
                             ))}
                     </ul>
                 </div>
-                {/* Recent Orders (global or for product) */}
-                <div className="bg-white rounded-xl p-6 shadow">
+
+                <div className="bg-white rounded-xl p-6 shadow md:col-span-2">
                     <h2 className="text-lg font-bold mb-4 text-[#415A77]">
                         Recent Orders
                     </h2>
@@ -228,10 +444,14 @@ export default function AdminDashboardPage() {
                             productSummary.recent_orders.map((order) => (
                                 <li
                                     key={order.id}
-                                    className="flex justify-between py-2 border-b last:border-b-0"
+                                    className="flex items-center justify-between py-2 border-b last:border-b-0"
                                 >
-                                    <span>#{order.order_number}</span>
-                                    <span>{order.user?.name ?? 'User'}</span>
+                                    <span className="mr-4">
+                                        #{order.order_number}
+                                    </span>
+                                    <span className="flex-1 px-4 text-left">
+                                        {order.user?.name ?? 'User'}
+                                    </span>
                                     <span className="font-bold text-[#F07167]">
                                         Rp{' '}
                                         {Number(order.total).toLocaleString(
@@ -245,10 +465,14 @@ export default function AdminDashboardPage() {
                             recentOrders.map((order) => (
                                 <li
                                     key={order.id}
-                                    className="flex justify-between py-2 border-b last:border-b-0"
+                                    className="flex items-center justify-between py-2 border-b last:border-b-0"
                                 >
-                                    <span>#{order.order_number}</span>
-                                    <span>{order.user?.name ?? 'User'}</span>
+                                    <span className="mr-4">
+                                        #{order.order_number}
+                                    </span>
+                                    <span className="flex-1 px-4 text-left">
+                                        {order.user?.name ?? 'User'}
+                                    </span>
                                     <span className="font-bold text-[#F07167]">
                                         Rp{' '}
                                         {Number(order.total).toLocaleString(

@@ -9,10 +9,19 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const searchContainerRef = useRef(null);
+    const justSelectedRef = useRef(false);
 
     useEffect(() => {
         if (query.length < 2) {
             setSuggestions([]);
+            return;
+        }
+
+        // If a suggestion was just clicked, skip one fetch to avoid the
+        // dropdown reappearing with the same value (the input was filled
+        // with the product name).
+        if (justSelectedRef.current) {
+            justSelectedRef.current = false;
             return;
         }
 
@@ -125,6 +134,11 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
                                 key={product.id}
                                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
+                                    // fill the input with the full product name
+                                    setQuery(product.name || '');
+                                    // mark that we just selected so the useEffect will skip
+                                    // the next fetch and keep the dropdown closed.
+                                    justSelectedRef.current = true;
                                     setSuggestions([]);
                                     if (onSelect) {
                                         onSelect(product);
