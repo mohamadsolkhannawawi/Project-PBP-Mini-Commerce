@@ -2,12 +2,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import ProductForm from '../../components/admin/ProductForm';
 import { Trash2 } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 function ManageProductsPage() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [toggleLoading, setToggleLoading] = useState({});
+    const [deleteLoading, setDeleteLoading] = useState({});
 
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState({
@@ -21,6 +24,8 @@ function ManageProductsPage() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const fetchProducts = useCallback(async () => {
         try {
@@ -59,6 +64,10 @@ function ManageProductsPage() {
     }, []);
 
     const handleSave = async (productData) => {
+        const toastId = showLoading(
+            selectedProduct ? 'Memperbarui produk...' : 'Menambah produk baru...'
+        );
+
         try {
             if (selectedProduct) {
                 await axiosClient.post(
@@ -66,10 +75,12 @@ function ManageProductsPage() {
                     productData,
                     { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
+                updateToast(toastId, 'Produk berhasil diperbarui!', 'success');
             } else {
                 await axiosClient.post('/admin/products', productData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
+                updateToast(toastId, 'Produk baru berhasil ditambahkan!', 'success');
             }
             setIsModalOpen(false);
             setSelectedProduct(null);
@@ -78,11 +89,16 @@ function ManageProductsPage() {
             const errorMessages = err.response?.data?.errors
                 ? Object.values(err.response.data.errors).flat().join(' \n')
                 : 'Gagal menyimpan produk. Periksa kembali data Anda.';
-            alert(errorMessages);
+            updateToast(toastId, errorMessages, 'error');
         }
     };
 
     const handleToggleStatus = async (product) => {
+        setToggleLoading(prev => ({ ...prev, [product.id]: true }));
+        const toastId = showLoading(
+            `${product.is_active ? 'Menonaktifkan' : 'Mengaktifkan'} produk...`
+        );
+
         try {
             const response = await axiosClient.patch(
                 `/admin/products/${product.id}/toggle-status`
@@ -92,25 +108,32 @@ function ManageProductsPage() {
                     p.id === product.id ? response.data.product : p
                 )
             );
+            updateToast(
+                toastId, 
+                `Status produk berhasil ${product.is_active ? 'dinonaktifkan' : 'diaktifkan'}!`,
+                'success'
+            );
         } catch (err) {
-            alert('Gagal mengubah status produk.');
+            updateToast(toastId, 'Gagal mengubah status produk.', 'error');
+        } finally {
+            setToggleLoading(prev => ({ ...prev, [product.id]: false }));
         }
     };
 
-    const handlePermanentDelete = async (productId) => {
-        if (
-            window.confirm(
-                'Apakah Anda yakin ingin menghapus produk ini secara permanen? Tindakan ini tidak dapat diurungkan.'
-            )
-        ) {
-            try {
-                await axiosClient.delete(`/admin/products/${productId}`);
-                setProducts((prevProducts) =>
-                    prevProducts.filter((p) => p.id !== productId)
-                );
-            } catch (err) {
-                alert('Gagal menghapus produk.');
-            }
+    const handlePermanentDelete = async (productId, productName) => {
+        setDeleteLoading(prev => ({ ...prev, [productId]: true }));
+        const toastId = showLoading('Menghapus produk...');
+
+        try {
+            await axiosClient.delete(`/admin/products/${productId}`);
+            setProducts((prevProducts) =>
+                prevProducts.filter((p) => p.id !== productId)
+            );
+            updateToast(toastId, `Produk "${productName}" berhasil dihapus!`, 'success');
+        } catch (err) {
+            updateToast(toastId, 'Gagal menghapus produk.', 'error');
+        } finally {
+            setDeleteLoading(prev => ({ ...prev, [productId]: false }));
         }
     };
 
@@ -374,31 +397,47 @@ function ManageProductsPage() {
                                     >
                                         Edit
                                     </button>
+                                    
+                                    {/* Toggle Status Button with Loading */}
                                     <button
-                                        onClick={() =>
-                                            handleToggleStatus(product)
-                                        }
+                                        onClick={() => handleToggleStatus(product)}
+                                        disabled={toggleLoading[product.id]}
                                         className={`hover:underline mr-4 ${
                                             product.is_active
                                                 ? 'text-yellow-600'
                                                 : 'text-green-600'
-                                        }
-										`}
+                                        } ${
+                                            toggleLoading[product.id] 
+                                                ? 'opacity-50 cursor-not-allowed' 
+                                                : ''
+                                        }`}
                                     >
-                                        {product.is_active
-                                            ? 'Nonaktifkan'
-                                            : 'Aktifkan'}
+                                        {toggleLoading[product.id] ? (
+                                            <div className="flex items-center gap-1">
+                                                <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
+                                                {product.is_active ? 'Menonaktifkan...' : 'Mengaktifkan...'}
+                                            </div>
+                                        ) : (
+                                            product.is_active ? 'Nonaktifkan' : 'Aktifkan'
+                                        )}
                                     </button>
+                                    
+                                    {/* Delete Button with Loading */}
                                     <button
-                                        onClick={() =>
-                                            handlePermanentDelete(product.id)
-                                        }
-                                        className="text-red-600"
+                                        onClick={() => handlePermanentDelete(product.id, product.name)}
+                                        disabled={deleteLoading[product.id]}
+                                        className={`text-red-600 ${
+                                            deleteLoading[product.id] 
+                                                ? 'opacity-50 cursor-not-allowed' 
+                                                : ''
+                                        }`}
+                                        title="Hapus produk"
                                     >
-                                        <Trash2
-                                            className="inline-block mr-1"
-                                            size={16}
-                                        />
+                                        {deleteLoading[product.id] ? (
+                                            <div className="w-4 h-4 border border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                                        ) : (
+                                            <Trash2 className="inline-block mr-1" size={16} />
+                                        )}
                                     </button>
                                 </td>
                             </tr>

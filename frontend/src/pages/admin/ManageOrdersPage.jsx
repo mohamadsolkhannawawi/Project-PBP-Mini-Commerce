@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import OrdersTable from '../../components/admin/OrdersTable';
+import { useToast } from '../../contexts/ToastContext';
 
 function ManageOrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [statusLoading, setStatusLoading] = useState({});
 
     const [searchOrder, setSearchOrder] = useState('');
     const [sortConfig, setSortConfig] = useState({
@@ -15,6 +17,8 @@ function ManageOrdersPage() {
     const [statusFilter, setStatusFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const fetchOrders = useCallback(async () => {
         try {
@@ -37,6 +41,9 @@ function ManageOrdersPage() {
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
+            setStatusLoading(prev => ({ ...prev, [orderId]: true }));
+            const toastId = showLoading('Memperbarui status pesanan...');
+            
             await axiosClient.put(`/admin/orders/${orderId}`, {
                 status: newStatus,
             });
@@ -47,10 +54,13 @@ function ManageOrdersPage() {
                         : order
                 )
             );
-            alert('Status pesanan berhasil diperbarui.');
+            
+            updateToast(toastId, 'Status pesanan berhasil diperbarui!', 'success');
         } catch (err) {
-            alert('Gagal memperbarui status. Silakan coba lagi.');
+            showError('Gagal memperbarui status. Silakan coba lagi.');
             fetchOrders();
+        } finally {
+            setStatusLoading(prev => ({ ...prev, [orderId]: false }));
         }
     };
 

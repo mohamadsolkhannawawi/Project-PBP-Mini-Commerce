@@ -1,17 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
+import { useCart } from '../contexts/CartContext';
+import { useToast } from '../contexts/ToastContext'; // ✅ TAMBAH INI
 
 import StarRating from './StarRating';
 import { getProductImageUrl } from '../utils/imageUtils';
 
 function ProductCard({ product, onAddToCart }) {
+    const [loading, setLoading] = useState(false);
+    const { addToCart } = useCart();
+    const { showSuccess, showError, showLoading, updateToast } = useToast(); // ✅ TAMBAH INI
+    
     const imageUrl = getProductImageUrl(product);
 
-    const handleAddToCart = (e) => {
+    const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (typeof onAddToCart === 'function') onAddToCart(product);
+        
+        // ✅ SHOW LOADING TOAST
+        const toastId = showLoading("Menambahkan ke keranjang...");
+        
+        try {
+            setLoading(true);
+            
+            if (typeof onAddToCart === 'function') {
+                await onAddToCart(product);
+                // ✅ SUCCESS TOAST
+                updateToast(toastId, `${product.name} berhasil ditambahkan ke keranjang!`, 'success');
+            } else {
+                // Fallback jika tidak ada onAddToCart function
+                await addToCart(product, 1);
+                updateToast(toastId, `${product.name} berhasil ditambahkan ke keranjang!`, 'success');
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            const errorMessage = error.message || 'Gagal menambahkan produk ke keranjang';
+            // ✅ ERROR TOAST
+            updateToast(toastId, errorMessage, 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -67,13 +96,20 @@ function ProductCard({ product, onAddToCart }) {
                         </div>
                     </div>
 
-                    {/* Quick Add to Cart */}
+                    {/* Quick Add to Cart dengan loading state */}
                     <button
-                        className="absolute top-4 right-4 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full p-2 shadow-lg"
+                        className={`absolute top-4 right-4 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full p-2 shadow-lg transition-all ${
+                            loading ? 'opacity-75 cursor-not-allowed' : ''
+                        }`}
                         onClick={handleAddToCart}
+                        disabled={loading}
                         aria-label="Tambah ke Keranjang"
                     >
-                        <ShoppingCart size={22} />
+                        {loading ? (
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                            <ShoppingCart size={22} />
+                        )}
                     </button>
                 </div>
             </div>

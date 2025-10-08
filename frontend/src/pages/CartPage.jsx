@@ -3,11 +3,13 @@ import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { getProductImageUrl } from '../utils/imageUtils';
+import { useToast } from '../contexts/ToastContext';
 
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
     const [selectedItems, setSelectedItems] = useState([]);
     const navigate = useNavigate();
+    const { showWarning } = useToast();
 
     // Handle select individual item
     const handleSelectItem = (itemId) => {
@@ -39,16 +41,13 @@ function CartPage() {
         }
     };
 
-    // Handle remove item
     const handleRemoveItem = async (itemId) => {
-        if (window.confirm('Hapus item ini dari keranjang?')) {
-            try {
-                await removeFromCart(itemId);
-                // Remove from selected items if it was selected
-                setSelectedItems((prev) => prev.filter((id) => id !== itemId));
-            } catch (error) {
-                console.error('Error removing item:', error);
-            }
+        try {
+            await removeFromCart(itemId);
+            // Remove from selected items if it was selected
+            setSelectedItems((prev) => prev.filter((id) => id !== itemId));
+        } catch (error) {
+            console.error('Error removing item:', error);
         }
     };
 
@@ -62,7 +61,7 @@ function CartPage() {
         if (itemsToCheckout.length > 0) {
             navigate('/checkout', { state: { items: itemsToCheckout } });
         } else {
-            alert('Pilih setidaknya satu produk untuk checkout.');
+            showWarning('Pilih setidaknya satu produk untuk checkout.');
         }
     };
 

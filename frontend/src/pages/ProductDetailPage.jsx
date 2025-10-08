@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useToast } from '../contexts/ToastContext.jsx'; // ✅ TAMBAH INI
 import StarRating from '../components/StarRating';
 import { getImageUrl } from '../utils/imageUtils';
 
@@ -20,6 +21,7 @@ export default function ProductDetailPage() {
     const navigate = useNavigate();
     const { productId } = useParams();
     const { addToCart } = useCart();
+    const { showSuccess, showError, showWarning } = useToast(); // ✅ TAMBAH INI
 
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -109,18 +111,16 @@ export default function ProductDetailPage() {
 
     const handleAddToCart = async () => {
         if (!user) {
-            alert('Silakan login untuk menambahkan produk ke keranjang.');
+            showWarning('Silakan login untuk menambahkan produk ke keranjang.');
             navigate('/login');
             return;
         }
         if (product) {
             try {
                 await addToCart(product, quantity);
-                alert(
-                    `${quantity} ${product.name} telah ditambahkan ke keranjang!`
-                );
             } catch (e) {
                 console.error('Gagal menambahkan ke keranjang:', e);
+                showError('Gagal menambahkan produk ke keranjang.');
             }
         }
     };
