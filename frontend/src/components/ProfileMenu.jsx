@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { User, LogOut } from 'lucide-react';
 
 export default function ProfileMenu() {
     const [open, setOpen] = useState(false);
@@ -28,16 +29,13 @@ export default function ProfileMenu() {
     return (
         <div className="relative" ref={ref}>
             <button
-                className="flex items-center space-x-3 p-1 rounded-full hover:shadow"
+                className="flex items-center justify-center p-2 rounded-full hover:bg-gray-100"
                 onClick={() => setOpen((s) => !s)}
                 aria-haspopup="true"
                 aria-expanded={open}
+                title={user?.name || 'Admin'}
             >
-                <img
-                    src={user?.avatar || '/no-image.webp'}
-                    alt={user?.name || 'User'}
-                    className="w-10 h-10 rounded-full object-cover"
-                />
+                <User className="w-7 h-7 text-[#1B263B]" />
             </button>
 
             {open && (
@@ -52,10 +50,14 @@ export default function ProfileMenu() {
                     </div>
                     <div className="py-1">
                         <button
-                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                            className="w-full flex items-center justify-center px-4 py-2 text-sm hover:bg-gray-100"
                             onClick={handleLogout}
+                            title="Logout"
                         >
-                            Logout
+                            <LogOut className="w-5 h-5 text-red-600 mr-2" />
+                            <span className="text-red-600 font-medium">
+                                Logout
+                            </span>
                         </button>
                     </div>
                 </div>

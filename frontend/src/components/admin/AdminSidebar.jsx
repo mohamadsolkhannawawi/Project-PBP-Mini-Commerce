@@ -81,15 +81,7 @@ function AdminSidebar({ user, handleLogout }) {
                         </NavLink>
                     </li>
                 </ul>
-                <div className="absolute bottom-0 left-0 p-4 w-64">
-                    <button
-                        onClick={handleLogout}
-                        className={`w-full ${normalLinkClass}`}
-                    >
-                        <LogOut className="w-6 h-6" />
-                        <span className="ml-3">Logout</span>
-                    </button>
-                </div>
+                {/* Sidebar logout removed - logout moved to profile menu */}
             </div>
         </aside>
     );
