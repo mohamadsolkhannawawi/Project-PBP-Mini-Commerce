@@ -92,23 +92,10 @@ export default function AdminDashboardPage() {
             .catch(() => setLoading(false));
     }, []);
 
-    // If location search contains product_id and navigation state matches, fetch product summary
+    // If location search contains product_id, fetch product summary (no navigation-state gating)
     useEffect(() => {
         const productId = getQuery('product_id');
         if (!productId) {
-            setProductSummary(null);
-            return;
-        }
-
-        const navState =
-            window.history.state && window.history.state.usr
-                ? window.history.state.usr
-                : null;
-        const navMarker =
-            navState && navState.admin_product_selected
-                ? String(navState.admin_product_selected)
-                : null;
-        if (!navMarker || String(navMarker) !== String(productId)) {
             setProductSummary(null);
             return;
         }
@@ -119,9 +106,11 @@ export default function AdminDashboardPage() {
                 const res = await axiosClient.get(
                     `/products/${productId}/summary_v2`
                 );
-                if (mounted) setProductSummary(res.data);
+                const payload = res.data?.data ?? res.data ?? res;
+                if (mounted) setProductSummary(payload);
             } catch (err) {
                 console.error('Failed to load product summary', err);
+                if (mounted) setProductSummary(null);
             }
         };
         fetchSummary();
@@ -150,6 +139,21 @@ export default function AdminDashboardPage() {
         salesOverTime = [],
         topSellingProducts = [],
     } = dashboard || {};
+
+    // If a product is selected and the product summary includes sales series,
+    // prefer that for the chart and related product-stat displays.
+    const chartData =
+        productSummary?.sales_over_time ||
+        productSummary?.salesOverTime ||
+        productSummary?.sales ||
+        salesOverTime;
+
+    // Consider the admin is 'searching' when a product_id query exists or
+    // when the navigation state indicates product_not_found. Hide the chart
+    // while searching and restore it when search is cleared.
+    const isSearching = Boolean(
+        getQuery('product_id') || window.history?.state?.usr?.product_not_found
+    );
 
     return (
         <div className="p-6 bg-[#D3D7DD] min-h-screen">
@@ -352,30 +356,47 @@ export default function AdminDashboardPage() {
                 })}
             </div>
 
-            {/* Sales Chart */}
-            <div className="bg-white rounded-xl p-6 mb-8 shadow">
-                <h2 className="text-xl font-bold mb-4 text-[#415A77]">
-                    Sales (Last 7 Days)
-                </h2>
-                <ResponsiveContainer width="100%" height={250}>
-                    <LineChart
-                        data={salesOverTime}
-                        margin={{ top: 5, right: 20, left: 30, bottom: 5 }}
-                    >
-                        <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Line
-                            type="monotone"
-                            dataKey="revenue"
-                            stroke="#415A77"
-                            strokeWidth={2}
-                            dot={{ r: 3 }}
-                        />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
+            {/* Sales Chart (hidden while admin is actively searching) */}
+            {!isSearching && (
+                <div className="bg-white rounded-xl p-6 mb-8 shadow">
+                    <h2 className="text-xl font-bold mb-4 text-[#415A77]">
+                        Sales (Last 7 Days)
+                    </h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                        {(!chartData || chartData.length === 0) &&
+                        productSummary ? (
+                            <div className="p-6 text-sm text-gray-500">
+                                No sales data available for this product.
+                            </div>
+                        ) : (
+                            <LineChart
+                                data={chartData}
+                                margin={{
+                                    top: 5,
+                                    right: 20,
+                                    left: 30,
+                                    bottom: 5,
+                                }}
+                            >
+                                <CartesianGrid
+                                    stroke="#eee"
+                                    strokeDasharray="5 5"
+                                />
+                                <XAxis dataKey="date" />
+                                <YAxis />
+                                <Tooltip />
+                                <Line
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="#415A77"
+                                    strokeWidth={2}
+                                    dot={{ r: 3 }}
+                                />
+                            </LineChart>
+                        )}
+                    </ResponsiveContainer>
+                </div>
+            )}
             {/* Top Selling Products & Recent Orders */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white rounded-xl p-6 shadow md:col-span-1">

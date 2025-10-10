@@ -7,6 +7,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
     const [notifications, setNotifications] = useState([]);
     const [open, setOpen] = useState(false);
     const pollRef = useRef(null);
+    const containerRef = useRef(null);
     const navigate = useNavigate();
 
     const fetchNotifications = async () => {
@@ -24,21 +25,82 @@ export default function NotificationBell({ pollInterval = 15000 }) {
         return () => clearInterval(pollRef.current);
     }, [pollInterval]);
 
+    // close on outside click and cleanup when closing
+    useEffect(() => {
+        const onDocClick = (e) => {
+            if (!open) return;
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(e.target)
+            ) {
+                setOpen(false);
+                cleanupNotifications();
+            }
+        };
+
+        document.addEventListener('mousedown', onDocClick);
+        return () => document.removeEventListener('mousedown', onDocClick);
+    }, [open, notifications]);
+
     const markRead = async (id) => {
         try {
             await axiosClient.post(`/notifications/${id}/read`);
+            // mark locally
             setNotifications((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, read: true } : n))
             );
+
+            // delete the notification after marking
+            try {
+                await axiosClient.delete(`/notifications/${id}`);
+                setNotifications((prev) => prev.filter((n) => n.id !== id));
+            } catch (delErr) {
+                // if delete fails, just keep the read state
+                console.warn(
+                    'Failed to delete notification after mark:',
+                    delErr
+                );
+            }
         } catch (err) {
             console.error(err);
         }
     };
 
+    // cleanup: delete marked notifications and unmarked older-than-24h
+    const cleanupNotifications = async () => {
+        const now = Date.now();
+        const toDelete = notifications
+            .filter((n) => {
+                if (n.read) return true;
+                if (!n.created_at) return false;
+                const created = new Date(n.created_at).getTime();
+                return now - created > 24 * 60 * 60 * 1000;
+            })
+            .map((n) => n.id);
+
+        if (toDelete.length === 0) return;
+
+        // attempt to delete on server, but remove locally regardless to respect UX
+        await Promise.all(
+            toDelete.map(async (id) => {
+                try {
+                    await axiosClient.delete(`/notifications/${id}`);
+                } catch (err) {
+                    // ignore server delete error
+                }
+            })
+        );
+
+        setNotifications((prev) =>
+            prev.filter((n) => !toDelete.includes(n.id))
+        );
+    };
+
     const unreadCount = notifications.filter((n) => !n.read).length;
+    const visibleNotifications = notifications.filter((n) => !n.read);
 
     return (
-        <div className="relative">
+        <div className="relative" ref={containerRef}>
             <button
                 onClick={() => {
                     setOpen(!open);
@@ -66,9 +128,18 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                                     await axiosClient.post(
                                         '/notifications/mark-all-read'
                                     );
-                                    setNotifications((prev) =>
-                                        prev.map((n) => ({ ...n, read: true }))
+                                    // delete all notifications locally and attempt server-side deletes
+                                    const ids = notifications.map((n) => n.id);
+                                    await Promise.all(
+                                        ids.map(async (id) => {
+                                            try {
+                                                await axiosClient.delete(
+                                                    `/notifications/${id}`
+                                                );
+                                            } catch (_) {}
+                                        })
                                     );
+                                    setNotifications([]);
                                 } catch (err) {
                                     console.error(err);
                                 }
@@ -78,27 +149,35 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                         </button>
                     </div>
                     <div className="max-h-64 overflow-auto">
-                        {notifications.length === 0 && (
+                        {visibleNotifications.length === 0 && (
                             <div className="p-3 text-sm text-gray-500">
                                 No notifications
                             </div>
                         )}
-                        {notifications.map((n) => (
+                        {visibleNotifications.map((n) => (
                             <div
                                 key={n.id}
-                                className={`p-3 border-b ${
-                                    n.read ? '' : 'bg-gray-50'
-                                }`}
+                                className={`p-3 border-b bg-gray-50`}
                             >
                                 <div className="flex justify-between">
                                     <div
                                         className="text-sm cursor-pointer"
                                         onClick={async () => {
-                                            // Always navigate to admin orders list when notification clicked
                                             try {
-                                                // mark as read on click
                                                 await axiosClient.post(
                                                     `/notifications/${n.id}/read`
+                                                );
+                                                // try deleting so it doesn't reappear on next poll
+                                                try {
+                                                    await axiosClient.delete(
+                                                        `/notifications/${n.id}`
+                                                    );
+                                                } catch (_) {}
+                                                // remove locally
+                                                setNotifications((prev) =>
+                                                    prev.filter(
+                                                        (x) => x.id !== n.id
+                                                    )
                                                 );
                                             } catch (err) {
                                                 console.error(
@@ -112,14 +191,12 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                                     >
                                         {n.title}
                                     </div>
-                                    {!n.read && (
-                                        <button
-                                            className="text-xs text-blue-600"
-                                            onClick={() => markRead(n.id)}
-                                        >
-                                            Mark
-                                        </button>
-                                    )}
+                                    <button
+                                        className="text-xs text-blue-600"
+                                        onClick={() => markRead(n.id)}
+                                    >
+                                        Mark
+                                    </button>
                                 </div>
                                 <div className="text-xs text-gray-500">
                                     {n.body}
