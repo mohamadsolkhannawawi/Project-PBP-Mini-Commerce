@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext';
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
     const [selectedItems, setSelectedItems] = useState([]);
+    const [editingItemId, setEditingItemId] = useState(null); // TAMBAHAN: untuk edit manual
     const navigate = useNavigate();
     const { showWarning } = useToast();
 
@@ -33,6 +34,7 @@ function CartPage() {
         if (newQuantity < 1) return;
         try {
             await updateCartItem(itemId, newQuantity);
+            setEditingItemId(null); // TAMBAHAN: tutup edit mode setelah update
         } catch (error) {
             console.error('Error updating quantity:', error);
         }
@@ -107,10 +109,10 @@ function CartPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 font-montserrat pb-24">
+        <div className="min-h-screen bg-white font-montserrat pb-24">
             <div className="container mx-auto px-4 py-6">
                 {/* Header Table */}
-                <div className="mb-4 rounded-lg overflow-hidden shadow-lg">
+                <div className="mb-2 rounded-lg overflow-hidden shadow-lg">
                     <div
                         className="flex items-center py-4 px-6 text-white font-medium"
                         style={{ backgroundColor: '#1B263B' }}
@@ -130,7 +132,7 @@ function CartPage() {
                         <div className="flex-1 text-left flex items-center">
                             Produk
                         </div>
-                        <div className="w-40 text-center flex items-center justify-center">
+                        <div className="w-48 text-center flex items-center justify-center">
                             Jumlah
                         </div>
                         <div className="w-32 text-center flex items-center justify-center">
@@ -143,13 +145,14 @@ function CartPage() {
                 </div>
 
                 {/* Cart Items */}
-                <div className="space-y-3 mb-8">
+                <div className="space-y-2 mb-8">
                     {cartItems.map((item) => (
                         <div
                             key={item.id}
                             className="bg-gray-200 rounded-lg shadow-md"
+                            style={{ height: '160px' }}
                         >
-                            <div className="flex items-center p-4">
+                            <div className="flex items-center h-full px-6">
                                 {/* Checkbox */}
                                 <div className="w-16 flex justify-start items-center">
                                     <input
@@ -167,7 +170,10 @@ function CartPage() {
 
                                 {/* Product Image & Info */}
                                 <div className="flex-1 flex items-center">
-                                    <div className="w-16 h-16 bg-white rounded-lg border-2 border-black flex items-center justify-center mr-4 flex-shrink-0">
+                                    <div 
+                                        className="bg-white rounded-lg border-2 border-black flex items-center justify-center mr-6 flex-shrink-0"
+                                        style={{ width: '100px', height: '100px' }}
+                                    >
                                         <img
                                             src={getProductImageUrl(
                                                 item.product
@@ -185,7 +191,7 @@ function CartPage() {
                                             style={{ display: 'none' }}
                                         >
                                             <svg
-                                                className="w-6 h-6"
+                                                className="w-10 h-10"
                                                 viewBox="0 0 24 24"
                                                 fill="currentColor"
                                             >
@@ -197,7 +203,7 @@ function CartPage() {
                                         <h3 className="font-medium text-black text-base leading-tight mb-1">
                                             {item.product.name}
                                         </h3>
-                                        <p className="text-black font-medium text-sm">
+                                        <p className="text-black font-semibold text-sm">
                                             Rp
                                             {new Intl.NumberFormat(
                                                 'id-ID'
@@ -206,49 +212,103 @@ function CartPage() {
                                     </div>
                                 </div>
 
-                                {/* Quantity Controls */}
-                                <div className="w-40 text-center flex flex-col items-center">
-                                    <div className="flex items-center justify-center space-x-1 mb-1">
-                                        <button
-                                            onClick={() =>
-                                                handleQuantityChange(
-                                                    item.id,
-                                                    item.quantity - 1
-                                                )
-                                            }
-                                            className="w-8 h-8 rounded-md border border-gray-500 bg-white flex items-center justify-center hover:bg-gray-50 text-gray-700 font-medium"
-                                            disabled={item.quantity <= 1}
-                                        >
-                                            −
-                                        </button>
-                                        <input
-                                            type="number"
-                                            value={item.quantity}
-                                            onChange={(e) => {
-                                                const newQty = parseInt(
-                                                    e.target.value
-                                                );
-                                                if (newQty >= 1) {
+                                {/* Quantity Controls - NEW STYLE */}
+                                <div className="w-48 flex flex-col items-center justify-center gap-2">
+                                    <div className="flex items-center gap-3">
+                                        {/* White square display/input */}
+                                        {editingItemId === item.id ? (
+                                            <input
+                                                type="number"
+                                                value={item.quantity}
+                                                onChange={(e) => {
+                                                    const newQty = parseInt(
+                                                        e.target.value
+                                                    );
+                                                    if (newQty >= 1) {
+                                                        handleQuantityChange(
+                                                            item.id,
+                                                            newQty
+                                                        );
+                                                    }
+                                                }}
+                                                onBlur={() => setEditingItemId(null)}
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        setEditingItemId(null);
+                                                    }
+                                                }}
+                                                autoFocus
+                                                min="1"
+                                                className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 text-center text-lg font-semibold text-black"
+                                            />
+                                        ) : (
+                                            <div
+                                                onClick={() => setEditingItemId(item.id)}
+                                                className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
+                                            >
+                                                <span className="text-lg font-semibold text-black">
+                                                    {item.quantity}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {/* Dark pill with minus | plus */}
+                                        <div className="h-7 px-2 rounded-full bg-[#415A77] text-white flex items-center">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
                                                     handleQuantityChange(
                                                         item.id,
-                                                        newQty
-                                                    );
+                                                        item.quantity - 1
+                                                    )
                                                 }
-                                            }}
-                                            className="w-12 h-8 text-center border border-gray-500 rounded-md bg-white text-black font-medium"
-                                            min="1"
-                                        />
-                                        <button
-                                            onClick={() =>
-                                                handleQuantityChange(
-                                                    item.id,
-                                                    item.quantity + 1
-                                                )
-                                            }
-                                            className="w-8 h-8 rounded-md border border-gray-500 bg-white flex items-center justify-center hover:bg-gray-50 text-gray-700 font-medium"
-                                        >
-                                            +
-                                        </button>
+                                                disabled={item.quantity <= 1}
+                                                aria-label="Kurangi"
+                                                className="h-4 w-4 rounded-full border border-white flex items-center justify-center mr-3 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="14"
+                                                    height="14"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="3"
+                                                    strokeLinecap="round"
+                                                >
+                                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                                </svg>
+                                            </button>
+
+                                            <span className="h-4 w-px bg-white/80" />
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleQuantityChange(
+                                                        item.id,
+                                                        item.quantity + 1
+                                                    )
+                                                }
+                                                disabled={item.quantity >= item.product.stock}
+                                                aria-label="Tambah"
+                                                className="h-4 w-4 rounded-full border border-white flex items-center justify-center ml-3 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="14"
+                                                    height="14"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="3"
+                                                    strokeLinecap="round"
+                                                >
+                                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                     <p className="text-xs text-gray-600">
                                         Stok: {item.product.stock}
@@ -256,8 +316,8 @@ function CartPage() {
                                 </div>
 
                                 {/* Total Price */}
-                                <div className="w-32 text-center flex items-center justify-center">
-                                    <p className="font-medium text-black text-sm">
+                                <div className="w-32 flex items-center justify-center">
+                                    <p className="font-semibold text-black text-sm">
                                         Rp
                                         {new Intl.NumberFormat('id-ID').format(
                                             item.product.price * item.quantity
@@ -266,7 +326,7 @@ function CartPage() {
                                 </div>
 
                                 {/* Actions */}
-                                <div className="w-20 text-center flex items-center justify-center">
+                                <div className="w-20 flex items-center justify-center">
                                     <button
                                         onClick={() =>
                                             handleRemoveItem(item.id)
