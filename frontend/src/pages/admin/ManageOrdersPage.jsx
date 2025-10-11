@@ -86,25 +86,11 @@ function ManageOrdersPage() {
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
     if (loading)
-        return (
-            <div className="p-8 text-center">
-                <div className="animate-pulse flex flex-col items-center">
-                    <div className="h-8 w-64 bg-blue-100 rounded mb-4"></div>
-                    <div className="h-4 w-48 bg-blue-100 rounded"></div>
-                </div>
-                <p className="mt-4 text-blue-600 font-medium">Memuat data pesanan...</p>
-            </div>
-        );
+        return <div className="p-4 text-center">Memuat data pesanan...</div>;
     if (error)
         return (
-            <div className="text-red-600 bg-red-50 p-6 rounded-lg border border-red-200 shadow-sm my-4">
-                <p className="font-semibold">{error}</p>
-                <button 
-                    onClick={fetchOrders}
-                    className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors duration-200"
-                >
-                    Coba Lagi
-                </button>
+            <div className="text-red-500 bg-red-100 p-4 rounded-md">
+                {error}
             </div>
         );
 
@@ -113,36 +99,36 @@ function ManageOrdersPage() {
     ).filter(Boolean);
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50 p-6">
-            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                    <div>
-                        <h1 className="text-3xl font-bold text-blue-800">
-                            Manajemen Pesanan
-                        </h1>
-                        <p className="text-blue-600 mt-2 font-medium">
-                            Total Pesanan: {filteredOrders.length}
-                        </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                        <input
-                            type="text"
-                            placeholder="Cari No. Pesanan..."
-                            value={searchOrder}
-                            onChange={(e) => {
-                                setSearchOrder(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            className="border border-blue-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto"
-                            style={{ minWidth: 220 }}
-                        />
+        <div className="min-h-screen flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h1 className="text-3xl font-bold text-[#001F3F]">
+                        Manajemen Pesanan
+                    </h1>
+                    <p className="text-gray-600 mt-3">
+                        Total Pesanan: {filteredOrders.length}
+                    </p>
+                </div>
+                <div className="flex gap-2 items-center">
+                    <input
+                        type="text"
+                        placeholder="Cari No. Pesanan..."
+                        value={searchOrder}
+                        onChange={(e) => {
+                            setSearchOrder(e.target.value);
+                            setCurrentPage(1);
+                        }}
+                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
+                        style={{ minWidth: 200 }}
+                    />
+                    <div className="relative">
                         <select
                             value={statusFilter}
                             onChange={(e) => {
                                 setStatusFilter(e.target.value);
                                 setCurrentPage(1);
                             }}
-                            className="border border-blue-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white w-full sm:w-auto"
+                            className="appearance-none border border-gray-300 rounded-md px-3 py-2 pr-8 focus:outline-none focus:ring focus:border-blue-300"
                         >
                             <option value="">Semua Status</option>
                             {statusOptions.map((status) => (
@@ -152,42 +138,62 @@ function ManageOrdersPage() {
                                 </option>
                             ))}
                         </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                            <svg
+                                className="w-4 h-4 text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="overflow-hidden rounded-lg border border-blue-100 shadow-sm">
-                    <OrdersTable
-                        orders={currentOrders}
-                        indexOfFirstOrder={indexOfFirstOrder}
-                        handleStatusChange={handleStatusChange}
-                        setSortConfig={setSortConfig}
-                        sortConfig={sortConfig}
-                    />
+            <div className="w-full">
+                <div className="bg-white shadow-md rounded-md overflow-hidden p-6 w-full">
+                    <div className="overflow-x-auto">
+                        <OrdersTable
+                            orders={currentOrders}
+                            indexOfFirstOrder={indexOfFirstOrder}
+                            handleStatusChange={handleStatusChange}
+                            setSortConfig={setSortConfig}
+                            sortConfig={sortConfig}
+                        />
+                    </div>
                 </div>
+            </div>
 
-                <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-3 mt-6">
-                    <button
-                        onClick={() =>
-                            setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 w-full sm:w-auto"
-                    >
-                        Sebelumnya
-                    </button>
-                    <span className="mx-4 text-sm font-medium text-blue-800">
-                        Halaman {currentPage} dari {totalPages || 1}
-                    </span>
-                    <button
-                        onClick={() =>
-                            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                        }
-                        disabled={currentPage === totalPages || totalPages === 0}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 w-full sm:w-auto"
-                    >
-                        Selanjutnya
-                    </button>
-                </div>
+            <div className="w-full flex justify-center items-center mt-4 mb-4">
+                <button
+                    onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="bg-gray-300 text-gray-700 px-6 py-3 rounded-md disabled:opacity-50 mx-2"
+                >
+                    Back
+                </button>
+                <span className="mx-4 text-sm font-medium">
+                    Halaman {currentPage} dari {totalPages}
+                </span>
+                <button
+                    onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="bg-gray-300 text-gray-700 px-6 py-3 rounded-md disabled:opacity-50 mx-2"
+                >
+                    Next
+                </button>
             </div>
         </div>
     );
