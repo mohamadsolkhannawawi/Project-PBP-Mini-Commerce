@@ -51,7 +51,6 @@ function Footer() {
         <footer style={{ backgroundColor: '#1B263B' }} className="text-white">
             <div className="container mx-auto px-6 py-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-                    {/* Kolom 1: Tentang TokoKita */}
                     <div>
                         <h3 className="font-bold text-lg mb-2 font-montserrat">
                             TokoKita
@@ -63,7 +62,6 @@ function Footer() {
                         </p>
                     </div>
 
-                    {/* Kolom 2: Link Cepat */}
                     <div>
                         <h3 className="font-bold text-lg mb-2">Link Cepat</h3>
                         <ul className="space-y-2">
@@ -102,7 +100,6 @@ function Footer() {
                         </ul>
                     </div>
 
-                    {/* Kolom 3: Media Sosial dengan Ikon */}
                     <div>
                         <h3 className="font-bold text-lg mb-4">Ikuti Kami</h3>
                         <div className="flex justify-center md:justify-start space-x-4 items-center">
@@ -131,7 +128,6 @@ function Footer() {
                     </div>
                 </div>
 
-                {/* Bagian Copyright */}
                 <div className="border-t border-gray-600 mt-8 pt-6 text-center text-gray-500">
                     <p>
                         &copy; {new Date().getFullYear()} TokoKita. Semua Hak

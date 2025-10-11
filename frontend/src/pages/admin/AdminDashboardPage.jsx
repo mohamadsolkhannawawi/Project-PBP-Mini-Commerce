@@ -39,7 +39,7 @@ const kpiIcons = {
                 ry="2"
                 fill="none"
             />
-            {/* centered dollar sign */}
+
             <text
                 x="12"
                 y="15"
@@ -149,7 +149,6 @@ export default function AdminDashboardPage() {
 
     return (
         <div className="p-6 bg-[#D3D7DD] min-h-screen">
-            {/* Dashboard top header: Welcome, centered search, notif + profile on right */}
             <div className="flex items-center justify-between -mt-10 mb-6">
                 <div className="pl-0">
                     <div className="text-3xl font-bold text-[#1B263B] flex items-center">
@@ -275,7 +274,6 @@ export default function AdminDashboardPage() {
                 Admin Dashboard
             </h1>
 
-            {/* Show product summary bar or 'not found' based on navigation state or productSummary */}
             {window.history.state &&
             window.history.state.usr &&
             window.history.state.usr.product_not_found ? (
@@ -302,7 +300,6 @@ export default function AdminDashboardPage() {
                 </div>
             ) : null}
 
-            {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                 {[
                     'totalRevenue',
@@ -348,7 +345,6 @@ export default function AdminDashboardPage() {
                 })}
             </div>
 
-            {/* Sales Chart (hidden while admin is actively searching) */}
             {!isSearching && (
                 <div className="bg-white rounded-xl p-6 mb-8 shadow">
                     <h2 className="text-xl font-bold mb-4 text-[#415A77]">
@@ -389,7 +385,7 @@ export default function AdminDashboardPage() {
                     </ResponsiveContainer>
                 </div>
             )}
-            {/* Top Selling Products & Recent Orders */}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white rounded-xl p-6 shadow md:col-span-1">
                     <h2 className="text-lg font-bold mb-4 text-[#415A77]">

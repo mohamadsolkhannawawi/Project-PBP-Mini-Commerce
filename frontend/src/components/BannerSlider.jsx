@@ -66,17 +66,14 @@ export default function BannerSlider({ height = '40vh' }) {
             style={{ height, fontFamily: 'Poppins, ui-sans-serif, system-ui' }}
         >
             <div className="relative w-full h-full">
-                {/* Background Image */}
                 <img
                     src={bannerContent.src}
                     alt={bannerContent.title}
                     className="absolute inset-0 w-full h-full object-cover"
                 />
 
-                {/* Content Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-[#1B263B]/70 via-[#1B263B]/40 to-transparent" />
 
-                {/* Banner Content */}
                 <div className="relative h-full flex items-center">
                     <div className="px-6 md:px-12 max-w-2xl">
                         <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-3">
@@ -107,7 +104,6 @@ export default function BannerSlider({ height = '40vh' }) {
                     </div>
                 </div>
 
-                {/* Decorative Circle */}
                 <div className="absolute bottom-4 right-4 opacity-20">
                     <div className="w-12 h-12 border-2 border-white rounded-full flex items-center justify-center">
                         <div className="w-6 h-6 bg-white rounded-full"></div>

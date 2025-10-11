@@ -15,7 +15,7 @@ const StarRating = ({ rating = 0, max = 5, onRate, readOnly = true }) => {
 
     return (
         <div style={{ display: 'flex', gap: 2 }}>
-            {/* Full stars */}
+
             {Array.from({ length: fullStars }).map((_, i) => (
                 <Star
                     key={`full-${i}`}
@@ -27,7 +27,7 @@ const StarRating = ({ rating = 0, max = 5, onRate, readOnly = true }) => {
                     data-testid="star-filled"
                 />
             ))}
-            {/* Partial star */}
+
             {partialStar > 0 && (
                 <span
                     key="partial"
@@ -64,7 +64,7 @@ const StarRating = ({ rating = 0, max = 5, onRate, readOnly = true }) => {
                     />
                 </span>
             )}
-            {/* Empty stars */}
+
             {Array.from({ length: emptyStars }).map((_, i) => (
                 <Star
                     key={`empty-${i}`}

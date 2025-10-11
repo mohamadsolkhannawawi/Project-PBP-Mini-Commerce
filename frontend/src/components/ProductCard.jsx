@@ -56,7 +56,6 @@ function ProductCard({ product, onAddToCart }) {
                 />
                 </div>
 
-                {/* Taller footer */}
                 <div className="bg-[#415A77] text-white px-5 py-12 flex items-center justify-left relative">
                     <div className="min-w-0 leading-snug text-left">
                         <h3 className="text-2xl md:text-2xl font-regular truncate whitespace-nowrap overflow-hidden">
@@ -69,7 +68,6 @@ function ProductCard({ product, onAddToCart }) {
                             )}
                         </div>
 
-                        {/* Rating, review count, sold count */}
                         <div className="flex items-center justify-center gap-3 mt-2">
                             <StarRating
                                 rating={product.reviews_avg_rating || 0}
@@ -83,7 +81,6 @@ function ProductCard({ product, onAddToCart }) {
                         </div>
                     </div>
 
-                    {/* Quick Add to Cart dengan loading state */}
                     <button
                         className={`absolute top-4 right-4 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full p-2 shadow-lg transition-all ${
                             loading ? 'opacity-75 cursor-not-allowed' : ''

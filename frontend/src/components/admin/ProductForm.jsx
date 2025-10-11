@@ -141,7 +141,6 @@ function ProductForm({ product, onSave, onCancel }) {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
                 <div>
                     <div>
                         <label className="block text-xs font-medium text-gray-600">
@@ -241,7 +240,6 @@ function ProductForm({ product, onSave, onCancel }) {
                     </div>
                 </div>
 
-                {/* Right Column */}
                 <div>
                     <div>
                         <label className="block text-xs font-medium text-gray-600">
@@ -254,7 +252,6 @@ function ProductForm({ product, onSave, onCancel }) {
                             className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             accept="image/*"
                         />
-                        {/* Preview existing or selected primary image */}
                         {primaryImage ? (
                             <img
                                 src={URL.createObjectURL(primaryImage)}
@@ -287,7 +284,7 @@ function ProductForm({ product, onSave, onCancel }) {
                             accept="image/*"
                             multiple
                         />
-                        {/* Existing Gallery Images Section */}
+
                         {existingGalleryImages.length > 0 && (
                             <div className="mt-3">
                                 <p className="text-xs text-gray-500 mb-2">
@@ -325,7 +322,6 @@ function ProductForm({ product, onSave, onCancel }) {
                             </div>
                         )}
 
-                        {/* New Gallery Images Preview */}
                         {galleryImages.length > 0 && (
                             <div className="mt-3">
                                 <p className="text-xs text-gray-500 mb-2">

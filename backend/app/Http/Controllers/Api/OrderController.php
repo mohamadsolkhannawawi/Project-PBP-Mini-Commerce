@@ -92,14 +92,12 @@ class OrderController extends Controller
                 return $order;
             });
 
-            // Dispatch notification to all admin users
             try {
                 $admins = User::where('role', 'admin')->get();
                 foreach ($admins as $admin) {
                     $admin->notify(new NewOrderNotification($order));
                 }
             } catch (\Throwable $ex) {
-                // Do not fail the order if notifications fail; just log
                 \Log::error('Failed to notify admins: ' . $ex->getMessage());
             }
 

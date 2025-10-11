@@ -194,7 +194,7 @@ function Navbar() {
                                     </NavLink>
                                 )}
                                 <span className="text-gray-300 h-6 w-px bg-gray-300"></span>
-                                {/* Profile Dropdown - click based */}
+
                                 <div className="relative" ref={profileMenuRef}>
                                     <button
                                         className="flex items-center gap-2 text-gray-700 font-semibold focus:outline-none"
@@ -208,7 +208,7 @@ function Navbar() {
                                     </button>
                                     {isProfileOpen && (
                                         <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                                            {/* Only show Riwayat Pesanan for regular user */}
+
                                             {user.role !== 'admin' && (
                                                 <Link
                                                     to="/order-history"
@@ -272,7 +272,7 @@ function Navbar() {
                                 </button>
                             </div>
                         )}
-                        {/* Mobile menu button + dropdown */}
+
                         <div className="md:hidden relative">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
@@ -296,7 +296,6 @@ function Navbar() {
                                     </span>
                                 </div>
 
-                                {/* Admin Link */}
                                 {user.role === 'admin' && (
                                     <NavLink
                                     to="/admin"
@@ -308,7 +307,6 @@ function Navbar() {
                                     </NavLink>
                                 )}
 
-                                {/* Order History (non-admin only) */}
                                 {user.role !== 'admin' && (
                                     <NavLink
                                     to="/order-history"
@@ -320,7 +318,6 @@ function Navbar() {
                                     </NavLink>
                                 )}
 
-                                {/* Logout */}
                                 <button
                                     onClick={() => {
                                     setIsOpen(false);

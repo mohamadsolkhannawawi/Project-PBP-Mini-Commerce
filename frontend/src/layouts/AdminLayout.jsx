@@ -43,8 +43,6 @@ function AdminLayout() {
 
             <main className="flex-1 p-6 overflow-y-auto bg-[#D3D7DD] min-h-0">
                 <header className="flex items-center justify-end mb-6 space-x-4">
-                    {/* hide layout search/notification on dashboard and any products pages (the pages render their own header) */}
-                    {/* use location so this reacts to route changes including query params */}
                     {(() => {
                         const hideOnPrefixes = [
                             '/admin/dashboard',
@@ -61,8 +59,6 @@ function AdminLayout() {
                             <div className="w-full max-w-md">
                                 <SearchBar
                                     onSelect={(product) => {
-                                        // navigate and pass a short-lived navigation state so the dashboard
-                                        // knows this navigation came from an active search/selection
                                         navigate(
                                             `/admin/dashboard?product_id=${product.id}`,
                                             {
@@ -89,7 +85,6 @@ function AdminLayout() {
                                             const trimmed = (q || '')
                                                 .trim()
                                                 .toLowerCase();
-                                            // prefer exact name match (case-insensitive)
                                             const exact = arr.find(
                                                 (p) =>
                                                     p.name &&
@@ -110,7 +105,6 @@ function AdminLayout() {
                                                     }
                                                 );
                                             } else if (arr.length === 1) {
-                                                // single non-exact result: still show it
                                                 navigate(
                                                     `/admin/dashboard?product_id=${arr[0].id}`,
                                                     {
@@ -123,8 +117,6 @@ function AdminLayout() {
                                                     }
                                                 );
                                             } else {
-                                                // no exact match (either 0 results or multiple partial results)
-                                                // show 'Produk tidak ditemukan' in the dashboard viewing area
                                                 navigate('/admin/dashboard', {
                                                     state: {
                                                         product_not_found: true,
@@ -137,7 +129,6 @@ function AdminLayout() {
                                                 'Search submit error',
                                                 err
                                             );
-                                            // network/search error -> show not found state in dashboard
                                             navigate('/admin/dashboard', {
                                                 state: {
                                                     product_not_found: true,
@@ -147,9 +138,6 @@ function AdminLayout() {
                                         }
                                     }}
                                     onClear={() => {
-                                        // clear product filter by navigating back to dashboard root
-                                        // use replace so the product_id query isn't left in history
-                                        // clear the selected marker and navigate back to base dashboard
                                         try {
                                             sessionStorage.removeItem(
                                                 'admin_product_selected'
@@ -158,7 +146,7 @@ function AdminLayout() {
                                         navigate('/admin/dashboard', {
                                             replace: true,
                                         });
-                                        // notify any dashboard listeners to clear product summary immediately
+
                                         try {
                                             window.dispatchEvent(
                                                 new CustomEvent(
@@ -166,7 +154,7 @@ function AdminLayout() {
                                                 )
                                             );
                                         } catch (e) {
-                                            // ignore if environment doesn't support CustomEvent
+                                            console.error('Error dispatching clearProductSummary event:', e);
                                         }
                                     }}
                                 />
@@ -186,7 +174,6 @@ function AdminLayout() {
                         return shouldShowHeader ? <NotificationBell /> : null;
                     })()}
                 </header>
-                {/* productMessage removed: dashboard shows viewing product bar when applicable */}
                 <Outlet />
             </main>
         </div>

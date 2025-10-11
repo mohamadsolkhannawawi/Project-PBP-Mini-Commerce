@@ -67,7 +67,6 @@ function CheckoutPage() {
         <div className="min-h-screen bg-white font-montserrat py-8">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
-                    {/* Left Column - Form Alamat */}
                     <div>
                         <form onSubmit={handleSubmit}>
                             <h1 className="text-3xl font-bold mb-6 text-black">
@@ -99,7 +98,6 @@ function CheckoutPage() {
                         </form>
                     </div>
 
-                    {/* Right Column - Ringkasan Pesanan */}
                     <div
                         className="rounded-lg p-6 shadow-lg"
                         style={{
@@ -109,7 +107,6 @@ function CheckoutPage() {
                         }}
                     >
                         <div className="space-y-4">
-                            {/* Product Items */}
                             {items.map((item) => {
                                 const imageUrl = getProductImageUrl(
                                     item.product
@@ -156,7 +153,6 @@ function CheckoutPage() {
                                 );
                             })}
 
-                            {/* Summary */}
                             <div className="pt-4 space-y-2">
                                 <div className="flex justify-between text-sm text-gray-700">
                                     <span>
@@ -176,7 +172,6 @@ function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Order Button dengan loading state yang lebih baik */}
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading || items.length === 0}
