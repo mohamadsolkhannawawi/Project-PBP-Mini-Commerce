@@ -41,4 +41,13 @@ class NotificationController extends Controller
         $user->unreadNotifications()->update(['read_at' => now()]);
         return response()->json(['success' => true]);
     }
+
+    public function delete(Request $request, $id)
+    {
+        $user = $request->user();
+        $notification = $user->notifications()->where('id', $id)->first();
+        if (!$notification) return response()->json(['message' => 'Notification not found'], 404);
+        $notification->delete();
+        return response()->json(['success' => true]);
+    }
 }

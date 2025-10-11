@@ -49,6 +49,7 @@ function AdminLayout() {
                         const hideOnPrefixes = [
                             '/admin/dashboard',
                             '/admin/products',
+                            '/admin/orders',
                         ];
                         const shouldShowHeader = !hideOnPrefixes.some((p) =>
                             location.pathname.startsWith(p)
@@ -176,6 +177,7 @@ function AdminLayout() {
                         const hideOnPrefixes = [
                             '/admin/dashboard',
                             '/admin/products',
+                            '/admin/orders',
                         ];
                         const shouldShowHeader = !hideOnPrefixes.some((p) =>
                             location.pathname.startsWith(p)

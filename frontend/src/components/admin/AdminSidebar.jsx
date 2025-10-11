@@ -16,13 +16,13 @@ function AdminSidebar({ user, handleLogout }) {
 
     return (
         <aside className="w-64 flex-shrink-0" aria-label="Sidebar">
-            <div className="relative overflow-y-auto py-4 px-3 h-full bg-[#1B263B] text-white font-montserrat">
+            <div className="relative overflow-y-auto py-4 px-3 h-full bg-[#1B263B] text-white font-montserrat flex flex-col">
                 <Link to="/" className="flex items-center justify-center mb-5">
                     <div className="text-center">
                         <div className="text-6xl font-bold text-white leading-none">
                             Toko
                         </div>
-                        <div className="text-5xl font-bold text-white -mt-2 leading-none">
+                        <div className="text-5xl font-bold text-white -mt-1 leading-none">
                             Kita
                         </div>
                     </div>
@@ -35,7 +35,7 @@ function AdminSidebar({ user, handleLogout }) {
                     </div>
                 </div>
 
-                <ul className="space-y-2">
+                <ul className="space-y-2 flex-1">
                     <li>
                         <NavLink
                             to="/"
@@ -81,6 +81,20 @@ function AdminSidebar({ user, handleLogout }) {
                         </NavLink>
                     </li>
                 </ul>
+
+                {/* Footer separator and copyright - positioned at bottom */}
+                <div className="mt-auto">
+                    <div className="border-t border-white/20 mb-4" />
+                    <div className="px-3 text-center">
+                        <div className="text-xs text-white/50">
+                            © 2025 Toko Kita
+                        </div>
+                        <div className="text-xs text-white/40 mt-1">
+                            All rights reserved
+                        </div>
+                    </div>
+                </div>
+
                 {/* Sidebar logout removed - logout moved to profile menu */}
             </div>
         </aside>
