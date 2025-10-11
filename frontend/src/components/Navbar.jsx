@@ -60,6 +60,17 @@ function Navbar() {
         };
     }, []);
 
+    useEffect(() => {
+        const handleResize = () => {
+        if (window.innerWidth >= 768) {
+            setIsOpen(false);
+        }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+  
+
     const handleLogout = async () => {
         await logout();
         navigate('/login');
@@ -68,7 +79,7 @@ function Navbar() {
     return (
         <nav className="bg-white shadow-md sticky top-0 z-50 font-montserrat">
             <div className="container mx-auto px-4">
-                <div className="flex justify-between items-center py-4">
+                <div className="flex justify-between items-center py-4 gap-x-4">
                     <Link
                         to="/"
                         className="text-2xl font-bold font-montserrat"
@@ -77,17 +88,32 @@ function Navbar() {
                         TokoKita
                     </Link>
 
-                    <div className="flex-1 flex justify-center items-center px-8">
+                    <div className="flex-1 flex justify-center items-center gap-2 px-2">
                         <div className="relative" ref={categoryMenuRef}>
                             <button
                                 onClick={() => setCategoryOpen(!isCategoryOpen)}
-                                className="flex items-center bg-gray-100 border border-gray-300 rounded-l-md px-4 py-2 text-gray-700 hover:bg-gray-200 focus:outline-none h-full"
+                                className={[
+                                    "w-full flex items-center justify-between gap-2 h-11 px-4",
+                                    "rounded-full border border-gray-200 bg-white text-[#1B263B]",
+                                    "hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-[#415A77]",
+                                    isCategoryOpen ? "shadow-sm" : ""
+                                ].join(" ")}
+                                  aria-expanded={isCategoryOpen}
+                                  aria-haspopup="menu"
                             >
-                                <span>Categories</span>
-                                <ChevronDown size={20} className="ml-2" />
+                                    <span className="font-semibold">Categories</span>
+                                    <ChevronDown
+                                        size={18}
+                                        className={[
+                                        "transition-transform duration-200",
+                                        isCategoryOpen ? "rotate-180" : "rotate-0"
+                                        ].join(" ")}
+                                    />
                             </button>
                             {isCategoryOpen && (
-                                <div className="absolute mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                                <div     
+                                role="menu"
+                                className="absolute left-0 mt-2 w-full rounded-2xl bg-white border border-gray-200 shadow-2xl p-4 z-10">
                                     {categories.slice(0, 5).map((category) => (
                                         <Link
                                             key={category.id}
@@ -216,10 +242,90 @@ function Navbar() {
                                 </button>
                             </div>
                         )}
-                        <div className="md:hidden">
-                            <button onClick={() => setIsOpen(!isOpen)}>
-                                {isOpen ? <X size={24} /> : <Menu size={24} />}
-                            </button>
+                        {/* Mobile menu button + dropdown */}
+                        <div className="md:hidden relative">
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="text-[#1B263B] focus:outline-none"
+                        >
+                            {isOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+
+                        {isOpen && (
+                            <div
+                            className="absolute right-0 mt-3 w-56 rounded-xl border border-gray-200 bg-white shadow-xl z-50 py-2transition-all duration-200 ease-out animate-fadeIn"
+                            >
+                            {user ? (
+                                <>
+                                <div className="px-4 py-2 border-b border-gray-100">
+                                    <span className="block text-sm font-semibold text-[#1B263B]">
+                                    {user.name}
+                                    </span>
+                                    <span className="block text-xs text-gray-500">
+                                    {user.email}
+                                    </span>
+                                </div>
+
+                                {/* Admin Link */}
+                                {user.role === 'admin' && (
+                                    <NavLink
+                                    to="/admin"
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    onClick={() => setIsOpen(false)}
+                                    >
+                                    <LayoutDashboard size={18} />
+                                    <span>Admin Panel</span>
+                                    </NavLink>
+                                )}
+
+                                {/* Order History (non-admin only) */}
+                                {user.role !== 'admin' && (
+                                    <NavLink
+                                    to="/order-history"
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                    onClick={() => setIsOpen(false)}
+                                    >
+                                    <ClipboardClock size={18} />
+                                    <span>Riwayat Pesanan</span>
+                                    </NavLink>
+                                )}
+
+                                {/* Logout */}
+                                <button
+                                    onClick={() => {
+                                    setIsOpen(false);
+                                    handleLogout();
+                                    }}
+                                    className="flex items-center gap-2 w-full px-4 py-2 text-red-500 hover:bg-red-50"
+                                >
+                                    <LogOut size={18} />
+                                    <span>Logout</span>
+                                </button>
+                                </>
+                            ) : (
+                                <>
+                                <button
+                                    onClick={() => {
+                                    setIsOpen(false);
+                                    navigate('/login');
+                                    }}
+                                    className="block w-full text-left px-4 py-2 text-[#1B263B] hover:bg-gray-50"
+                                >
+                                    Login
+                                </button>
+                                <button
+                                    onClick={() => {
+                                    setIsOpen(false);
+                                    navigate('/register');
+                                    }}
+                                    className="block w-full text-left px-4 py-2 text-white bg-[#1B263B] hover:opacity-90"
+                                >
+                                    Register
+                                </button>
+                                </>
+                            )}
+                            </div>
+                        )}
                         </div>
                     </div>
                 </div>
