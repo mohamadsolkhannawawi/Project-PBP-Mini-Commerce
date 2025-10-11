@@ -11,25 +11,59 @@ function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState(null);
+    const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    
-    const { showSuccess, showError, showLoading, updateToast } = useToast();
+
+    const { showError, showLoading, updateToast } = useToast();
+
+    const validate = () => {
+        const newErrors = {};
+
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            newErrors.email = 'Format email tidak valid.';
+        }
+
+        const passwordRules = [
+            { test: (p) => p.length >= 8, message: 'minimal 8 karakter' },
+            { test: (p) => /[a-z]/.test(p), message: 'huruf kecil' },
+            { test: (p) => /[A-Z]/.test(p), message: 'huruf besar' },
+            { test: (p) => /\d/.test(p), message: 'angka' },
+            { test: (p) => /[^a-zA-Z0-9]/.test(p), message: 'simbol' },
+        ];
+
+        const failedRules = passwordRules
+            .filter((rule) => !rule.test(password))
+            .map((rule) => rule.message);
+
+        if (failedRules.length > 0) {
+            newErrors.password = `Password harus mengandung: ${failedRules.join(
+                ', '
+            )}.`;
+        }
+
+        if (password !== confirmPassword) {
+            newErrors.confirmPassword =
+                'Password dan konfirmasi password tidak cocok!';
+        }
+
+        return newErrors;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        if (password !== confirmPassword) {
-            showError('Password dan konfirmasi password tidak cocok!');
-            setError('Password tidak cocok!');
+        const validationErrors = validate();
+
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            const firstError = Object.values(validationErrors)[0];
+            showError(firstError);
             return;
         }
-        
-        setError(null);
+
+        setErrors({});
         setIsLoading(true);
-        
         const toastId = showLoading('Membuat akun baru...');
 
         try {
@@ -37,30 +71,80 @@ function RegisterPage() {
                 name,
                 email,
                 password,
-                password_confirmation: password,
+                password_confirmation: confirmPassword,
             });
-            
-            updateToast(toastId, 'Akun berhasil dibuat! Selamat bergabung!', 'success');
-            navigate('/');
+
+            updateToast(
+                toastId,
+                'Akun berhasil dibuat! Selamat bergabung!',
+                'success'
+            );
+            navigate('/login');
         } catch (err) {
-            let errorMessage = 'Gagal mendaftar. Silakan coba lagi.';
-            
-            if (err.response && err.response.data.errors) {
-                const messages = Object.values(err.response.data.errors).flat();
-                errorMessage = messages.join(' ');
-                
-                if (errorMessage.toLowerCase().includes('email') && 
-                    (errorMessage.toLowerCase().includes('taken') || 
-                    errorMessage.toLowerCase().includes('sudah') ||
-                    errorMessage.toLowerCase().includes('exists'))) {
-                    errorMessage = 'Email sudah terdaftar. Gunakan email lain atau login.';
+            let generalError = 'Gagal mendaftar. Silakan coba lagi.';
+            const newErrors = {};
+
+            const resp =
+                err.response && err.response.data ? err.response.data : null;
+
+            // Support both shapes:
+            // 1) { errors: { field: [msg] } }
+            // 2) { field: [msg] }
+            let apiErrors = null;
+            if (resp) {
+                if (resp.errors && typeof resp.errors === 'object') {
+                    apiErrors = resp.errors;
+                } else if (typeof resp === 'object') {
+                    // If it's a plain object that looks like validation errors (has keys like email/password)
+                    const possibleKeys = Object.keys(resp);
+                    const hasValidationLike = possibleKeys.some((k) =>
+                        [
+                            'email',
+                            'password',
+                            'name',
+                            'confirmPassword',
+                            'password_confirmation',
+                        ].includes(k)
+                    );
+                    if (hasValidationLike) {
+                        apiErrors = resp;
+                    }
                 }
-            } else if (err.response && err.response.status === 422) {
-                errorMessage = 'Email sudah terdaftar. Gunakan email lain atau login.';
             }
-            
-            setError(errorMessage);
-            updateToast(toastId, errorMessage, 'error');
+
+            if (apiErrors) {
+                // email
+                if (apiErrors.email) {
+                    const msg = Array.isArray(apiErrors.email)
+                        ? apiErrors.email[0]
+                        : apiErrors.email;
+                    generalError = msg;
+                    newErrors.email = msg;
+                }
+
+                // password
+                if (apiErrors.password) {
+                    const msg = Array.isArray(apiErrors.password)
+                        ? apiErrors.password[0]
+                        : apiErrors.password;
+                    newErrors.password = msg;
+                    if (!newErrors.email) {
+                        generalError =
+                            'Periksa kembali data yang Anda masukkan.';
+                    }
+                }
+
+                // other field errors -> fallback message
+                if (!newErrors.email && !newErrors.password) {
+                    generalError = 'Periksa kembali data yang Anda masukkan.';
+                }
+            } else if (resp && resp.message) {
+                // Use explicit message if backend provided one
+                generalError = resp.message;
+            }
+
+            setErrors(newErrors);
+            updateToast(toastId, generalError, 'error');
         } finally {
             setIsLoading(false);
         }
@@ -78,7 +162,7 @@ function RegisterPage() {
                         >
                             Register
                         </h2>
-                        <form className="space-y-5" onSubmit={handleSubmit}>
+                        <form className="space-y-4" onSubmit={handleSubmit}>
                             <div>
                                 <label
                                     htmlFor="name"
@@ -112,12 +196,21 @@ function RegisterPage() {
                                     name="email"
                                     type="email"
                                     required
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
+                                    className={`w-full px-4 py-2 rounded-lg border ${
+                                        errors.email
+                                            ? 'border-red-500'
+                                            : 'border-gray-300'
+                                    } focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm`}
                                     placeholder="Enter your email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={isLoading}
                                 />
+                                {errors.email && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.email}
+                                    </p>
+                                )}
                             </div>
                             <div>
                                 <label
@@ -131,17 +224,27 @@ function RegisterPage() {
                                     <input
                                         id="password"
                                         name="password"
-                                        type={showPassword ? 'text' : 'password'}
+                                        type={
+                                            showPassword ? 'text' : 'password'
+                                        }
                                         required
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
+                                        className={`w-full px-4 py-2 rounded-lg border ${
+                                            errors.password
+                                                ? 'border-red-500'
+                                                : 'border-gray-300'
+                                        } focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm`}
                                         placeholder="Create a password"
                                         value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
                                         disabled={isLoading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
                                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-[#415A77] transition-colors duration-200 hover:scale-110 active:scale-95"
                                         disabled={isLoading}
                                     >
@@ -151,6 +254,16 @@ function RegisterPage() {
                                             <Eye size={20} />
                                         )}
                                     </button>
+                                </div>
+                                {errors.password && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.password}
+                                    </p>
+                                )}
+                                <div className="text-xs text-gray-500 mt-1">
+                                    Password harus mengandung minimal 8
+                                    karakter, termasuk huruf besar, huruf kecil,
+                                    angka, dan simbol.
                                 </div>
                             </div>
                             <div>
@@ -165,17 +278,31 @@ function RegisterPage() {
                                     <input
                                         id="confirm-password"
                                         name="confirm-password"
-                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        type={
+                                            showConfirmPassword
+                                                ? 'text'
+                                                : 'password'
+                                        }
                                         required
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
+                                        className={`w-full px-4 py-2 rounded-lg border ${
+                                            errors.confirmPassword
+                                                ? 'border-red-500'
+                                                : 'border-gray-300'
+                                        } focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm`}
                                         placeholder="Confirm your password"
                                         value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        onChange={(e) =>
+                                            setConfirmPassword(e.target.value)
+                                        }
                                         disabled={isLoading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        onClick={() =>
+                                            setShowConfirmPassword(
+                                                !showConfirmPassword
+                                            )
+                                        }
                                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-[#415A77] transition-colors duration-200 hover:scale-110 active:scale-95"
                                         disabled={isLoading}
                                     >
@@ -186,12 +313,12 @@ function RegisterPage() {
                                         )}
                                     </button>
                                 </div>
+                                {errors.confirmPassword && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        {errors.confirmPassword}
+                                    </p>
+                                )}
                             </div>
-                            {error && (
-                                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200 animate-pulse">
-                                    {error}
-                                </div>
-                            )}
                             <button
                                 type="submit"
                                 disabled={isLoading}

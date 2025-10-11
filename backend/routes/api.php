@@ -11,6 +11,13 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Admin\DashboardController;
+use Illuminate\Support\Facades\App;
+
+Route::get('/test-locale', function () {
+    return response()->json([
+        'locale' => App::getLocale(),
+    ]);
+});
 
 /*
 |--------------------------------------------------------------------------
