@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
+import LoadingSpinner from './LoadingSpinner';
 
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
@@ -60,7 +61,7 @@ function CartPage() {
     };
 
     if (loading) {
-        return <div className="text-center py-20 font-montserrat">Memuat keranjang...</div>;
+        return <LoadingSpinner text="Memuat keranjang..." size="lg" className="py-12" />;
     }
 
     if (cartItems.length === 0) {

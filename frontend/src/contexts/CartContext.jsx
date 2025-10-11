@@ -61,9 +61,14 @@ export function CartProvider({ children }) {
         } catch (error) {
             console.error('Gagal menambahkan ke keranjang:', error);
 
-            const errorMessage =
-                error.response?.data?.message ||
-                'Gagal menambahkan produk ke keranjang.';
+            let errorMessage = 'Gagal menambahkan produk ke keranjang.';
+            
+            // Handle specific error cases
+            if (error.response?.status === 401 || error.response?.data?.message === 'Unauthenticated') {
+                errorMessage = 'Silakan login atau register terlebih dahulu untuk menambahkan produk ke keranjang.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
             
             showError(errorMessage);
             throw new Error(errorMessage);
@@ -79,7 +84,13 @@ export function CartProvider({ children }) {
         } catch (error) {
             console.error('Gagal mengubah jumlah item:', error);
             
-            showError('Gagal mengubah jumlah item.');
+            let errorMessage = 'Gagal mengubah jumlah item.';
+            
+            if (error.response?.status === 401 || error.response?.data?.message === 'Unauthenticated') {
+                errorMessage = 'Silakan login terlebih dahulu untuk mengubah jumlah item.';
+            }
+            
+            showError(errorMessage);
         }
     };
 
@@ -92,7 +103,13 @@ export function CartProvider({ children }) {
         } catch (error) {
             console.error('Gagal menghapus item:', error);
             
-            showError('Gagal menghapus item.');
+            let errorMessage = 'Gagal menghapus item.';
+            
+            if (error.response?.status === 401 || error.response?.data?.message === 'Unauthenticated') {
+                errorMessage = 'Silakan login terlebih dahulu untuk menghapus item.';
+            }
+            
+            showError(errorMessage);
         }
     };
 

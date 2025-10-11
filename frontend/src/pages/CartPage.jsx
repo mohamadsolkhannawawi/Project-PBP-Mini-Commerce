@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { getProductImageUrl } from '../utils/imageUtils';
 import { useToast } from '../contexts/ToastContext';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
@@ -63,11 +64,7 @@ function CartPage() {
     };
 
     if (loading) {
-        return (
-            <div className="text-center py-20 font-montserrat">
-                Memuat keranjang...
-            </div>
-        );
+        return <LoadingSpinner text="Memuat keranjang..." size="lg" className="py-12" />;
     }
 
     if (cartItems.length === 0) {
