@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import OrdersTable from '../../components/admin/OrdersTable';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { useToast } from '../../contexts/ToastContext';
 
 function ManageOrdersPage() {
@@ -96,7 +97,7 @@ function ManageOrdersPage() {
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
     if (loading)
-        return <div className="p-4 text-center">Memuat data pesanan...</div>;
+        return <LoadingSpinner text="Memuat data pesanan..." size="lg" className="py-12" />;
     if (error)
         return (
             <div className="text-red-500 bg-red-100 p-4 rounded-md">

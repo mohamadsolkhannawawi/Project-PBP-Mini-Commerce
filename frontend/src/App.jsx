@@ -1,8 +1,7 @@
-// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
-import { ToastProvider } from './contexts/ToastContext.jsx'; // ✅ TAMBAH INI
+import { ToastProvider } from './contexts/ToastContext.jsx';
 import MainLayout from './layouts/MainLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import AuthLayout from './layouts/AuthLayout.jsx';
@@ -19,7 +18,6 @@ import CategoryPage from './pages/CategoryPage.jsx';
 import OrderHistoryPage from './pages/OrderHistoryPage.jsx';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 
-// Import ToastContainer dan CSS
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -27,7 +25,7 @@ function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <ToastProvider> {/* ✅ TAMBAH WRAPPER INI */}
+                <ToastProvider>
                     <CartProvider>
                         <ToastContainer
                             position="bottom-right"
@@ -91,7 +89,7 @@ function App() {
                             />
                         </Routes>
                     </CartProvider>
-                </ToastProvider> {/* ✅ TUTUP WRAPPER DI SINI */}
+                </ToastProvider>
             </AuthProvider>
         </BrowserRouter>
     );

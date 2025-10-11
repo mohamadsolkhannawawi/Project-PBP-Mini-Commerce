@@ -11,7 +11,7 @@ import {
 function AdminSidebar({ user, handleLogout }) {
     const baseLinkClass =
         'flex items-center p-2 text-base font-normal rounded-lg transition-colors duration-150';
-    const activeLinkClass = `${baseLinkClass} bg-[#415A77] text-white`; // abu kebiruan untuk active
+    const activeLinkClass = `${baseLinkClass} bg-[#415A77] text-white`;
     const normalLinkClass = `${baseLinkClass} text-gray-100 hover:bg-[#4D809E]`;
 
     return (

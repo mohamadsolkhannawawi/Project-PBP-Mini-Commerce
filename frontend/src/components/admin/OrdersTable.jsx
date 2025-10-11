@@ -14,7 +14,6 @@ function OrdersTable({
     });
     const badgeRefs = useRef({});
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!event.target.closest('.status-dropdown')) {

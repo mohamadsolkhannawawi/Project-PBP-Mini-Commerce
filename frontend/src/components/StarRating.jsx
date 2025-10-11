@@ -3,16 +3,15 @@ import { Star } from 'lucide-react';
 
 /**
  * StarRating component
- * @param {number} rating - current rating (1-5, with 0.1 precision)
- * @param {number} max - max stars (default 5)
- * @param {function} onRate - optional callback for interactive rating
- * @param {boolean} readOnly - if true, stars are not clickable
+ * @param {number} rating
+ * @param {number} max
+ * @param {function} onRate
+ * @param {boolean} readOnly
  */
 const StarRating = ({ rating = 0, max = 5, onRate, readOnly = true }) => {
-    // Calculate full, partial, and empty stars
-    const fullStars = Math.floor(rating); // Full stars
-    const partialStar = Math.round((rating - fullStars) * 10); // Partial star (e.g., 4.1 becomes 1, 4.2 becomes 2)
-    const emptyStars = max - fullStars - (partialStar > 0 ? 1 : 0); // Empty stars
+    const fullStars = Math.floor(rating);
+    const partialStar = Math.round((rating - fullStars) * 10);
+    const emptyStars = max - fullStars - (partialStar > 0 ? 1 : 0);
 
     return (
         <div style={{ display: 'flex', gap: 2 }}>

@@ -3,7 +3,7 @@ import { useCart } from '../contexts/CartContext';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { getProductImageUrl } from '../utils/imageUtils';
-import { useToast } from '../contexts/ToastContext'; // ✅ TAMBAH INI
+import { useToast } from '../contexts/ToastContext';
 
 function CheckoutPage() {
     const { fetchCart } = useCart();
@@ -12,7 +12,7 @@ function CheckoutPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const { showSuccess, showError, showLoading, updateToast } = useToast(); // ✅ TAMBAH INI
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const items = location.state?.items;
 
@@ -32,7 +32,6 @@ function CheckoutPage() {
             return;
         }
         
-        // ✅ SHOW LOADING TOAST
         const toastId = showLoading('Memproses pesanan...');
         setLoading(true);
         setError('');
@@ -45,12 +44,10 @@ function CheckoutPage() {
                 cart_item_ids: selectedCartItemIds,
             });
             
-            // ✅ UPDATE TOAST MENJADI SUCCESS
             updateToast(toastId, 'Pesanan berhasil dibuat! Terima kasih telah berbelanja.', 'success');
             
             await fetchCart();
             
-            // Navigate setelah delay singkat agar user bisa lihat toast
             setTimeout(() => {
                 navigate('/');
             }, 1500);
@@ -59,7 +56,6 @@ function CheckoutPage() {
             console.error('Gagal checkout:', err);
             const errorMessage = err.response?.data?.message || 'Gagal memproses pesanan. Silakan coba lagi.';
             
-            // ✅ UPDATE TOAST MENJADI ERROR
             updateToast(toastId, errorMessage, 'error');
             setError(errorMessage);
         } finally {

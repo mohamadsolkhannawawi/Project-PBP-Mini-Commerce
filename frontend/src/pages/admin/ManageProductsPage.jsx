@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import ProductForm from '../../components/admin/ProductForm';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { Trash2, Edit3, ToggleRight, ToggleLeft } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 function ManageProductsPage() {
     const [products, setProducts] = useState([]);
@@ -172,7 +174,7 @@ function ManageProductsPage() {
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
     if (loading)
-        return <div className="p-4 text-center">Memuat data produk...</div>;
+        return <LoadingSpinner text="Memuat data produk..." size="lg" className="py-12" />;
     if (error)
         return (
             <div className="text-red-500 bg-red-100 p-4 rounded-md">

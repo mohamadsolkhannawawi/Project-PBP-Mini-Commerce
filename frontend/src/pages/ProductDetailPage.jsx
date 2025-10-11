@@ -1,4 +1,3 @@
-// src/pages/ProductDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
@@ -12,16 +11,17 @@ import {
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { useToast } from '../contexts/ToastContext.jsx'; // ✅ TAMBAH INI
+import { useToast } from '../contexts/ToastContext.jsx';
 import StarRating from '../components/StarRating';
 import { getImageUrl } from '../utils/imageUtils';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function ProductDetailPage() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const { productId } = useParams();
     const { addToCart } = useCart();
-    const { showSuccess, showError, showWarning } = useToast(); // ✅ TAMBAH INI
+    const { showSuccess, showError, showWarning } = useToast();
 
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
@@ -31,13 +31,11 @@ export default function ProductDetailPage() {
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
 
-    // Fetch product data
     useEffect(() => {
         (async () => {
             try {
                 setLoading(true);
                 const res = await axiosClient.get(`/products/${productId}`);
-                // Pastikan ambil data dari res.data.data
                 const data = res.data?.data || res.data;
                 setProduct(data);
                 if (data.primary_image) {
@@ -53,7 +51,6 @@ export default function ProductDetailPage() {
         })();
     }, [productId]);
 
-    // Set active image when product loads
     useEffect(() => {
         if (product && !activeImage) {
             const allImages = [
@@ -67,7 +64,6 @@ export default function ProductDetailPage() {
         }
     }, [product, activeImage]);
 
-    // Keyboard navigation untuk gallery
     useEffect(() => {
         if (!product) return;
 
@@ -125,7 +121,6 @@ export default function ProductDetailPage() {
         }
     };
 
-    // Navigation functions for gallery
     const goToPreviousImage = () => {
         if (allImages.length <= 1) return;
         const currentIndex = allImages.findIndex(
@@ -148,7 +143,6 @@ export default function ProductDetailPage() {
         setActiveImage(allImages[nextIndex]);
     };
 
-    // Touch gesture handlers
     const handleTouchStart = (e) => {
         setTouchEnd(null);
         setTouchStart(e.targetTouches[0].clientX);
@@ -173,19 +167,16 @@ export default function ProductDetailPage() {
     };
 
     if (loading)
-        return <div className="text-center py-10">Memuat detail produk...</div>;
+        return <LoadingSpinner text="Memuat detail produk..." size="lg" className="py-12" />;
     if (error)
         return <div className="text-center py-10 text-red-500">{error}</div>;
     if (!product) return null;
 
-    // Ambil rating dan review count
     const avgRating = product.reviews_avg_rating || 0;
     const reviewCount = product.reviews_count || 0;
 
-    // Ambil array review
     const reviews = product.reviews || [];
 
-    // Gabungkan primary image dengan gallery images
     const allImages = [
         product.primary_image,
         ...(product.gallery_images || []),

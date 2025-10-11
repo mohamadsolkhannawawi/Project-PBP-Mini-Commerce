@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import SearchBar from './SearchBar';
 import axiosClient from '../api/axiosClient';
 
@@ -20,9 +21,11 @@ function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isCategoryOpen, setCategoryOpen] = useState(false);
     const [isProfileOpen, setProfileOpen] = useState(false);
+    const [logoutLoading, setLogoutLoading] = useState(false);
     const [categories, setCategories] = useState([]);
     const { cartCount } = useCart();
     const { user, logout } = useAuth();
+    const { showLoading, updateToast } = useToast();
     const navigate = useNavigate();
     const categoryMenuRef = useRef(null);
     const profileMenuRef = useRef(null);
@@ -61,8 +64,21 @@ function Navbar() {
     }, []);
 
     const handleLogout = async () => {
-        await logout();
-        navigate('/login');
+        if (logoutLoading) return;
+        
+        setLogoutLoading(true);
+        const toastId = showLoading('Logging out...');
+        
+        try {
+            await logout();
+            updateToast(toastId, 'Berhasil logout!', 'success');
+            setProfileOpen(false);
+            navigate('/login');
+        } catch (e) {
+            updateToast(toastId, 'Gagal logout. Silakan coba lagi.', 'error');
+        } finally {
+            setLogoutLoading(false);
+        }
     };
 
     return (
@@ -187,13 +203,27 @@ function Navbar() {
                                                     setProfileOpen(false);
                                                     handleLogout();
                                                 }}
-                                                className="flex items-center w-full px-4 py-2 text-red-500 hover:bg-red-50 rounded-md"
+                                                disabled={logoutLoading}
+                                                className={`flex items-center w-full px-4 py-2 rounded-md transition-colors ${
+                                                    logoutLoading 
+                                                        ? 'text-gray-500 bg-gray-50 cursor-wait' 
+                                                        : 'text-red-500 hover:bg-red-50'
+                                                }`}
                                             >
-                                                <LogOut
-                                                    size={18}
-                                                    className="mr-2"
-                                                />
-                                                Logout
+                                                {logoutLoading ? (
+                                                    <>
+                                                        <div className="w-4 h-4 mr-2 border-2 border-[#415A77] border-t-transparent rounded-full animate-spin"></div>
+                                                        <span>Logging out...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <LogOut
+                                                            size={18}
+                                                            className="mr-2"
+                                                        />
+                                                        Logout
+                                                    </>
+                                                )}
                                             </button>
                                         </div>
                                     )}

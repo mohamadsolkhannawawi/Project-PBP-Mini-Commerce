@@ -25,18 +25,15 @@ const ReviewForm = ({ productId, orderItemId, onSuccess, onClose }) => {
                 comment,
             });
             
-            // ✅ SUCCESS TOAST HIJAU
             updateToast(toastId, 'Review berhasil dikirim! Terima kasih atas ulasan Anda.', 'success');
             
-            // ✅ TUTUP MODAL + AUTO REFRESH SETELAH TOAST SELESAI (3 detik)
             setTimeout(() => {
-                if (onClose) onClose(); // Tutup modal dulu
+                if (onClose) onClose();
                 
-                // ✅ REFRESH HALAMAN SETELAH 500ms (biar modal tutup dulu)
                 setTimeout(() => {
                     window.location.reload();
                 }, 500);
-            }, 3000); // 3 detik (sesuai durasi toast)
+            }, 3000);
             
         } catch (err) {
             console.error('Error submitting review:', err);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import ProductCard from '../components/ProductCard';
+import LoadingSpinner from '../components/LoadingSpinner';
 function CategoryPage() {
     const { categoryId } = useParams();
     const [category, setCategory] = useState(null);
@@ -13,13 +14,11 @@ function CategoryPage() {
         const fetchCategoryAndProducts = async () => {
             setLoading(true);
             try {
-                // First, get the category details to display the name
                 const categoryResponse = await axiosClient.get(
                     `/categories/${categoryId}`
                 );
                 setCategory(categoryResponse.data);
 
-                // Then, get the products for that category
                 const productsResponse = await axiosClient.get(
                     `/products?category_id=${categoryId}&limit=100&all=1`
                 );
@@ -42,7 +41,7 @@ function CategoryPage() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            {loading && <p className="text-center">Loading...</p>}
+            {loading && <LoadingSpinner text="Memuat kategori..." size="lg" className="py-12" />}
             {error && <p className="text-center text-red-500">{error}</p>}
             {!loading && !error && category && (
                 <>

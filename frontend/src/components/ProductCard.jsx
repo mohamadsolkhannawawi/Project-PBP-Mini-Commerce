@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
-import { useToast } from '../contexts/ToastContext'; // ✅ TAMBAH INI
+import { useToast } from '../contexts/ToastContext';
 
 import StarRating from './StarRating';
 import { getProductImageUrl } from '../utils/imageUtils';
@@ -10,7 +10,7 @@ import { getProductImageUrl } from '../utils/imageUtils';
 function ProductCard({ product, onAddToCart }) {
     const [loading, setLoading] = useState(false);
     const { addToCart } = useCart();
-    const { showSuccess, showError, showLoading, updateToast } = useToast(); // ✅ TAMBAH INI
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
     
     const imageUrl = getProductImageUrl(product);
 
@@ -18,7 +18,6 @@ function ProductCard({ product, onAddToCart }) {
         e.preventDefault();
         e.stopPropagation();
         
-        // ✅ SHOW LOADING TOAST
         const toastId = showLoading("Menambahkan ke keranjang...");
         
         try {
@@ -26,17 +25,14 @@ function ProductCard({ product, onAddToCart }) {
             
             if (typeof onAddToCart === 'function') {
                 await onAddToCart(product);
-                // ✅ SUCCESS TOAST
                 updateToast(toastId, `${product.name} berhasil ditambahkan ke keranjang!`, 'success');
             } else {
-                // Fallback jika tidak ada onAddToCart function
                 await addToCart(product, 1);
                 updateToast(toastId, `${product.name} berhasil ditambahkan ke keranjang!`, 'success');
             }
         } catch (error) {
             console.error('Error adding to cart:', error);
             const errorMessage = error.message || 'Gagal menambahkan produk ke keranjang';
-            // ✅ ERROR TOAST
             updateToast(toastId, errorMessage, 'error');
         } finally {
             setLoading(false);

@@ -26,7 +26,6 @@ export default function NotificationBell({ pollInterval = 15000 }) {
         return () => clearInterval(pollRef.current);
     }, [pollInterval]);
 
-    // close on outside click and cleanup when closing
     useEffect(() => {
         const onDocClick = (e) => {
             if (!open) return;
@@ -46,17 +45,14 @@ export default function NotificationBell({ pollInterval = 15000 }) {
     const markRead = async (id) => {
         try {
             await axiosClient.post(`/notifications/${id}/read`);
-            // mark locally
             setNotifications((prev) =>
                 prev.map((n) => (n.id === id ? { ...n, read: true } : n))
             );
 
-            // delete the notification after marking
             try {
                 await axiosClient.delete(`/notifications/${id}`);
                 setNotifications((prev) => prev.filter((n) => n.id !== id));
             } catch (delErr) {
-                // if delete fails, just keep the read state
                 console.warn(
                     'Failed to delete notification after mark:',
                     delErr
@@ -67,7 +63,6 @@ export default function NotificationBell({ pollInterval = 15000 }) {
         }
     };
 
-    // cleanup: delete marked notifications and unmarked older-than-24h
     const cleanupNotifications = async () => {
         const now = Date.now();
         const toDelete = notifications
@@ -81,13 +76,11 @@ export default function NotificationBell({ pollInterval = 15000 }) {
 
         if (toDelete.length === 0) return;
 
-        // attempt to delete on server, but remove locally regardless to respect UX
         await Promise.all(
             toDelete.map(async (id) => {
                 try {
                     await axiosClient.delete(`/notifications/${id}`);
                 } catch (err) {
-                    // ignore server delete error
                 }
             })
         );
@@ -136,7 +129,6 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                                     await axiosClient.post(
                                         '/notifications/mark-all-read'
                                     );
-                                    // delete all notifications locally and attempt server-side deletes
                                     const ids = notifications.map((n) => n.id);
                                     await Promise.all(
                                         ids.map(async (id) => {
@@ -175,13 +167,11 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                                                 await axiosClient.post(
                                                     `/notifications/${n.id}/read`
                                                 );
-                                                // try deleting so it doesn't reappear on next poll
                                                 try {
                                                     await axiosClient.delete(
                                                         `/notifications/${n.id}`
                                                     );
                                                 } catch (_) {}
-                                                // remove locally
                                                 setNotifications((prev) =>
                                                     prev.filter(
                                                         (x) => x.id !== n.id
@@ -194,7 +184,6 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                                                 );
                                             }
                                             setOpen(false);
-                                            // Navigate to orders page and if there's an order_id, we could highlight it
                                             navigate('/admin/orders');
                                         }}
                                     >

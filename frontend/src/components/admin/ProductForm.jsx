@@ -40,16 +40,13 @@ function ProductForm({ product, onSave, onCancel }) {
                 category_id: product.category_id || '',
                 is_active: product.is_active == 1,
             });
-            // Always show preview for existing images after save
             setPrimaryImage(null);
             setGalleryImages([]);
 
-            // Handle different data structures for gallery images
             let galleryImages = [];
             if (product.galleryImages && Array.isArray(product.galleryImages)) {
                 galleryImages = product.galleryImages;
             } else if (product.images && Array.isArray(product.images)) {
-                // Filter non-primary images from images array
                 galleryImages = product.images.filter((img) => !img.is_primary);
             }
 
@@ -107,13 +104,10 @@ function ProductForm({ product, onSave, onCancel }) {
                 data.append('gallery_images[]', image);
             });
         }
-        // Send IDs of gallery images to keep (for edit mode)
-        // Always send this array in edit mode, even if empty, to signal gallery update
         if (product) {
             existingGalleryImages.forEach((img) => {
                 data.append('keep_gallery_image_ids[]', img.id);
             });
-            // If no existing gallery images to keep, send empty indicator
             if (existingGalleryImages.length === 0) {
                 data.append('keep_gallery_image_ids[]', '');
             }

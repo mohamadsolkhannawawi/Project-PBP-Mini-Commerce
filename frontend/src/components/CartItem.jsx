@@ -8,7 +8,6 @@ function CartPage() {
     const [selectedItems, setSelectedItems] = useState([]);
     const navigate = useNavigate();
 
-    // Handle select individual item
     const handleSelectItem = (itemId) => {
         setSelectedItems((prevSelected) => {
             if (prevSelected.includes(itemId)) {
@@ -19,16 +18,14 @@ function CartPage() {
         });
     };
 
-    // Handle select all items
     const handleSelectAll = () => {
         if (selectedItems.length === cartItems.length) {
-            setSelectedItems([]); // Unselect all
+            setSelectedItems([]);
         } else {
-            setSelectedItems(cartItems.map(item => item.id)); // Select all
+            setSelectedItems(cartItems.map(item => item.id));
         }
     };
 
-    // Handle quantity change
     const handleQuantityChange = async (itemId, newQuantity) => {
         if (newQuantity < 1) return;
         try {
@@ -38,12 +35,10 @@ function CartPage() {
         }
     };
 
-    // Handle remove item
     const handleRemoveItem = async (itemId) => {
         if (window.confirm('Hapus item ini dari keranjang?')) {
             try {
                 await removeFromCart(itemId);
-                // Remove from selected items if it was selected
                 setSelectedItems(prev => prev.filter(id => id !== itemId));
             } catch (error) {
                 console.error('Error removing item:', error);
@@ -51,7 +46,6 @@ function CartPage() {
         }
     };
 
-    // Calculate selected items for checkout
     const itemsToCheckout = useMemo(
         () => cartItems.filter((item) => selectedItems.includes(item.id)),
         [cartItems, selectedItems]
@@ -69,7 +63,6 @@ function CartPage() {
         return <div className="text-center py-20 font-montserrat">Memuat keranjang...</div>;
     }
 
-    // Empty Cart State (Gambar 1)
     if (cartItems.length === 0) {
         return (
             <div className="min-h-screen bg-gray-100 font-montserrat">
@@ -99,7 +92,6 @@ function CartPage() {
         );
     }
 
-    // Cart with Items State (Gambar 2)
     return (
         <div className="min-h-screen bg-gray-100 font-montserrat pb-24">
             <div className="container mx-auto px-4 py-6">

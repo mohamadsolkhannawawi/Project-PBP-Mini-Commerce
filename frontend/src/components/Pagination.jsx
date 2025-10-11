@@ -11,14 +11,11 @@ function Pagination({ pagination, onPageChange }) {
         const maxVisible = 5;
 
         if (last_page <= maxVisible) {
-            // Show all pages if total pages is less than or equal to maxVisible
             for (let i = 1; i <= last_page; i++) {
                 pages.push(i);
             }
         } else {
-            // Show pages with ellipsis
             if (current_page <= 3) {
-                // Show first 3 pages + ellipsis + last page
                 for (let i = 1; i <= 3; i++) {
                     pages.push(i);
                 }
@@ -27,7 +24,6 @@ function Pagination({ pagination, onPageChange }) {
                 }
                 pages.push(last_page);
             } else if (current_page >= last_page - 2) {
-                // Show first page + ellipsis + last 3 pages
                 pages.push(1);
                 if (last_page > 4) {
                     pages.push('...');
@@ -36,7 +32,6 @@ function Pagination({ pagination, onPageChange }) {
                     pages.push(i);
                 }
             } else {
-                // Show first + ellipsis + current-1, current, current+1 + ellipsis + last
                 pages.push(1);
                 pages.push('...');
                 for (let i = current_page - 1; i <= current_page + 1; i++) {

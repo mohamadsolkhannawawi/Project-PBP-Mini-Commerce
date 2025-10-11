@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import SearchBar from '../../components/SearchBar';
 import NotificationBell from '../../components/NotificationBell';
 import ProfileMenu from '../../components/ProfileMenu';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../contexts/AuthContext';
 
 import {
@@ -79,12 +80,10 @@ export default function AdminDashboardPage() {
         return params.get(name);
     };
 
-    // On mount: fetch global dashboard
     useEffect(() => {
         axiosClient
             .get('/admin/dashboard')
             .then((res) => {
-                // normalize response shape: some endpoints return payload under res.data.data
                 const payload = res.data?.data ?? res.data ?? {};
                 setDashboard(payload);
                 setLoading(false);
@@ -92,7 +91,6 @@ export default function AdminDashboardPage() {
             .catch(() => setLoading(false));
     }, []);
 
-    // If location search contains product_id, fetch product summary (no navigation-state gating)
     useEffect(() => {
         const productId = getQuery('product_id');
         if (!productId) {
@@ -117,7 +115,6 @@ export default function AdminDashboardPage() {
         return () => (mounted = false);
     }, [location.search]);
 
-    // Listen for explicit clear events from the header SearchBar
     useEffect(() => {
         const handler = () => setProductSummary(null);
         window.addEventListener('clearProductSummary', handler);
@@ -125,7 +122,7 @@ export default function AdminDashboardPage() {
     }, []);
 
     if (loading)
-        return <div className="p-8 text-center">Loading dashboard...</div>;
+        return <LoadingSpinner text="Memuat dashboard..." size="lg" className="py-12" />;
     if (!dashboard)
         return (
             <div className="p-8 text-center text-red-500">
@@ -140,17 +137,12 @@ export default function AdminDashboardPage() {
         topSellingProducts = [],
     } = dashboard || {};
 
-    // If a product is selected and the product summary includes sales series,
-    // prefer that for the chart and related product-stat displays.
     const chartData =
         productSummary?.sales_over_time ||
         productSummary?.salesOverTime ||
         productSummary?.sales ||
         salesOverTime;
 
-    // Consider the admin is 'searching' when a product_id query exists or
-    // when the navigation state indicates product_not_found. Hide the chart
-    // while searching and restore it when search is cleared.
     const isSearching = Boolean(
         getQuery('product_id') || window.history?.state?.usr?.product_not_found
     );
