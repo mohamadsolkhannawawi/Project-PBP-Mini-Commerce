@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { User, LogOut } from 'lucide-react';
 
 export default function ProfileMenu() {
     const [open, setOpen] = useState(false);
+    const [logoutLoading, setLogoutLoading] = useState(false);
     const ref = useRef(null);
     const { user, logout } = useAuth();
+    const { showLoading, updateToast, showError } = useToast();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -18,12 +21,21 @@ export default function ProfileMenu() {
     }, []);
 
     const handleLogout = async () => {
+        if (logoutLoading) return;
+        
+        setLogoutLoading(true);
+        const toastId = showLoading('Logging out...');
+        
         try {
             await logout();
+            updateToast(toastId, 'Berhasil logout!', 'success');
+            setOpen(false);
+            navigate('/login');
         } catch (e) {
-            // ignore
+            updateToast(toastId, 'Gagal logout. Silakan coba lagi.', 'error');
+        } finally {
+            setLogoutLoading(false);
         }
-        navigate('/login');
     };
 
     return (
@@ -50,14 +62,30 @@ export default function ProfileMenu() {
                     </div>
                     <div className="py-1">
                         <button
-                            className="w-full flex items-center justify-center px-4 py-2 text-sm hover:bg-gray-100"
+                            className={`w-full flex items-center justify-center px-4 py-2 text-sm transition-colors ${
+                                logoutLoading 
+                                    ? 'bg-gray-100 cursor-wait' 
+                                    : 'hover:bg-gray-100'
+                            }`}
                             onClick={handleLogout}
-                            title="Logout"
+                            disabled={logoutLoading}
+                            title={logoutLoading ? 'Logging out...' : 'Logout'}
                         >
-                            <LogOut className="w-5 h-5 text-red-600 mr-2" />
-                            <span className="text-red-600 font-medium">
-                                Logout
-                            </span>
+                            {logoutLoading ? (
+                                <>
+                                    <div className="w-5 h-5 mr-2 border-2 border-[#415A77] border-t-transparent rounded-full animate-spin"></div>
+                                    <span className="text-gray-600 font-medium">
+                                        Logging out...
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <LogOut className="w-5 h-5 text-red-600 mr-2" />
+                                    <span className="text-red-600 font-medium">
+                                        Logout
+                                    </span>
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>

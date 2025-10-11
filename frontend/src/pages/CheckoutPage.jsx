@@ -3,6 +3,7 @@ import { useCart } from '../contexts/CartContext';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { getProductImageUrl } from '../utils/imageUtils';
+import { useToast } from '../contexts/ToastContext';
 
 function CheckoutPage() {
     const { fetchCart } = useCart();
@@ -11,6 +12,7 @@ function CheckoutPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const items = location.state?.items;
 
@@ -29,6 +31,8 @@ function CheckoutPage() {
             setError('Alamat pengiriman wajib diisi.');
             return;
         }
+        
+        const toastId = showLoading('Memproses pesanan...');
         setLoading(true);
         setError('');
 
@@ -39,15 +43,21 @@ function CheckoutPage() {
                 address_text: address,
                 cart_item_ids: selectedCartItemIds,
             });
-            alert('Pesanan berhasil dibuat!');
+            
+            updateToast(toastId, 'Pesanan berhasil dibuat! Terima kasih telah berbelanja.', 'success');
+            
             await fetchCart();
-            navigate('/');
+            
+            setTimeout(() => {
+                navigate('/');
+            }, 1500);
+            
         } catch (err) {
             console.error('Gagal checkout:', err);
-            setError(
-                err.response?.data?.message ||
-                    'Gagal memproses pesanan. Silakan coba lagi.'
-            );
+            const errorMessage = err.response?.data?.message || 'Gagal memproses pesanan. Silakan coba lagi.';
+            
+            updateToast(toastId, errorMessage, 'error');
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -166,14 +176,23 @@ function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Order Button */}
+                            {/* Order Button dengan loading state yang lebih baik */}
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading || items.length === 0}
-                                className="w-full py-4 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                                className={`w-full py-4 text-white font-semibold rounded-lg transition-all mt-6 ${
+                                    loading ? 'opacity-75 cursor-not-allowed' : 'hover:brightness-110'
+                                }`}
                                 style={{ backgroundColor: '#1B263B' }}
                             >
-                                {loading ? 'Memproses...' : 'Order Sekarang'}
+                                {loading ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Memproses Pesanan...
+                                    </div>
+                                ) : (
+                                    'Order Sekarang'
+                                )}
                             </button>
                         </div>
                     </div>

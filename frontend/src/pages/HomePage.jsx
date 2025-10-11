@@ -1,12 +1,11 @@
-// src/pages/HomePage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductList from '../components/ProductList';
 import Pagination from '../components/Pagination';
 import axiosClient from '../api/axiosClient';
 import BannerSlider from '../components/BannerSlider';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-// Objek mapping untuk ikon kategori
 const categoryIcons = {
     elektronik: (
         <svg
@@ -166,7 +165,6 @@ const categoryIcons = {
     ),
 };
 
-// Fungsi untuk mencari ikon yang sesuai, tidak diubah.
 const getCategoryIcon = (categoryName) => {
     const name = categoryName.toLowerCase();
     const foundKey = Object.keys(categoryIcons).find((key) =>
@@ -198,10 +196,8 @@ export default function HomePage() {
                 axiosClient.get('/categories'),
             ]);
 
-            // Handle paginated response
             const productsData = productsResponse.data?.data;
             if (productsData && productsData.data) {
-                // Paginated response
                 setProducts(
                     Array.isArray(productsData.data) ? productsData.data : []
                 );
@@ -214,7 +210,6 @@ export default function HomePage() {
                     to: productsData.to || 0,
                 });
             } else {
-                // Non-paginated response (fallback)
                 let arr = productsData || productsResponse.data || [];
                 setProducts(Array.isArray(arr) ? arr : []);
             }
@@ -248,7 +243,6 @@ export default function HomePage() {
 
     const handlePageChange = (page) => {
         fetchHomePageData(page);
-        // Scroll to products section
         document.getElementById('products')?.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
@@ -321,12 +315,11 @@ export default function HomePage() {
                 </div>
 
                 {loading && (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                        <span className="ml-3 text-gray-600 pl-2 sm:pl-4 md:pl-6">
-                            Memuat produk...
-                        </span>
-                    </div>
+                    <LoadingSpinner 
+                        text="Memuat produk..." 
+                        size="lg"
+                        className="py-12"
+                    />
                 )}
 
                 {error && (

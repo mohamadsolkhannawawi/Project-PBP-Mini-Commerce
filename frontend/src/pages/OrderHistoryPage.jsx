@@ -16,7 +16,6 @@ const OrderHistoryPage = () => {
     const [activeStatus, setActiveStatus] = useState('all');
     const navigate = useNavigate();
 
-    // Fetch orders from backend every time tab changes
     useEffect(() => {
         const fetchOrders = async () => {
             setLoading(true);
@@ -38,7 +37,6 @@ const OrderHistoryPage = () => {
         setSearchQuery('');
     }, [activeStatus]);
 
-    // Reset search when tab changes
     useEffect(() => {
         setSearchQuery('');
     }, [activeStatus]);

@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import ProductForm from '../../components/admin/ProductForm';
+import LoadingSpinner from '../../components/LoadingSpinner';
 import { Trash2, Edit3, ToggleRight, ToggleLeft } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 function ManageProductsPage() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [toggleLoading, setToggleLoading] = useState({});
+    const [deleteLoading, setDeleteLoading] = useState({});
 
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState({
@@ -21,6 +25,8 @@ function ManageProductsPage() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const fetchProducts = useCallback(async () => {
         try {
@@ -59,6 +65,10 @@ function ManageProductsPage() {
     }, []);
 
     const handleSave = async (productData) => {
+        const toastId = showLoading(
+            selectedProduct ? 'Memperbarui produk...' : 'Menambah produk baru...'
+        );
+
         try {
             if (selectedProduct) {
                 await axiosClient.post(
@@ -66,10 +76,12 @@ function ManageProductsPage() {
                     productData,
                     { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
+                updateToast(toastId, 'Produk berhasil diperbarui!', 'success');
             } else {
                 await axiosClient.post('/admin/products', productData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
+                updateToast(toastId, 'Produk baru berhasil ditambahkan!', 'success');
             }
             setIsModalOpen(false);
             setSelectedProduct(null);
@@ -78,11 +90,16 @@ function ManageProductsPage() {
             const errorMessages = err.response?.data?.errors
                 ? Object.values(err.response.data.errors).flat().join(' \n')
                 : 'Gagal menyimpan produk. Periksa kembali data Anda.';
-            alert(errorMessages);
+            updateToast(toastId, errorMessages, 'error');
         }
     };
 
     const handleToggleStatus = async (product) => {
+        setToggleLoading(prev => ({ ...prev, [product.id]: true }));
+        const toastId = showLoading(
+            `${product.is_active ? 'Menonaktifkan' : 'Mengaktifkan'} produk...`
+        );
+
         try {
             const response = await axiosClient.patch(
                 `/admin/products/${product.id}/toggle-status`
@@ -92,25 +109,32 @@ function ManageProductsPage() {
                     p.id === product.id ? response.data.product : p
                 )
             );
+            updateToast(
+                toastId, 
+                `Status produk berhasil ${product.is_active ? 'dinonaktifkan' : 'diaktifkan'}!`,
+                'success'
+            );
         } catch (err) {
-            alert('Gagal mengubah status produk.');
+            updateToast(toastId, 'Gagal mengubah status produk.', 'error');
+        } finally {
+            setToggleLoading(prev => ({ ...prev, [product.id]: false }));
         }
     };
 
-    const handlePermanentDelete = async (productId) => {
-        if (
-            window.confirm(
-                'Apakah Anda yakin ingin menghapus produk ini secara permanen? Tindakan ini tidak dapat diurungkan.'
-            )
-        ) {
-            try {
-                await axiosClient.delete(`/admin/products/${productId}`);
-                setProducts((prevProducts) =>
-                    prevProducts.filter((p) => p.id !== productId)
-                );
-            } catch (err) {
-                alert('Gagal menghapus produk.');
-            }
+    const handlePermanentDelete = async (productId, productName) => {
+        setDeleteLoading(prev => ({ ...prev, [productId]: true }));
+        const toastId = showLoading('Menghapus produk...');
+
+        try {
+            await axiosClient.delete(`/admin/products/${productId}`);
+            setProducts((prevProducts) =>
+                prevProducts.filter((p) => p.id !== productId)
+            );
+            updateToast(toastId, `Produk "${productName}" berhasil dihapus!`, 'success');
+        } catch (err) {
+            updateToast(toastId, 'Gagal menghapus produk.', 'error');
+        } finally {
+            setDeleteLoading(prev => ({ ...prev, [productId]: false }));
         }
     };
 
@@ -150,7 +174,7 @@ function ManageProductsPage() {
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
     if (loading)
-        return <div className="p-4 text-center">Memuat data produk...</div>;
+        return <LoadingSpinner text="Memuat data produk..." size="lg" className="py-12" />;
     if (error)
         return (
             <div className="text-red-500 bg-red-100 p-4 rounded-md">

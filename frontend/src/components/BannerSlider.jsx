@@ -1,8 +1,6 @@
-// src/components/BannerSlider.jsx
 import React from 'react';
 
 export default function BannerSlider({ height = '40vh' }) {
-    // Fungsi untuk membuat background SVG, tidak diubah.
     const createBannerBg = () =>
         'data:image/svg+xml;utf8,' +
         encodeURIComponent(
@@ -30,7 +28,6 @@ export default function BannerSlider({ height = '40vh' }) {
             </svg>`
         );
 
-    // Konten untuk banner Anda, tidak diubah.
     const bannerContent = {
         src: createBannerBg(),
         title: 'Selamat Datang di TokoKita',
@@ -38,7 +35,6 @@ export default function BannerSlider({ height = '40vh' }) {
         ctaText: 'Jelajahi Produk'
     };
 
-    // Fungsi scroll ke produk, tidak diubah.
     const scrollToProducts = () => {
         const productHeader = document.querySelector('[data-section="products"] h2') ||
                               document.querySelector('#products h2') ||
@@ -57,7 +53,6 @@ export default function BannerSlider({ height = '40vh' }) {
                 behavior: 'smooth'
             });
         } else {
-            // Fallback jika section tidak ditemukan
             window.scrollTo({
                 top: window.innerHeight * 0.9,
                 behavior: 'smooth'
@@ -112,7 +107,7 @@ export default function BannerSlider({ height = '40vh' }) {
                     </div>
                 </div>
 
-                {/* Decorative elements */}
+                {/* Decorative Circle */}
                 <div className="absolute bottom-4 right-4 opacity-20">
                     <div className="w-12 h-12 border-2 border-white rounded-full flex items-center justify-center">
                         <div className="w-6 h-6 bg-white rounded-full"></div>

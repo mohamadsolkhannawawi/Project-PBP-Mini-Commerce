@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 function RegisterPage() {
@@ -13,14 +14,24 @@ function RegisterPage() {
     const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (password !== confirmPassword) {
+            showError('Password dan konfirmasi password tidak cocok!');
             setError('Password tidak cocok!');
             return;
         }
+        
         setError(null);
+        setIsLoading(true);
+        
+        const toastId = showLoading('Membuat akun baru...');
+
         try {
             await register({
                 name,
@@ -28,14 +39,30 @@ function RegisterPage() {
                 password,
                 password_confirmation: password,
             });
+            
+            updateToast(toastId, 'Akun berhasil dibuat! Selamat bergabung!', 'success');
             navigate('/');
         } catch (err) {
+            let errorMessage = 'Gagal mendaftar. Silakan coba lagi.';
+            
             if (err.response && err.response.data.errors) {
                 const messages = Object.values(err.response.data.errors).flat();
-                setError(messages.join(' '));
-            } else {
-                setError('Gagal mendaftar. Silakan coba lagi.');
+                errorMessage = messages.join(' ');
+                
+                if (errorMessage.toLowerCase().includes('email') && 
+                    (errorMessage.toLowerCase().includes('taken') || 
+                    errorMessage.toLowerCase().includes('sudah') ||
+                    errorMessage.toLowerCase().includes('exists'))) {
+                    errorMessage = 'Email sudah terdaftar. Gunakan email lain atau login.';
+                }
+            } else if (err.response && err.response.status === 422) {
+                errorMessage = 'Email sudah terdaftar. Gunakan email lain atau login.';
             }
+            
+            setError(errorMessage);
+            updateToast(toastId, errorMessage, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -65,10 +92,11 @@ function RegisterPage() {
                                     name="name"
                                     type="text"
                                     required
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
                                     placeholder="Enter your full name"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div>
@@ -84,10 +112,11 @@ function RegisterPage() {
                                     name="email"
                                     type="email"
                                     required
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
                                     placeholder="Enter your email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div>
@@ -102,23 +131,19 @@ function RegisterPage() {
                                     <input
                                         id="password"
                                         name="password"
-                                        type={
-                                            showPassword ? 'text' : 'password'
-                                        }
+                                        type={showPassword ? 'text' : 'password'}
                                         required
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
                                         placeholder="Create a password"
                                         value={password}
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        disabled={isLoading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setShowPassword(!showPassword)
-                                        }
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-[#415A77] transition-colors duration-200 hover:scale-110 active:scale-95"
+                                        disabled={isLoading}
                                     >
                                         {showPassword ? (
                                             <EyeOff size={20} />
@@ -140,27 +165,19 @@ function RegisterPage() {
                                     <input
                                         id="confirm-password"
                                         name="confirm-password"
-                                        type={
-                                            showConfirmPassword
-                                                ? 'text'
-                                                : 'password'
-                                        }
+                                        type={showConfirmPassword ? 'text' : 'password'}
                                         required
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
                                         placeholder="Confirm your password"
                                         value={confirmPassword}
-                                        onChange={(e) =>
-                                            setConfirmPassword(e.target.value)
-                                        }
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        disabled={isLoading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setShowConfirmPassword(
-                                                !showConfirmPassword
-                                            )
-                                        }
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-[#415A77] transition-colors duration-200 hover:scale-110 active:scale-95"
+                                        disabled={isLoading}
                                     >
                                         {showConfirmPassword ? (
                                             <EyeOff size={20} />
@@ -171,22 +188,34 @@ function RegisterPage() {
                                 </div>
                             </div>
                             {error && (
-                                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg">
+                                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200 animate-pulse">
                                     {error}
                                 </div>
                             )}
                             <button
                                 type="submit"
-                                className="w-full py-3 rounded-lg font-semibold text-white bg-[#1B263B] hover:bg-[#16213A] transition"
+                                disabled={isLoading}
+                                className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 transform ${
+                                    isLoading
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-[#1B263B] hover:bg-[#415A77] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#415A77]'
+                                }`}
                             >
-                                CREATE ACCOUNT
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center">
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                        Membuat akun...
+                                    </div>
+                                ) : (
+                                    'CREATE ACCOUNT'
+                                )}
                             </button>
                         </form>
                         <p className="mt-6 text-center text-sm text-gray-500">
                             Already have an account?{' '}
                             <Link
                                 to="/login"
-                                className="font-medium"
+                                className="font-medium transition-colors duration-200 hover:underline hover:text-[#415A77]"
                                 style={{ color: '#1B263B' }}
                             >
                                 Sign in here
