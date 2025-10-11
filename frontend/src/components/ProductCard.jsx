@@ -46,31 +46,28 @@ function ProductCard({ product, onAddToCart }) {
             aria-label={`Lihat ${product.name}`}
         >
             <div
-                className="overflow-hidden shadow-md hover:shadow-lg transition-shadow bg-gray-100 rounded-[14px]"
+                className="overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl border border-[#415A77]-100"
                 style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui' }}
             >
-                {/* Taller image area */}
-                <div className="bg-gray-200 h-80 md:h-80 flex items-center justify-center rounded-t-[14px] overflow-hidden">
-                    <img
-                        src={imageUrl}
-                        alt={product.name}
-                        className="max-h-full w-auto object-contain p-6"
-                        loading="lazy"
-                        onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = '/no-image.webp';
-                        }}
-                    />
+                <div className="relative h-56 md:h-64 rounded-t-[14px] overflow-hidden bg-white">
+                <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover block"
+                    loading="lazy"
+                    onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/no-image.webp';
+                    }}
+                />
                 </div>
 
                 {/* Taller footer */}
-                <div className="bg-[#415A77] text-white px-5 py-14 flex items-center justify-center">
-                    <div className="min-w-0 leading-snug text-center">
-                        {/* Extra large product name */}
-                        <h3 className="text-2xl md:text-2xl font-regular">
+                <div className="bg-[#415A77] text-white px-5 py-12 flex items-center justify-left relative">
+                    <div className="min-w-0 leading-snug text-left">
+                        <h3 className="text-2xl md:text-2xl font-regular truncate whitespace-nowrap overflow-hidden">
                             {product.name}
                         </h3>
-                        {/* Bigger price */}
                         <div className="mt-2 font-bold text-base md:text-xl">
                             Rp
                             {new Intl.NumberFormat('id-ID').format(
@@ -83,10 +80,10 @@ function ProductCard({ product, onAddToCart }) {
                             <StarRating
                                 rating={product.reviews_avg_rating || 0}
                             />
-                            <span className="text-sm text-yellow-200">
+                            <span className="text-sm text-gray-400">
                                 ({product.reviews_count || 0})
                             </span>
-                            <span className="text-xs text-gray-200 ml-2">
+                            <span className="text-xs text-gray-400 ml-2">
                                 Terjual: {product.order_items_count || 0}
                             </span>
                         </div>
