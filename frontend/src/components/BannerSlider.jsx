@@ -67,7 +67,7 @@ export default function BannerSlider({ height = '40vh' }) {
 
     return (
         <div
-            className="relative overflow-hidden rounded-2xl bg-[#1B263B] shadow-2xl"
+            className="relative overflow-hidden rounded-2xl bg-[#1B263B] shadow-md"
             style={{ height, fontFamily: 'Poppins, ui-sans-serif, system-ui' }}
         >
             <div className="relative w-full h-full">
