@@ -2,13 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
+import LoadingSpinner from './LoadingSpinner';
 
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
     const [selectedItems, setSelectedItems] = useState([]);
     const navigate = useNavigate();
 
-    // Handle select individual item
     const handleSelectItem = (itemId) => {
         setSelectedItems((prevSelected) => {
             if (prevSelected.includes(itemId)) {
@@ -19,16 +19,14 @@ function CartPage() {
         });
     };
 
-    // Handle select all items
     const handleSelectAll = () => {
         if (selectedItems.length === cartItems.length) {
-            setSelectedItems([]); // Unselect all
+            setSelectedItems([]);
         } else {
-            setSelectedItems(cartItems.map(item => item.id)); // Select all
+            setSelectedItems(cartItems.map(item => item.id));
         }
     };
 
-    // Handle quantity change
     const handleQuantityChange = async (itemId, newQuantity) => {
         if (newQuantity < 1) return;
         try {
@@ -38,12 +36,10 @@ function CartPage() {
         }
     };
 
-    // Handle remove item
     const handleRemoveItem = async (itemId) => {
         if (window.confirm('Hapus item ini dari keranjang?')) {
             try {
                 await removeFromCart(itemId);
-                // Remove from selected items if it was selected
                 setSelectedItems(prev => prev.filter(id => id !== itemId));
             } catch (error) {
                 console.error('Error removing item:', error);
@@ -51,7 +47,6 @@ function CartPage() {
         }
     };
 
-    // Calculate selected items for checkout
     const itemsToCheckout = useMemo(
         () => cartItems.filter((item) => selectedItems.includes(item.id)),
         [cartItems, selectedItems]
@@ -66,10 +61,9 @@ function CartPage() {
     };
 
     if (loading) {
-        return <div className="text-center py-20 font-montserrat">Memuat keranjang...</div>;
+        return <LoadingSpinner text="Memuat keranjang..." size="lg" className="py-12" />;
     }
 
-    // Empty Cart State (Gambar 1)
     if (cartItems.length === 0) {
         return (
             <div className="min-h-screen bg-gray-100 font-montserrat">
@@ -99,7 +93,6 @@ function CartPage() {
         );
     }
 
-    // Cart with Items State (Gambar 2)
     return (
         <div className="min-h-screen bg-gray-100 font-montserrat pb-24">
             <div className="container mx-auto px-4 py-6">
@@ -125,12 +118,10 @@ function CartPage() {
                     </div>
                 </div>
 
-                {/* Cart Items */}
                 <div className="space-y-3 mb-8">
                     {cartItems.map((item) => (
                         <div key={item.id} className="bg-gray-200 rounded-lg shadow-md">
                             <div className="flex items-center p-4">
-                                {/* Checkbox */}
                                 <div className="w-16 flex justify-start items-center">
                                     <input
                                         type="checkbox"
@@ -141,7 +132,6 @@ function CartPage() {
                                     />
                                 </div>
 
-                                {/* Product Image & Info */}
                                 <div className="flex-1 flex items-center">
                                     <div className="w-16 h-16 bg-white rounded-lg border-2 border-black flex items-center justify-center mr-4 flex-shrink-0">
                                         {item.product.image_url ? (
@@ -168,7 +158,6 @@ function CartPage() {
                                     </div>
                                 </div>
 
-                                {/* Quantity Controls */}
                                 <div className="w-40 text-center flex flex-col items-center">
                                     <div className="flex items-center justify-center space-x-1 mb-1">
                                         <button
@@ -202,14 +191,12 @@ function CartPage() {
                                     </p>
                                 </div>
 
-                                {/* Total Price */}
                                 <div className="w-32 text-center flex items-center justify-center">
                                     <p className="font-medium text-black text-sm">
                                         Rp{new Intl.NumberFormat('id-ID').format(item.product.price * item.quantity)}
                                     </p>
                                 </div>
 
-                                {/* Actions */}
                                 <div className="w-20 text-center flex items-center justify-center">
                                     <button
                                         onClick={() => handleRemoveItem(item.id)}
@@ -225,7 +212,6 @@ function CartPage() {
                 </div>
             </div>
 
-            {/* Fixed Bottom Bar with Checkout Button */}
             <div 
                 className="fixed bottom-0 left-0 right-0 py-4 px-6 flex justify-end shadow-lg"
                 style={{ backgroundColor: '#1B263B' }}

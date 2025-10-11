@@ -11,14 +11,11 @@ function Pagination({ pagination, onPageChange }) {
         const maxVisible = 5;
 
         if (last_page <= maxVisible) {
-            // Show all pages if total pages is less than or equal to maxVisible
             for (let i = 1; i <= last_page; i++) {
                 pages.push(i);
             }
         } else {
-            // Show pages with ellipsis
             if (current_page <= 3) {
-                // Show first 3 pages + ellipsis + last page
                 for (let i = 1; i <= 3; i++) {
                     pages.push(i);
                 }
@@ -27,7 +24,6 @@ function Pagination({ pagination, onPageChange }) {
                 }
                 pages.push(last_page);
             } else if (current_page >= last_page - 2) {
-                // Show first page + ellipsis + last 3 pages
                 pages.push(1);
                 if (last_page > 4) {
                     pages.push('...');
@@ -36,7 +32,6 @@ function Pagination({ pagination, onPageChange }) {
                     pages.push(i);
                 }
             } else {
-                // Show first + ellipsis + current-1, current, current+1 + ellipsis + last
                 pages.push(1);
                 pages.push('...');
                 for (let i = current_page - 1; i <= current_page + 1; i++) {
@@ -54,15 +49,13 @@ function Pagination({ pagination, onPageChange }) {
 
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
-            {/* Results info */}
+
             <div className="text-sm text-gray-600 order-2 sm:order-1">
                 Showing {from} to {to} of {total} product
                 {total !== 1 ? 's' : ''}
             </div>
 
-            {/* Pagination controls */}
             <div className="flex items-center gap-2 order-1 sm:order-2">
-                {/* Previous button */}
                 <button
                     onClick={() => onPageChange(current_page - 1)}
                     disabled={current_page === 1}
@@ -80,7 +73,6 @@ function Pagination({ pagination, onPageChange }) {
                     Previous
                 </button>
 
-                {/* Page numbers */}
                 <div className="flex items-center gap-1">
                     {visiblePages.map((page, index) => {
                         if (page === '...') {
@@ -114,7 +106,6 @@ function Pagination({ pagination, onPageChange }) {
                     })}
                 </div>
 
-                {/* Next button */}
                 <button
                     onClick={() => onPageChange(current_page + 1)}
                     disabled={current_page === last_page}
@@ -133,7 +124,6 @@ function Pagination({ pagination, onPageChange }) {
                 </button>
             </div>
 
-            {/* Page info for mobile */}
             <div className="text-sm text-gray-600 sm:hidden order-3">
                 Page {current_page} of {last_page}
             </div>

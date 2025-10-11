@@ -25,6 +25,8 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product:slug}', [ProductController::class, 'show']);
+Route::get('/products/{id}/summary', [ProductController::class, 'summary']);
+Route::get('/products/{id}/summary_v2', [ProductController::class, 'summaryV2']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -39,6 +41,40 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::post('/reviews', [ReviewController::class, 'store']);
     Route::post('/checkout', [OrderController::class, 'store']);
+
+    // Notifications endpoints
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markRead']);
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'delete']);
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
+
+    // Dev-only: dispatch a test notification to all admins
+    Route::post('/notifications/test', function (\Illuminate\Http\Request $request) {
+        try {
+            $admins = \App\Models\User::where('role', 'admin')->get();
+            if ($admins->isEmpty()) {
+                return response()->json(['error' => 'No admin users found'], 404);
+            }
+            
+            // Get the latest order or create a fake one
+            $latestOrder = \App\Models\Order::with('user')->latest()->first();
+            if (!$latestOrder) {
+                return response()->json(['error' => 'No orders found to create test notification'], 404);
+            }
+            
+            foreach ($admins as $admin) {
+                $admin->notify(new \App\Notifications\NewOrderNotification($latestOrder));
+            }
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Test notification sent to ' . $admins->count() . ' admin(s)',
+                'order_number' => $latestOrder->order_number
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    });
 });
 
 Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function () {

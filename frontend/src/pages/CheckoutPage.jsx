@@ -3,6 +3,7 @@ import { useCart } from '../contexts/CartContext';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { getProductImageUrl } from '../utils/imageUtils';
+import { useToast } from '../contexts/ToastContext';
 
 function CheckoutPage() {
     const { fetchCart } = useCart();
@@ -11,6 +12,7 @@ function CheckoutPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const items = location.state?.items;
 
@@ -29,6 +31,8 @@ function CheckoutPage() {
             setError('Alamat pengiriman wajib diisi.');
             return;
         }
+        
+        const toastId = showLoading('Memproses pesanan...');
         setLoading(true);
         setError('');
 
@@ -39,15 +43,21 @@ function CheckoutPage() {
                 address_text: address,
                 cart_item_ids: selectedCartItemIds,
             });
-            alert('Pesanan berhasil dibuat!');
+            
+            updateToast(toastId, 'Pesanan berhasil dibuat! Terima kasih telah berbelanja.', 'success');
+            
             await fetchCart();
-            navigate('/');
+            
+            setTimeout(() => {
+                navigate('/');
+            }, 1500);
+            
         } catch (err) {
             console.error('Gagal checkout:', err);
-            setError(
-                err.response?.data?.message ||
-                    'Gagal memproses pesanan. Silakan coba lagi.'
-            );
+            const errorMessage = err.response?.data?.message || 'Gagal memproses pesanan. Silakan coba lagi.';
+            
+            updateToast(toastId, errorMessage, 'error');
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -57,7 +67,6 @@ function CheckoutPage() {
         <div className="min-h-screen bg-white font-montserrat py-8">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
-                    {/* Left Column - Form Alamat */}
                     <div>
                         <form onSubmit={handleSubmit}>
                             <h1 className="text-3xl font-bold mb-6 text-black">
@@ -89,7 +98,6 @@ function CheckoutPage() {
                         </form>
                     </div>
 
-                    {/* Right Column - Ringkasan Pesanan */}
                     <div
                         className="rounded-lg p-6 shadow-lg"
                         style={{
@@ -99,7 +107,6 @@ function CheckoutPage() {
                         }}
                     >
                         <div className="space-y-4">
-                            {/* Product Items */}
                             {items.map((item) => {
                                 const imageUrl = getProductImageUrl(
                                     item.product
@@ -146,7 +153,6 @@ function CheckoutPage() {
                                 );
                             })}
 
-                            {/* Summary */}
                             <div className="pt-4 space-y-2">
                                 <div className="flex justify-between text-sm text-gray-700">
                                     <span>
@@ -166,14 +172,22 @@ function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Order Button */}
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading || items.length === 0}
-                                className="w-full py-4 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                                className={`w-full py-4 text-white font-semibold rounded-lg transition-all mt-6 ${
+                                    loading ? 'opacity-75 cursor-not-allowed' : 'hover:brightness-110'
+                                }`}
                                 style={{ backgroundColor: '#1B263B' }}
                             >
-                                {loading ? 'Memproses...' : 'Order Sekarang'}
+                                {loading ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Memproses Pesanan...
+                                    </div>
+                                ) : (
+                                    'Order Sekarang'
+                                )}
                             </button>
                         </div>
                     </div>

@@ -40,16 +40,13 @@ function ProductForm({ product, onSave, onCancel }) {
                 category_id: product.category_id || '',
                 is_active: product.is_active == 1,
             });
-            // Always show preview for existing images after save
             setPrimaryImage(null);
             setGalleryImages([]);
 
-            // Handle different data structures for gallery images
             let galleryImages = [];
             if (product.galleryImages && Array.isArray(product.galleryImages)) {
                 galleryImages = product.galleryImages;
             } else if (product.images && Array.isArray(product.images)) {
-                // Filter non-primary images from images array
                 galleryImages = product.images.filter((img) => !img.is_primary);
             }
 
@@ -107,13 +104,10 @@ function ProductForm({ product, onSave, onCancel }) {
                 data.append('gallery_images[]', image);
             });
         }
-        // Send IDs of gallery images to keep (for edit mode)
-        // Always send this array in edit mode, even if empty, to signal gallery update
         if (product) {
             existingGalleryImages.forEach((img) => {
                 data.append('keep_gallery_image_ids[]', img.id);
             });
-            // If no existing gallery images to keep, send empty indicator
             if (existingGalleryImages.length === 0) {
                 data.append('keep_gallery_image_ids[]', '');
             }
@@ -147,7 +141,6 @@ function ProductForm({ product, onSave, onCancel }) {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
                 <div>
                     <div>
                         <label className="block text-xs font-medium text-gray-600">
@@ -247,7 +240,6 @@ function ProductForm({ product, onSave, onCancel }) {
                     </div>
                 </div>
 
-                {/* Right Column */}
                 <div>
                     <div>
                         <label className="block text-xs font-medium text-gray-600">
@@ -260,7 +252,6 @@ function ProductForm({ product, onSave, onCancel }) {
                             className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             accept="image/*"
                         />
-                        {/* Preview existing or selected primary image */}
                         {primaryImage ? (
                             <img
                                 src={URL.createObjectURL(primaryImage)}
@@ -293,7 +284,7 @@ function ProductForm({ product, onSave, onCancel }) {
                             accept="image/*"
                             multiple
                         />
-                        {/* Existing Gallery Images Section */}
+
                         {existingGalleryImages.length > 0 && (
                             <div className="mt-3">
                                 <p className="text-xs text-gray-500 mb-2">
@@ -331,7 +322,6 @@ function ProductForm({ product, onSave, onCancel }) {
                             </div>
                         )}
 
-                        {/* New Gallery Images Preview */}
                         {galleryImages.length > 0 && (
                             <div className="mt-3">
                                 <p className="text-xs text-gray-500 mb-2">

@@ -31,7 +31,6 @@ class ProductController extends Controller
     $validatedData['is_active'] = $request->input('is_active') === 'true' ? 1 : 0;
     $product = Product::create($validatedData);
 
-        // Handle Primary Image
         if ($request->hasFile('primary_image')) {
             $path = $request->file('primary_image')->store('products', 'public');
             $product->images()->create([
@@ -40,7 +39,6 @@ class ProductController extends Controller
             ]);
         }
 
-        // Handle Gallery Images
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $image) {
                 $path = $image->store('products', 'public');
@@ -69,16 +67,13 @@ class ProductController extends Controller
 
         $product->update($validatedData);
 
-        // Handle primary image update
         if ($request->hasFile('primary_image')) {
-            // Delete old primary image
             $oldPrimaryImage = $product->images()->where('is_primary', true)->first();
             if ($oldPrimaryImage) {
                 Storage::disk('public')->delete($oldPrimaryImage->image_path);
                 $oldPrimaryImage->delete();
             }
             
-            // Upload new primary image
             $path = $request->file('primary_image')->store('products', 'public');
             $product->images()->create([
                 'image_path' => $path,
@@ -86,14 +81,11 @@ class ProductController extends Controller
             ]);
         }
 
-        // Handle gallery images update
         if ($request->hasFile('gallery_images') || $request->has('keep_gallery_image_ids')) {
-            // Get IDs of gallery images to keep, filter out empty values
             $keepImageIds = array_filter($request->input('keep_gallery_image_ids', []), function($id) {
                 return !empty($id);
             });
             
-            // Delete gallery images that are not in the keep list
             $galleryImagesToDelete = $product->images()
                 ->where('is_primary', false)
                 ->whereNotIn('id', $keepImageIds)
@@ -104,7 +96,6 @@ class ProductController extends Controller
                 $image->delete();
             }
 
-            // Upload new gallery images
             if ($request->hasFile('gallery_images')) {
                 foreach ($request->file('gallery_images') as $image) {
                     $path = $image->store('products', 'public');
@@ -121,11 +112,9 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Delete all associated images from storage
         foreach ($product->images as $image) {
             Storage::disk('public')->delete($image->image_path);
         }
-        // Images in DB will be deleted automatically due to cascade on delete constraint
 
         $product->delete();
         return response()->json(['message' => 'Produk berhasil dihapus secara permanen.']);

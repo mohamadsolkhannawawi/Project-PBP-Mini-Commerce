@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from './AuthContext';
+import { useToast } from './ToastContext';
 
 const CartContext = createContext();
 
@@ -20,6 +21,7 @@ export function CartProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     const { token } = useAuth();
+    const { showSuccess, showError } = useToast();
 
     const fetchCart = useCallback(async () => {
         if (!token) {
@@ -52,14 +54,22 @@ export function CartProvider({ children }) {
                 quantity,
             });
             await fetchCart();
+            
+            showSuccess(`${product.name} berhasil ditambahkan ke keranjang!`);
+            
             return response.data;
         } catch (error) {
             console.error('Gagal menambahkan ke keranjang:', error);
 
-            const errorMessage =
-                error.response?.data?.message ||
-                'Gagal menambahkan produk ke keranjang.';
-            alert(errorMessage);
+            let errorMessage = 'Gagal menambahkan produk ke keranjang.';
+            
+            if (error.response?.status === 401 || error.response?.data?.message === 'Unauthenticated') {
+                errorMessage = 'Silakan login atau register terlebih dahulu untuk menambahkan produk ke keranjang.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+            
+            showError(errorMessage);
             throw new Error(errorMessage);
         }
     };
@@ -68,9 +78,18 @@ export function CartProvider({ children }) {
         try {
             await axiosClient.put(`/cart-items/${cartItemId}`, { quantity });
             await fetchCart();
+            
+            showSuccess('Jumlah item berhasil diubah!');
         } catch (error) {
             console.error('Gagal mengubah jumlah item:', error);
-            alert('Gagal mengubah jumlah item.');
+            
+            let errorMessage = 'Gagal mengubah jumlah item.';
+            
+            if (error.response?.status === 401 || error.response?.data?.message === 'Unauthenticated') {
+                errorMessage = 'Silakan login terlebih dahulu untuk mengubah jumlah item.';
+            }
+            
+            showError(errorMessage);
         }
     };
 
@@ -78,9 +97,18 @@ export function CartProvider({ children }) {
         try {
             await axiosClient.delete(`/cart-items/${cartItemId}`);
             await fetchCart();
+            
+            showSuccess('Item berhasil dihapus dari keranjang!');
         } catch (error) {
             console.error('Gagal menghapus item:', error);
-            alert('Gagal menghapus item.');
+            
+            let errorMessage = 'Gagal menghapus item.';
+            
+            if (error.response?.status === 401 || error.response?.data?.message === 'Unauthenticated') {
+                errorMessage = 'Silakan login terlebih dahulu untuk menghapus item.';
+            }
+            
+            showError(errorMessage);
         }
     };
 

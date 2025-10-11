@@ -1,101 +1,41 @@
-# Dokumentasi Backend UMKM-MiniCommerce (Laravel)
+# Backend Application (Laravel)
 
-Dokumen ini menjelaskan struktur folder dan file dari aplikasi backend yang dibangun menggunakan framework Laravel. Memahami struktur ini penting untuk pengembangan dan pemeliharaan.
+This document provides a detailed breakdown of the `backend` directory, which contains the Laravel-based API for the TokoKita application.
 
-## Struktur Folder Utama
-
-Berikut adalah direktori-direktori utama dalam aplikasi Laravel dan fungsinya:
+## Directory Structure
 
 ```
-/
-├── app/                 # Folder inti aplikasi (logika bisnis)
-├── bootstrap/           # Script untuk bootstraping aplikasi
-├── config/              # File-file konfigurasi
-├── database/            # Migrasi, seeder, dan factory database
-├── public/              # Document root, titik masuk aplikasi
-├── resources/           # View, aset mentah (CSS, JS), file bahasa
-├── routes/              # Definisi rute aplikasi
-├── storage/             # File cache, log, dan file yang di-upload
-├── tests/               # File-file pengujian (Unit & Feature)
-├── vendor/              # Dependensi dari Composer
-├── .env                 # Konfigurasi spesifik untuk environment
-├── artisan              # Command-line interface (CLI) Laravel
-└── composer.json        # Definisi dependensi proyek
+backend/
+├── app/                        # Core application code
+│   ├── Console/                # Artisan commands
+│   │   └── Commands/           # Custom Artisan command classes
+│   ├── Exceptions/             # Application exception handling
+│   ├── Http/                   # Controllers, Middleware, and Requests
+│   │   ├── Controllers/        # Handles the logic for incoming HTTP requests
+│   │   │   └── Api/            # Controllers specifically for the API
+│   │   ├── Middleware/         # Filters incoming requests (e.g., auth, admin checks)
+│   │   └── Requests/           # Form Request classes for validation
+│   ├── Models/                 # Eloquent ORM models that interact with the database
+│   ├── Notifications/          # Classes for sending notifications (e.g., New Order)
+│   └── Providers/              # Service providers to bootstrap application services
+├── bootstrap/                  # Scripts that bootstrap the Laravel framework
+├── config/                     # Application configuration files (database, auth, etc.)
+├── database/                   # Database migrations, factories, and seeders
+│   ├── factories/              # Model factories for generating test data
+│   ├── migrations/             # Version control for your database schema
+│   └── seeders/                # Classes to populate the database with initial data
+├── public/                     # The web server document root; entry point for all requests
+├── resources/                  # Views, raw assets (CSS, JS), and language files
+├── routes/                     # Application route definitions
+│   ├── api.php                 # Defines all routes for the API
+│   ├── console.php             # Defines console-based Artisan commands
+│   └── web.php                 # Defines routes for web interface (if any)
+├── storage/                    # Compiled Blade templates, file-based sessions, caches, and logs
+│   ├── app/public/             # User-uploaded files (e.g., product images)
+│   └── logs/                   # Application log files
+├── tests/                      # Application tests (Unit, Feature)
+├── .env.example                # An example environment file template
+├── artisan                     # The command-line interface for Laravel
+├── composer.json               # Manages PHP dependencies for the project
+└── server.php                  # Built-in server entry point
 ```
-
----
-
-## Penjelasan Detail
-
-### Folder `app`
-
-Ini adalah folder utama yang berisi semua logika bisnis aplikasi Anda.
-
--   **`Http/`**: Berisi `Controllers`, `Middleware`, dan `Requests`. Semua logika yang menangani permintaan HTTP masuk ke sini.
--   **`Models/`**: Berisi semua kelas Model Eloquent. Setiap model merepresentasikan satu tabel di database dan digunakan untuk berinteraksi dengan tabel tersebut.
--   **`Providers/`**: Berisi semua Service Provider. Ini adalah tempat untuk me-bootstrap layanan, event listener, dll.
--   **`Exceptions/`**: Berisi handler untuk semua eksepsi yang terjadi di aplikasi.
-
-### Folder `bootstrap`
-
-Folder ini berisi script untuk memulai (bootstrap) framework Laravel.
-
--   **`app.php`**: File utama yang membuat instance dari aplikasi.
--   **`cache/`**: Berisi file-file cache yang digenerate oleh framework untuk meningkatkan performa, seperti `packages.php` dan `services.php`.
-
-### Folder `config`
-
-Berisi semua file konfigurasi aplikasi, seperti koneksi database (`database.php`), konfigurasi aplikasi (`app.php`), email (`mail.php`), dll. Nilai di sini dapat di-override oleh file `.env`.
-
-### Folder `database`
-
-Semua yang berhubungan dengan skema dan data database Anda ada di sini.
-
--   **`factories/`**: Digunakan untuk mendefinisikan cara membuat data palsu (fake data) untuk model Anda. Sangat berguna untuk testing dan seeding.
--   **`migrations/`**: Berisi file-file migrasi untuk mengelola skema database Anda secara version-controlled. Setiap file mendefinisikan perubahan pada struktur database.
--   **`seeders/`**: Berisi kelas-kelas untuk mengisi database dengan data awal (seeding).
-
-### Folder `public`
-
-Ini adalah _document root_ untuk aplikasi Anda. Semua permintaan masuk melalui folder ini.
-
--   **`index.php`**: Titik masuk (entry point) untuk semua permintaan HTTP.
--   **Aset yang sudah di-compile**: Seperti file CSS dan JavaScript yang sudah diproses.
-
-### Folder `resources`
-
-Berisi file-file mentah yang akan di-compile atau digunakan untuk view.
-
--   **`css/`**, **`js/`**: Berisi file mentah CSS (seperti Tailwind) dan JavaScript sebelum di-compile.
--   **`views/`**: Berisi semua template Blade untuk aplikasi Anda.
--   **`lang/`** (jika ada): Berisi file-file bahasa untuk lokalisasi.
-
-### Folder `routes`
-
-Tempat untuk mendefinisikan semua rute (URL) aplikasi.
-
--   **`web.php`**: Untuk rute web yang menggunakan state seperti session dan CSRF protection.
--   **`api.php`**: Untuk rute API yang bersifat stateless.
--   **`console.php`**: Untuk mendefinisikan command Artisan kustom Anda.
-
-### Folder `storage`
-
-Folder ini digunakan oleh framework untuk menyimpan file yang digenerate, cache, log, dll.
-
--   **`app/public/`**: Direktori ini digunakan untuk menyimpan file yang di-generate oleh pengguna (seperti avatar) yang harus dapat diakses secara publik. Anda perlu menjalankan `php artisan storage:link` untuk membuatnya dapat diakses dari web.
--   **`framework/`**: Berisi file-file yang digenerate oleh framework seperti cache, session, dan view yang sudah di-compile.
--   **`logs/`**: Berisi file log aplikasi, seperti `laravel.log`.
-
-### Folder `tests`
-
-Berisi semua file pengujian otomatis Anda.
-
--   **`Feature/`**: Untuk pengujian fungsional yang menguji sebagian besar fungsionalitas aplikasi dari luar (misalnya, melalui request HTTP).
--   **`Unit/`**: Untuk pengujian unit yang menguji bagian kecil dan terisolasi dari kode Anda.
-
-### File Penting di Root
-
--   **`.env`**: File yang sangat penting ini berisi konfigurasi spesifik untuk environment tempat aplikasi berjalan (lokal, staging, produksi). File ini **tidak boleh** dimasukkan ke dalam version control.
--   **`.env.example`**: File contoh yang menunjukkan variabel apa saja yang dibutuhkan oleh aplikasi.
--   **`artisan`**: Script PHP yang menjadi entry point untuk semua command Artisan.
--   **`composer.json`**: File yang mendefinisikan semua dependensi PHP (paket) yang dibutuhkan oleh proyek Anda.
