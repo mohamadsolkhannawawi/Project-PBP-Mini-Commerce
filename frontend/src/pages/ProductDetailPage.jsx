@@ -107,7 +107,7 @@ export default function ProductDetailPage() {
 
     const handleAddToCart = async () => {
         if (!user) {
-            showWarning('Silakan login untuk menambahkan produk ke keranjang.');
+            showError('Silakan login atau register terlebih dahulu untuk menambahkan produk ke keranjang.');
             navigate('/login');
             return;
         }
