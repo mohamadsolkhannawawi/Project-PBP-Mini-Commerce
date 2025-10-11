@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { Eye, EyeOff } from 'lucide-react';
 
 function LoginPage() {
@@ -10,26 +11,41 @@ function LoginPage() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    
+    const { showSuccess, showError, showLoading, updateToast } = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        setIsLoading(true);
+        
+        const toastId = showLoading('Sedang masuk ke akun Anda...');
+
         try {
             const response = await login({ email, password });
+            
+            updateToast(toastId, 'Login berhasil! Selamat datang!', 'success');
+            
             if (response.data.user.role === 'admin') {
                 navigate('/admin');
             } else {
                 navigate('/');
             }
         } catch (err) {
+            let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+            
             if (err.response && err.response.status === 401) {
-                setError('Email atau password salah.');
+                errorMessage = 'Email atau password salah.';
             } else if (err.response && err.response.data.errors) {
                 const messages = Object.values(err.response.data.errors).flat();
-                setError(messages.join(' '));
-            } else {
-                setError('Terjadi kesalahan. Silakan coba lagi.');
+                errorMessage = messages.join(' ');
             }
+            
+            setError(errorMessage);
+            updateToast(toastId, errorMessage, 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -59,10 +75,11 @@ function LoginPage() {
                                     name="email"
                                     type="email"
                                     required
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
                                     placeholder="Enter your email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    disabled={isLoading}
                                 />
                             </div>
                             <div>
@@ -77,23 +94,19 @@ function LoginPage() {
                                     <input
                                         id="password"
                                         name="password"
-                                        type={
-                                            showPassword ? 'text' : 'password'
-                                        }
+                                        type={showPassword ? 'text' : 'password'}
                                         required
-                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#1B263B] focus:border-[#1B263B] text-[#1B263B] placeholder-gray-400"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
                                         placeholder="Enter your password"
                                         value={password}
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        disabled={isLoading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setShowPassword(!showPassword)
-                                        }
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-[#415A77] transition-colors duration-200 hover:scale-110 active:scale-95"
+                                        disabled={isLoading}
                                     >
                                         {showPassword ? (
                                             <EyeOff size={20} />
@@ -104,22 +117,34 @@ function LoginPage() {
                                 </div>
                             </div>
                             {error && (
-                                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg">
+                                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg border border-red-200 animate-pulse">
                                     {error}
                                 </div>
                             )}
                             <button
                                 type="submit"
-                                className="w-full py-3 rounded-lg font-semibold text-white bg-[#1B263B] hover:bg-[#16213A] transition"
+                                disabled={isLoading}
+                                className={`w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 transform ${
+                                    isLoading
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-[#1B263B] hover:bg-[#415A77] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#415A77]'
+                                }`}
                             >
-                                SIGN IN
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center">
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                        Sedang masuk...
+                                    </div>
+                                ) : (
+                                    'SIGN IN'
+                                )}
                             </button>
                         </form>
                         <p className="mt-6 text-center text-sm text-gray-500">
                             Don't have an account yet?{' '}
                             <Link
                                 to="/register"
-                                className="font-medium"
+                                className="font-medium transition-colors duration-200 hover:underline hover:text-[#415A77]"
                                 style={{ color: '#1B263B' }}
                             >
                                 Register for free
@@ -136,7 +161,7 @@ function LoginPage() {
                             <span className="block text-5xl -mt-2">Kita</span>
                         </h1>
                         <p className="mt-3 text-2xl font-semibold text-[#415A77] drop-shadow">
-                        Easy to shop!
+                            Easy to shop!
                         </p>
                     </div>
                 </div>

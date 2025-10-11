@@ -10,6 +10,8 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\NewOrderNotification;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
@@ -89,6 +91,17 @@ class OrderController extends Controller
 
                 return $order;
             });
+
+            // Dispatch notification to all admin users
+            try {
+                $admins = User::where('role', 'admin')->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new NewOrderNotification($order));
+                }
+            } catch (\Throwable $ex) {
+                // Do not fail the order if notifications fail; just log
+                \Log::error('Failed to notify admins: ' . $ex->getMessage());
+            }
 
             return response()->json($order->load(['items.product', 'items.review']), 201);
 

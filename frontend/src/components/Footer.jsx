@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// --- Komponen Ikon SVG Kustom ---
-
 const XLogo = ({ size = 24 }) => (
     <svg
         width={size}

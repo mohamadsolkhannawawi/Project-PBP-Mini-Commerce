@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReviewForm from '../components/ReviewForm';
 import StarRating from '../components/StarRating';
+import LoadingSpinner from '../components/LoadingSpinner';
 import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -16,7 +17,6 @@ const OrderHistoryPage = () => {
     const [activeStatus, setActiveStatus] = useState('all');
     const navigate = useNavigate();
 
-    // Fetch orders from backend every time tab changes
     useEffect(() => {
         const fetchOrders = async () => {
             setLoading(true);
@@ -38,7 +38,6 @@ const OrderHistoryPage = () => {
         setSearchQuery('');
     }, [activeStatus]);
 
-    // Reset search when tab changes
     useEffect(() => {
         setSearchQuery('');
     }, [activeStatus]);
@@ -107,7 +106,7 @@ const OrderHistoryPage = () => {
                 >
                     Kembali ke Homepage
                 </button>
-                {loading && <div>Memuat...</div>}
+                {loading && <LoadingSpinner text="Memuat riwayat pesanan..." size="lg" className="py-12" />}
                 {error && <div className="text-red-500">{error}</div>}
                 {filteredOrders.length === 0 && !loading && (
                     <div>

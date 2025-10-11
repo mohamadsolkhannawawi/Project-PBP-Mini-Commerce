@@ -14,7 +14,7 @@ class ReviewController extends Controller
             'product_id' => 'required|exists:products,id',
             'order_item_id' => 'required|exists:order_items,id|unique:reviews,order_item_id',
             'rating' => 'required|numeric|min:1|max:5',
-            'comment' => 'nullable|string'|'max:1000',
+            'comment' => 'nullable|string|max:1000',
         ]);
 
 

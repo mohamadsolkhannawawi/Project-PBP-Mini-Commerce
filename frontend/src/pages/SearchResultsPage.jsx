@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import ProductCard from '../components/ProductCard';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function SearchResultsPage() {
     const [searchResults, setSearchResults] = useState([]);
@@ -20,7 +21,6 @@ function SearchResultsPage() {
         const fetchSearchResults = async () => {
             setLoading(true);
             try {
-                // Ambil semua produk yang cocok, non-paginated
                 const response = await axiosClient.get(
                     `/products?search=${query}&limit=100&all=1`
                 );
@@ -42,11 +42,7 @@ function SearchResultsPage() {
     }, [query]);
 
     if (loading) {
-        return (
-            <div className="container mx-auto px-4 py-8 text-center">
-                Mencari produk...
-            </div>
-        );
+        return <LoadingSpinner text="Mencari produk..." size="lg" className="py-12" />;
     }
 
     if (error) {

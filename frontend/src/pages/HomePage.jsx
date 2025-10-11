@@ -1,12 +1,11 @@
-// src/pages/HomePage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ProductList from '../components/ProductList';
 import Pagination from '../components/Pagination';
 import axiosClient from '../api/axiosClient';
 import BannerSlider from '../components/BannerSlider';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-// Objek mapping untuk ikon kategori
 const categoryIcons = {
     elektronik: (
         <svg
@@ -166,7 +165,6 @@ const categoryIcons = {
     ),
 };
 
-// Fungsi untuk mencari ikon yang sesuai, tidak diubah.
 const getCategoryIcon = (categoryName) => {
     const name = categoryName.toLowerCase();
     const foundKey = Object.keys(categoryIcons).find((key) =>
@@ -198,10 +196,8 @@ export default function HomePage() {
                 axiosClient.get('/categories'),
             ]);
 
-            // Handle paginated response
             const productsData = productsResponse.data?.data;
             if (productsData && productsData.data) {
-                // Paginated response
                 setProducts(
                     Array.isArray(productsData.data) ? productsData.data : []
                 );
@@ -214,7 +210,6 @@ export default function HomePage() {
                     to: productsData.to || 0,
                 });
             } else {
-                // Non-paginated response (fallback)
                 let arr = productsData || productsResponse.data || [];
                 setProducts(Array.isArray(arr) ? arr : []);
             }
@@ -248,7 +243,6 @@ export default function HomePage() {
 
     const handlePageChange = (page) => {
         fetchHomePageData(page);
-        // Scroll to products section
         document.getElementById('products')?.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
@@ -265,7 +259,7 @@ export default function HomePage() {
             </section>
 
             <section className="mb-8 mt-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                <h2 className="text-xl font-bold text-gray-800 mb-4 pl-2 sm:pl-4 md:pl-6">
                     Kategori Pilihan
                 </h2>
                 <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -312,21 +306,20 @@ export default function HomePage() {
 
             <section data-section="products" id="products">
                 <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2 pl-2 sm:pl-4 md:pl-6">
                         Produk Pilihan
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 pl-2 sm:pl-4 md:pl-6">
                         Temukan produk berkualitas dengan harga terbaik
                     </p>
                 </div>
 
                 {loading && (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                        <span className="ml-3 text-gray-600">
-                            Memuat produk...
-                        </span>
-                    </div>
+                    <LoadingSpinner 
+                        text="Memuat produk..." 
+                        size="lg"
+                        className="py-12"
+                    />
                 )}
 
                 {error && (
