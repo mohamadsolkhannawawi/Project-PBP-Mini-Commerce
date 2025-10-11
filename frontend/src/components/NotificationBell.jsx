@@ -13,6 +13,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
     const fetchNotifications = async () => {
         try {
             const res = await axiosClient.get('/notifications');
+            console.log('Notifications response:', res.data);
             setNotifications(res.data.notifications || []);
         } catch (err) {
             console.error('notif fetch', err);
@@ -99,6 +100,13 @@ export default function NotificationBell({ pollInterval = 15000 }) {
     const unreadCount = notifications.filter((n) => !n.read).length;
     const visibleNotifications = notifications.filter((n) => !n.read);
 
+    console.log('Notifications debug:', {
+        total: notifications.length,
+        unread: unreadCount,
+        visible: visibleNotifications.length,
+        notifications: notifications,
+    });
+
     return (
         <div className="relative" ref={containerRef}>
             <button
@@ -161,7 +169,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                             >
                                 <div className="flex justify-between">
                                     <div
-                                        className="text-sm cursor-pointer"
+                                        className="text-sm cursor-pointer hover:text-blue-600"
                                         onClick={async () => {
                                             try {
                                                 await axiosClient.post(
@@ -186,6 +194,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
                                                 );
                                             }
                                             setOpen(false);
+                                            // Navigate to orders page and if there's an order_id, we could highlight it
                                             navigate('/admin/orders');
                                         }}
                                     >
