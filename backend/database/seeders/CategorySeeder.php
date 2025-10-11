@@ -26,7 +26,6 @@ class CategorySeeder extends Seeder
             'Otomotif',
             'Komputer & Aksesoris',
             'Gadget',
-            'Perhiasan & Aksesoris',
             'Furniture',
             'Hobi & Kerajinan',
             'Musik & Audio'
