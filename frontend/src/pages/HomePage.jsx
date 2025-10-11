@@ -265,7 +265,7 @@ export default function HomePage() {
             </section>
 
             <section className="mb-8 mt-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                <h2 className="text-xl font-bold text-gray-800 mb-4 pl-2 sm:pl-4 md:pl-6">
                     Kategori Pilihan
                 </h2>
                 <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -312,10 +312,10 @@ export default function HomePage() {
 
             <section data-section="products" id="products">
                 <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2 pl-2 sm:pl-4 md:pl-6">
                         Produk Pilihan
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 pl-2 sm:pl-4 md:pl-6">
                         Temukan produk berkualitas dengan harga terbaik
                     </p>
                 </div>
@@ -323,7 +323,7 @@ export default function HomePage() {
                 {loading && (
                     <div className="flex justify-center items-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                        <span className="ml-3 text-gray-600">
+                        <span className="ml-3 text-gray-600 pl-2 sm:pl-4 md:pl-6">
                             Memuat produk...
                         </span>
                     </div>

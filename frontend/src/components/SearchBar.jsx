@@ -101,30 +101,34 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
             className="relative w-full max-w-md mx-auto"
             ref={searchContainerRef}
         >
-            <form onSubmit={handleSubmit} className="relative">
-                <input
-                    type="text"
-                    value={query}
-                    onChange={handleInputChange}
-                    placeholder="Cari produk..."
-                    className="w-full px-4 py-2 pr-10 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+            <form onSubmit={handleSubmit} className="relative group">
+            <input
+                type="text"
+                value={query}
+                onChange={handleInputChange}
+                placeholder="Cari produk..."
+                className="w-full h-11 px-4 pr-10 text-gray-700 bg-white border border-gray-300
+                        rounded-full transition-colors
+                        hover:bg-gray-50 group-hover:bg-gray-50
+                        focus:outline-none focus:ring-1 focus:ring-[#415A77] focus:border-[#415A77]"
+            />
+            <button
+                type="submit"
+                className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700"
+            >
+                <Search size={24} />
+            </button>
+            {query && (
                 <button
-                    type="submit"
-                    className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700"
+                type="button"
+                onClick={handleClear}
+                className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600"
                 >
-                    <Search size={24} />
+                <X size={20} />
                 </button>
-                {query && (
-                    <button
-                        type="button"
-                        onClick={handleClear}
-                        className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600"
-                    >
-                        <X size={20} />
-                    </button>
-                )}
+            )}
             </form>
+
 
             {suggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
