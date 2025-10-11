@@ -16,8 +16,14 @@ class DashboardController extends Controller
     public function index()
     {
         // KPI Cards
+        // Only include completed orders in revenue (status = 'selesai')
         $totalRevenue = Order::where('status', 'selesai')->sum('total');
         $totalOrders = Order::count();
+        // Total units sold across completed orders
+        $totalSold = \DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', 'selesai')
+            ->sum('order_items.quantity');
         $totalProducts = Product::count();
         $totalCustomers = User::where('role', 'user')->count();
 
@@ -49,6 +55,7 @@ class DashboardController extends Controller
         return response()->json([
             'kpi' => [
                 'totalRevenue' => $totalRevenue,
+                'sold' => (int) $totalSold,
                 'totalOrders' => $totalOrders,
                 'totalProducts' => $totalProducts,
                 'totalCustomers' => $totalCustomers,

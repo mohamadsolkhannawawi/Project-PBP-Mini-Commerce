@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import ProductForm from '../../components/admin/ProductForm';
-import { Trash2 } from 'lucide-react';
-import { useToast } from '../../contexts/ToastContext';
+import { Trash2, Edit3, ToggleRight, ToggleLeft } from 'lucide-react';
 
 function ManageProductsPage() {
     const [products, setProducts] = useState([]);
@@ -204,246 +203,317 @@ function ManageProductsPage() {
                         className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
                         style={{ minWidth: 200 }}
                     />
-                    <select
-                        value={categoryFilter}
-                        onChange={(e) => {
-                            setCategoryFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                    >
-                        <option value="">Semua Kategori</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => {
-                            setStatusFilter(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-                    >
-                        <option value="">Semua Status</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Nonaktif</option>
-                    </select>
+                    <div className="relative">
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => {
+                                setCategoryFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="appearance-none border border-gray-300 rounded-md px-3 py-2 pr-8 focus:outline-none focus:ring focus:border-blue-300"
+                        >
+                            <option value="">Semua Kategori</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                            <svg
+                                className="w-4 h-4 text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                    <div className="relative">
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => {
+                                setStatusFilter(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="appearance-none border border-gray-300 rounded-md px-3 py-2 pr-8 focus:outline-none focus:ring focus:border-blue-300"
+                        >
+                            <option value="">Semua Status</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                            <svg
+                                className="w-4 h-4 text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
+                    </div>
                     <button
                         onClick={() => {
                             setSelectedProduct(null);
                             setIsModalOpen(true);
                         }}
-                        className="bg-[#F07167] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors"
+                        className="bg-[#415A77] text-white px-4 py-2 rounded-md hover:bg-[#364e60] transition-colors"
                     >
                         + Tambah Produk
                     </button>
                 </div>
             </div>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden flex-1">
-                <table className="min-w-full text-sm">
-                    <thead className="bg-[#4D809E] text-white">
-                        <tr>
-                            <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider">
-                                No.
-                            </th>
-                            <th
-                                className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
-                                onClick={() =>
-                                    setSortConfig({
-                                        key: 'name',
-                                        direction:
-                                            sortConfig.key === 'name' &&
-                                            sortConfig.direction === 'asc'
-                                                ? 'desc'
-                                                : 'asc',
-                                    })
-                                }
-                            >
-                                Nama Produk{' '}
-                                {sortConfig.key === 'name'
-                                    ? sortConfig.direction === 'asc'
-                                        ? '▲'
-                                        : '▼'
-                                    : ''}
-                            </th>
-                            <th
-                                className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
-                                onClick={() =>
-                                    setSortConfig({
-                                        key: 'category',
-                                        direction:
-                                            sortConfig.key === 'category' &&
-                                            sortConfig.direction === 'asc'
-                                                ? 'desc'
-                                                : 'asc',
-                                    })
-                                }
-                            >
-                                Kategori{' '}
-                                {sortConfig.key === 'category'
-                                    ? sortConfig.direction === 'asc'
-                                        ? '▲'
-                                        : '▼'
-                                    : ''}
-                            </th>
-                            <th
-                                className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
-                                onClick={() =>
-                                    setSortConfig({
-                                        key: 'price',
-                                        direction:
-                                            sortConfig.key === 'price' &&
-                                            sortConfig.direction === 'asc'
-                                                ? 'desc'
-                                                : 'asc',
-                                    })
-                                }
-                            >
-                                Harga{' '}
-                                {sortConfig.key === 'price'
-                                    ? sortConfig.direction === 'asc'
-                                        ? '▲'
-                                        : '▼'
-                                    : ''}
-                            </th>
-                            <th
-                                className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
-                                onClick={() =>
-                                    setSortConfig({
-                                        key: 'stock',
-                                        direction:
-                                            sortConfig.key === 'stock' &&
-                                            sortConfig.direction === 'asc'
-                                                ? 'desc'
-                                                : 'asc',
-                                    })
-                                }
-                            >
-                                Stok{' '}
-                                {sortConfig.key === 'stock'
-                                    ? sortConfig.direction === 'asc'
-                                        ? '▲'
-                                        : '▼'
-                                    : ''}
-                            </th>
-                            <th
-                                className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer"
-                                onClick={() =>
-                                    setSortConfig({
-                                        key: 'is_active',
-                                        direction:
-                                            sortConfig.key === 'is_active' &&
-                                            sortConfig.direction === 'asc'
-                                                ? 'desc'
-                                                : 'asc',
-                                    })
-                                }
-                            >
-                                Status{' '}
-                                {sortConfig.key === 'is_active'
-                                    ? sortConfig.direction === 'asc'
-                                        ? '▲'
-                                        : '▼'
-                                    : ''}
-                            </th>
-                            <th className="px-3 py-2"></th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-gray-700 text-xs">
-                        {currentProducts.map((product, index) => (
-                            <tr
-                                key={product.id}
-                                className="border-b border-gray-200 hover:bg-gray-50"
-                            >
-                                <td className="px-3 py-2">
-                                    {indexOfFirstProduct + index + 1}
-                                </td>
-                                <td className="px-3 py-2">{product.name}</td>
-                                <td className="px-3 py-2">
-                                    {product.category?.name || 'N/A'}
-                                </td>
-                                <td className="px-3 py-2">
-                                    Rp{' '}
-                                    {new Intl.NumberFormat('id-ID').format(
-                                        product.price
-                                    )}
-                                </td>
-                                <td className="px-3 py-2">{product.stock}</td>
-                                <td className="px-3 py-2">
-                                    <span
-                                        className={`px-2 py-1 text-xs font-semibold leading-tight ${
-                                            product.is_active
-                                                ? 'text-green-700 bg-green-100'
-                                                : 'text-red-700 bg-red-100'
+            <div className="w-full">
+                <div className="bg-white shadow-md rounded-md overflow-hidden p-6 w-full">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th className="px-6 py-4 text-center text-sm font-medium text-white bg-[#415A77] rounded-l-md">
+                                        No.
+                                    </th>
+                                    <th
+                                        className="px-6 py-4 text-left text-sm font-medium text-white bg-[#415A77] cursor-pointer"
+                                        onClick={() =>
+                                            setSortConfig({
+                                                key: 'name',
+                                                direction:
+                                                    sortConfig.key === 'name' &&
+                                                    sortConfig.direction ===
+                                                        'asc'
+                                                        ? 'desc'
+                                                        : 'asc',
+                                            })
                                         }
-										rounded-full`}
                                     >
-                                        {product.is_active
-                                            ? 'Aktif'
-                                            : 'Nonaktif'}
-                                    </span>
-                                </td>
-                                <td className="px-3 py-2 text-right flex items-center">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedProduct(product);
-                                            setIsModalOpen(true);
-                                        }}
-                                        className="text-[#4D809E] hover:underline mr-4"
+                                        Nama Produk{' '}
+                                        {sortConfig.key === 'name'
+                                            ? sortConfig.direction === 'asc'
+                                                ? '▲'
+                                                : '▼'
+                                            : ''}
+                                    </th>
+                                    <th
+                                        className="px-6 py-4 text-left text-sm font-medium text-white bg-[#415A77] cursor-pointer"
+                                        onClick={() =>
+                                            setSortConfig({
+                                                key: 'category',
+                                                direction:
+                                                    sortConfig.key ===
+                                                        'category' &&
+                                                    sortConfig.direction ===
+                                                        'asc'
+                                                        ? 'desc'
+                                                        : 'asc',
+                                            })
+                                        }
                                     >
-                                        Edit
-                                    </button>
-                                    
-                                    {/* Toggle Status Button with Loading */}
-                                    <button
-                                        onClick={() => handleToggleStatus(product)}
-                                        disabled={toggleLoading[product.id]}
-                                        className={`hover:underline mr-4 ${
-                                            product.is_active
-                                                ? 'text-yellow-600'
-                                                : 'text-green-600'
-                                        } ${
-                                            toggleLoading[product.id] 
-                                                ? 'opacity-50 cursor-not-allowed' 
-                                                : ''
-                                        }`}
+                                        Kategori{' '}
+                                        {sortConfig.key === 'category'
+                                            ? sortConfig.direction === 'asc'
+                                                ? '▲'
+                                                : '▼'
+                                            : ''}
+                                    </th>
+                                    <th
+                                        className="px-6 py-4 text-left text-sm font-medium text-white bg-[#415A77] cursor-pointer"
+                                        onClick={() =>
+                                            setSortConfig({
+                                                key: 'price',
+                                                direction:
+                                                    sortConfig.key ===
+                                                        'price' &&
+                                                    sortConfig.direction ===
+                                                        'asc'
+                                                        ? 'desc'
+                                                        : 'asc',
+                                            })
+                                        }
                                     >
-                                        {toggleLoading[product.id] ? (
-                                            <div className="flex items-center gap-1">
-                                                <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
-                                                {product.is_active ? 'Menonaktifkan...' : 'Mengaktifkan...'}
+                                        Harga{' '}
+                                        {sortConfig.key === 'price'
+                                            ? sortConfig.direction === 'asc'
+                                                ? '▲'
+                                                : '▼'
+                                            : ''}
+                                    </th>
+                                    <th
+                                        className="px-6 py-4 text-center text-sm font-medium text-white bg-[#415A77] cursor-pointer"
+                                        onClick={() =>
+                                            setSortConfig({
+                                                key: 'stock',
+                                                direction:
+                                                    sortConfig.key ===
+                                                        'stock' &&
+                                                    sortConfig.direction ===
+                                                        'asc'
+                                                        ? 'desc'
+                                                        : 'asc',
+                                            })
+                                        }
+                                    >
+                                        Stok{' '}
+                                        {sortConfig.key === 'stock'
+                                            ? sortConfig.direction === 'asc'
+                                                ? '▲'
+                                                : '▼'
+                                            : ''}
+                                    </th>
+                                    <th
+                                        className="px-6 py-4 text-center text-sm font-medium text-white bg-[#415A77] cursor-pointer"
+                                        onClick={() =>
+                                            setSortConfig({
+                                                key: 'is_active',
+                                                direction:
+                                                    sortConfig.key ===
+                                                        'is_active' &&
+                                                    sortConfig.direction ===
+                                                        'asc'
+                                                        ? 'desc'
+                                                        : 'asc',
+                                            })
+                                        }
+                                    >
+                                        Status{' '}
+                                        {sortConfig.key === 'is_active'
+                                            ? sortConfig.direction === 'asc'
+                                                ? '▲'
+                                                : '▼'
+                                            : ''}
+                                    </th>
+                                    <th className="px-3 py-4 text-center text-sm font-medium text-white bg-[#415A77]">
+                                        Kelola Produk
+                                    </th>
+                                    <th className="px-6 py-4 text-center text-sm font-medium text-white bg-[#415A77] rounded-r-md">
+                                        Delete
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-gray-700 text-xs">
+                                {currentProducts.map((product, index) => (
+                                    <tr
+                                        key={product.id}
+                                        className="border-b border-gray-200 hover:bg-gray-50"
+                                    >
+                                        <td className="px-6 py-4 align-middle text-center">
+                                            {indexOfFirstProduct + index + 1}
+                                        </td>
+                                        <td className="px-6 py-4 align-middle text-left">
+                                            {product.name}
+                                        </td>
+                                        <td className="px-6 py-4 align-middle text-left">
+                                            {product.category?.name || 'N/A'}
+                                        </td>
+                                        <td className="px-6 py-4 align-middle text-left">
+                                            Rp{' '}
+                                            {new Intl.NumberFormat(
+                                                'id-ID'
+                                            ).format(product.price)}
+                                        </td>
+                                        <td className="px-6 py-4 align-middle text-center">
+                                            {product.stock}
+                                        </td>
+                                        <td className="px-6 py-4 align-middle text-center">
+                                            <span
+                                                className={`inline-flex items-center gap-2 text-xs font-semibold px-2 py-1 rounded-md ${
+                                                    product.is_active
+                                                        ? 'text-green-800 bg-green-100'
+                                                        : 'text-red-800 bg-red-100'
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`w-2 h-2 rounded-full ${
+                                                        product.is_active
+                                                            ? 'bg-green-500'
+                                                            : 'bg-red-500'
+                                                    }`}
+                                                />
+                                                {product.is_active
+                                                    ? 'Aktif'
+                                                    : 'Nonaktif'}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-4 align-middle text-center">
+                                            <div className="flex items-center justify-center space-x-3">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedProduct(
+                                                            product
+                                                        );
+                                                        setIsModalOpen(true);
+                                                    }}
+                                                    className="text-[#4D809E] p-1 rounded hover:bg-gray-100"
+                                                    aria-label="Edit produk"
+                                                    title="Edit"
+                                                >
+                                                    <Edit3 className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() =>
+                                                        handleToggleStatus(
+                                                            product
+                                                        )
+                                                    }
+                                                    className={`p-1 rounded hover:bg-gray-100 ${
+                                                        product.is_active
+                                                            ? 'text-yellow-600'
+                                                            : 'text-green-600'
+                                                    }`}
+                                                    aria-label={
+                                                        product.is_active
+                                                            ? 'Nonaktifkan produk'
+                                                            : 'Aktifkan produk'
+                                                    }
+                                                    title={
+                                                        product.is_active
+                                                            ? 'Nonaktifkan'
+                                                            : 'Aktifkan'
+                                                    }
+                                                >
+                                                    {product.is_active ? (
+                                                        <ToggleLeft className="w-5 h-5" />
+                                                    ) : (
+                                                        <ToggleRight className="w-5 h-5" />
+                                                    )}
+                                                </button>
                                             </div>
-                                        ) : (
-                                            product.is_active ? 'Nonaktifkan' : 'Aktifkan'
-                                        )}
-                                    </button>
-                                    
-                                    {/* Delete Button with Loading */}
-                                    <button
-                                        onClick={() => handlePermanentDelete(product.id, product.name)}
-                                        disabled={deleteLoading[product.id]}
-                                        className={`text-red-600 ${
-                                            deleteLoading[product.id] 
-                                                ? 'opacity-50 cursor-not-allowed' 
-                                                : ''
-                                        }`}
-                                        title="Hapus produk"
-                                    >
-                                        {deleteLoading[product.id] ? (
-                                            <div className="w-4 h-4 border border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                                        ) : (
-                                            <Trash2 className="inline-block mr-1" size={16} />
-                                        )}
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                        </td>
+                                        <td className="px-3 py-4 align-middle text-center">
+                                            <button
+                                                onClick={() =>
+                                                    handlePermanentDelete(
+                                                        product.id
+                                                    )
+                                                }
+                                                className="text-red-600"
+                                            >
+                                                <Trash2
+                                                    className="inline-block"
+                                                    size={16}
+                                                />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div className="w-full flex justify-center items-center mt-4 mb-4">
