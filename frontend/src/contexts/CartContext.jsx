@@ -63,7 +63,6 @@ export function CartProvider({ children }) {
 
             let errorMessage = 'Gagal menambahkan produk ke keranjang.';
             
-            // Handle specific error cases
             if (error.response?.status === 401 || error.response?.data?.message === 'Unauthenticated') {
                 errorMessage = 'Silakan login atau register terlebih dahulu untuk menambahkan produk ke keranjang.';
             } else if (error.response?.data?.message) {

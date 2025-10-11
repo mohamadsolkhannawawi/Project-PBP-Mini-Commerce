@@ -27,7 +27,7 @@ function AdminSidebar({ user, handleLogout }) {
                         </div>
                     </div>
                 </Link>
-                {/* separator + small label */}
+
                 <div className="border-t border-white/20 mt-2 mb-4" />
                 <div className="px-3 mb-2">
                     <div className="text-xs uppercase text-white/60 font-semibold">
@@ -82,7 +82,6 @@ function AdminSidebar({ user, handleLogout }) {
                     </li>
                 </ul>
 
-                {/* Footer separator and copyright - positioned at bottom */}
                 <div className="mt-auto">
                     <div className="border-t border-white/20 mb-4" />
                     <div className="px-3 text-center">
@@ -94,8 +93,6 @@ function AdminSidebar({ user, handleLogout }) {
                         </div>
                     </div>
                 </div>
-
-                {/* Sidebar logout removed - logout moved to profile menu */}
             </div>
         </aside>
     );

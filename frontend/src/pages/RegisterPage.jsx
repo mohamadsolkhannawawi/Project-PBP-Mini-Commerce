@@ -87,15 +87,11 @@ function RegisterPage() {
             const resp =
                 err.response && err.response.data ? err.response.data : null;
 
-            // Support both shapes:
-            // 1) { errors: { field: [msg] } }
-            // 2) { field: [msg] }
             let apiErrors = null;
             if (resp) {
                 if (resp.errors && typeof resp.errors === 'object') {
                     apiErrors = resp.errors;
                 } else if (typeof resp === 'object') {
-                    // If it's a plain object that looks like validation errors (has keys like email/password)
                     const possibleKeys = Object.keys(resp);
                     const hasValidationLike = possibleKeys.some((k) =>
                         [
@@ -113,7 +109,6 @@ function RegisterPage() {
             }
 
             if (apiErrors) {
-                // email
                 if (apiErrors.email) {
                     const msg = Array.isArray(apiErrors.email)
                         ? apiErrors.email[0]
@@ -122,7 +117,6 @@ function RegisterPage() {
                     newErrors.email = msg;
                 }
 
-                // password
                 if (apiErrors.password) {
                     const msg = Array.isArray(apiErrors.password)
                         ? apiErrors.password[0]
@@ -134,12 +128,10 @@ function RegisterPage() {
                     }
                 }
 
-                // other field errors -> fallback message
                 if (!newErrors.email && !newErrors.password) {
                     generalError = 'Periksa kembali data yang Anda masukkan.';
                 }
             } else if (resp && resp.message) {
-                // Use explicit message if backend provided one
                 generalError = resp.message;
             }
 

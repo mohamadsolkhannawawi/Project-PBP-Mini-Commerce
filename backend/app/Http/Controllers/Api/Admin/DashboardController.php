@@ -15,11 +15,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // KPI Cards
-        // Only include completed orders in revenue (status = 'selesai')
         $totalRevenue = Order::where('status', 'selesai')->sum('total');
         $totalOrders = Order::count();
-        // Total units sold across completed orders
         $totalSold = \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.status', 'selesai')
@@ -27,13 +24,11 @@ class DashboardController extends Controller
         $totalProducts = Product::count();
         $totalCustomers = User::where('role', 'user')->count();
 
-        // Recent Orders
         $recentOrders = Order::with('user')
             ->latest()
             ->take(5)
             ->get();
 
-        // Sales Chart Data (last 7 days)
         $salesOverTime = Order::select(
                 DB::raw('DATE(created_at) as date'),
                 DB::raw('SUM(total) as revenue')
@@ -44,7 +39,6 @@ class DashboardController extends Controller
             ->orderBy('date', 'ASC')
             ->get();
 
-        // Top Selling Products
         $topSellingProducts = Product::withCount(['orderItems as items_sold' => function ($query) {
                 $query->select(DB::raw('sum(quantity)'));
             }])

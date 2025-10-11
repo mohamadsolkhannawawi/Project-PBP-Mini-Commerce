@@ -28,7 +28,6 @@ class NewOrderNotification extends Notification
         return [
             'title' => 'New Order: ' . $this->order->order_number,
             'body' => 'Order #' . $this->order->order_number . ' placed by ' . ($this->order->user->name ?? 'Guest'),
-            // navigate to admin order management list when clicking the notification
             'route' => '/admin/orders',
             'order_id' => $this->order->id,
         ];

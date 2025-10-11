@@ -24,7 +24,6 @@ class ProductController extends Controller
             $query->where('category_id', $request->input('category_id'));
         }
 
-        // Hitung total units sold (jumlah orderItems untuk produk ini)
         $products = $query->withCount('orderItems')->paginate(12);
 
         return response()->json(['success' => true, 'data' => $products]);
@@ -45,7 +44,6 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'data' => $product]);
     }
 
-    // GET /products/{id}/summary
     public function summary($id)
     {
         $product = Product::find($id);
@@ -53,7 +51,6 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        // Use explicit DB queries so aggregations are unambiguous.
         $totalSold = (int) \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('order_items.product_id', $product->id)
@@ -92,7 +89,6 @@ class ProductController extends Controller
         ]);
     }
 
-    // Extended summary with recent orders and top buyers
     public function summaryV2($id)
     {
         $product = Product::find($id);
@@ -100,7 +96,6 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        // Use only completed orders (status = 'selesai') for metrics
         $completed = \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('order_items.product_id', $product->id)
@@ -108,10 +103,8 @@ class ProductController extends Controller
 
         $totalSold = (int) $completed->sum('order_items.quantity');
 
-        // distinct completed orders containing this product
         $totalOrders = (int) $completed->distinct('order_items.order_id')->count('order_items.order_id');
 
-        // distinct buyers (users) from completed orders
         $totalBuyers = (int) $completed->distinct('orders.user_id')->count('orders.user_id');
 
         $revenue = (float) \DB::table('order_items')
@@ -130,7 +123,6 @@ class ProductController extends Controller
             ->take(5)
             ->get();
 
-        // Top buyers with user name and qty
         $topBuyers = \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('users', 'orders.user_id', '=', 'users.id')
@@ -142,7 +134,6 @@ class ProductController extends Controller
             ->take(5)
             ->get();
 
-        // Recent order_items lines for debugging revenue (quantity, price, line_total)
         $lineItems = \DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->select(

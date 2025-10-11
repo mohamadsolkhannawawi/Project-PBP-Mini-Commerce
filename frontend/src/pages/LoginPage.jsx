@@ -52,7 +52,7 @@ function LoginPage() {
     return (
         <div className="min-h-screen w-full bg-[#1B263B] font-montserrat flex items-center justify-center">
             <div className="bg-[#EAEAEA] rounded-3xl flex flex-col md:flex-row w-full max-w-4xl shadow-xl p-4 md:p-0">
-                {/* Form Section */}
+
                 <div className="flex-1 flex items-center justify-center p-4">
                     <div className="w-full max-w-md bg-white bg-opacity-60 rounded-2xl shadow-lg p-6">
                         <h2
@@ -153,7 +153,6 @@ function LoginPage() {
                     </div>
                 </div>
 
-                {/* Branding Section */}
                 <div className="hidden md:flex flex-1 flex-col items-center justify-center p-4">
                     <div className="text-center">
                         <h1 className="font-extrabold text-[#1B263B] drop-shadow-lg leading-tight">

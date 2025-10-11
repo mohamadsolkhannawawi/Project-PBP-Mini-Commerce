@@ -49,15 +49,13 @@ function Pagination({ pagination, onPageChange }) {
 
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
-            {/* Results info */}
+
             <div className="text-sm text-gray-600 order-2 sm:order-1">
                 Showing {from} to {to} of {total} product
                 {total !== 1 ? 's' : ''}
             </div>
 
-            {/* Pagination controls */}
             <div className="flex items-center gap-2 order-1 sm:order-2">
-                {/* Previous button */}
                 <button
                     onClick={() => onPageChange(current_page - 1)}
                     disabled={current_page === 1}
@@ -75,7 +73,6 @@ function Pagination({ pagination, onPageChange }) {
                     Previous
                 </button>
 
-                {/* Page numbers */}
                 <div className="flex items-center gap-1">
                     {visiblePages.map((page, index) => {
                         if (page === '...') {
@@ -109,7 +106,6 @@ function Pagination({ pagination, onPageChange }) {
                     })}
                 </div>
 
-                {/* Next button */}
                 <button
                     onClick={() => onPageChange(current_page + 1)}
                     disabled={current_page === last_page}
@@ -128,7 +124,6 @@ function Pagination({ pagination, onPageChange }) {
                 </button>
             </div>
 
-            {/* Page info for mobile */}
             <div className="text-sm text-gray-600 sm:hidden order-3">
                 Page {current_page} of {last_page}
             </div>

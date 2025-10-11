@@ -108,7 +108,7 @@ function CartPage() {
     return (
         <div className="min-h-screen bg-white font-montserrat pb-24">
             <div className="container mx-auto px-4 py-6">
-                {/* Header Table */}
+
                 <div className="mb-2 rounded-lg overflow-hidden shadow-lg">
                     <div
                         className="flex items-center py-4 px-6 text-white font-medium"
@@ -141,7 +141,6 @@ function CartPage() {
                     </div>
                 </div>
 
-                {/* Cart Items */}
                 <div className="space-y-2 mb-8">
                     {cartItems.map((item) => (
                         <div
@@ -150,7 +149,6 @@ function CartPage() {
                             style={{ height: '160px' }}
                         >
                             <div className="flex items-center h-full px-6">
-                                {/* Checkbox */}
                                 <div className="w-16 flex justify-start items-center">
                                     <input
                                         type="checkbox"
@@ -165,7 +163,6 @@ function CartPage() {
                                     />
                                 </div>
 
-                                {/* Product Image & Info */}
                                 <div className="flex-1 flex items-center">
                                     <div 
                                         className="bg-white rounded-lg border-2 border-black flex items-center justify-center mr-6 flex-shrink-0"
@@ -209,10 +206,8 @@ function CartPage() {
                                     </div>
                                 </div>
 
-                                {/* Quantity Controls - NEW STYLE */}
                                 <div className="w-48 flex flex-col items-center justify-center gap-2">
                                     <div className="flex items-center gap-3">
-                                        {/* White square display/input */}
                                         {editingItemId === item.id ? (
                                             <input
                                                 type="number"
@@ -249,7 +244,6 @@ function CartPage() {
                                             </div>
                                         )}
 
-                                        {/* Dark pill with minus | plus */}
                                         <div className="h-7 px-2 rounded-full bg-[#415A77] text-white flex items-center">
                                             <button
                                                 type="button"
@@ -312,7 +306,6 @@ function CartPage() {
                                     </p>
                                 </div>
 
-                                {/* Total Price */}
                                 <div className="w-32 flex items-center justify-center">
                                     <p className="font-semibold text-black text-sm">
                                         Rp
@@ -322,7 +315,6 @@ function CartPage() {
                                     </p>
                                 </div>
 
-                                {/* Actions */}
                                 <div className="w-20 flex items-center justify-center">
                                     <button
                                         onClick={() =>
@@ -340,7 +332,6 @@ function CartPage() {
                 </div>
             </div>
 
-            {/* Fixed Bottom Bar with Checkout Button */}
             <div
                 className="fixed bottom-0 left-0 right-0 py-4 px-6 flex justify-end shadow-lg"
                 style={{ backgroundColor: '#1B263B' }}

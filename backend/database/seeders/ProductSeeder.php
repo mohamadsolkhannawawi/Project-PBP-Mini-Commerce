@@ -17,7 +17,6 @@ class ProductSeeder extends Seeder
         $categories = Category::pluck('id', 'name');
 
         $productsData = [
-            // ## Elektronik
             [
                 'category_name' => 'Elektronik',
                 'name' => 'Smart TV 4K 55 Inch',
@@ -33,7 +32,6 @@ class ProductSeeder extends Seeder
                 'stock' => 60,
             ],
 
-            // ## Fashion Pria
             [
                 'category_name' => 'Fashion Pria',
                 'name' => 'Kemeja Pria Lengan Pendek',
@@ -49,7 +47,6 @@ class ProductSeeder extends Seeder
                 'stock' => 120,
             ],
 
-            // ## Fashion Wanita
             [
                 'category_name' => 'Fashion Wanita',
                 'name' => 'Blouse Wanita Lengan Panjang',
@@ -65,7 +62,6 @@ class ProductSeeder extends Seeder
                 'stock' => 90,
             ],
 
-            // ## Buku
             [
                 'category_name' => 'Buku',
                 'name' => 'Buku "Filosofi Teras"',
@@ -81,7 +77,6 @@ class ProductSeeder extends Seeder
                 'stock' => 220,
             ],
 
-            // ## Olahraga
             [
                 'category_name' => 'Olahraga',
                 'name' => 'Sepatu Lari Pria',
@@ -97,7 +92,6 @@ class ProductSeeder extends Seeder
                 'stock' => 150,
             ],
 
-            // ## Makanan & Minuman
             [
                 'category_name' => 'Makanan & Minuman',
                 'name' => 'Madu Hutan Murni 500ml',
@@ -113,7 +107,6 @@ class ProductSeeder extends Seeder
                 'stock' => 300,
             ],
 
-            // ## Kesehatan & Kecantikan
             [
                 'category_name' => 'Kesehatan & Kecantikan',
                 'name' => 'Serum Wajah Niacinamide',
@@ -129,7 +122,6 @@ class ProductSeeder extends Seeder
                 'stock' => 400,
             ],
 
-            // ## Peralatan Rumah Tangga
             [
                 'category_name' => 'Peralatan Rumah Tangga',
                 'name' => 'Air Fryer Digital 4L',
@@ -145,7 +137,6 @@ class ProductSeeder extends Seeder
                 'stock' => 100,
             ],
             
-            // ## Mainan Anak
             [
                 'category_name' => 'Mainan Anak',
                 'name' => 'Mainan Balok Kreatif',
@@ -161,7 +152,6 @@ class ProductSeeder extends Seeder
                 'stock' => 80,
             ],
 
-            // ## Otomotif
             [
                 'category_name' => 'Otomotif',
                 'name' => 'Dashcam Mobil Full HD',
@@ -177,7 +167,6 @@ class ProductSeeder extends Seeder
                 'stock' => 500,
             ],
 
-            // ## Komputer & Aksesoris
             [
                 'category_name' => 'Komputer & Aksesoris',
                 'name' => 'Mouse Wireless Ergonomis',
@@ -193,7 +182,6 @@ class ProductSeeder extends Seeder
                 'stock' => 110,
             ],
 
-            // ## Gadget
             [
                 'category_name' => 'Gadget',
                 'name' => 'Smartphone Mid-range 128GB',
@@ -209,7 +197,6 @@ class ProductSeeder extends Seeder
                 'stock' => 300,
             ],
 
-            // ## Furniture
             [
                 'category_name' => 'Furniture',
                 'name' => 'Rak Buku Minimalis',
@@ -225,7 +212,6 @@ class ProductSeeder extends Seeder
                 'stock' => 75,
             ],
 
-            // ## Hobi & Kerajinan
             [
                 'category_name' => 'Hobi & Kerajinan',
                 'name' => 'Model Kit Mini 4WD',
@@ -241,7 +227,6 @@ class ProductSeeder extends Seeder
                 'stock' => 220,
             ],
 
-            // ## Musik & Audio
             [
                 'category_name' => 'Musik & Audio',
                 'name' => 'Headphone Noise Cancelling',

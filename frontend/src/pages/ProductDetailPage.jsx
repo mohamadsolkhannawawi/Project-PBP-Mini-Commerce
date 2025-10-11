@@ -226,10 +226,8 @@ export default function ProductDetailPage() {
                                 }}
                             />
 
-                            {/* Navigation Buttons - Only show if there are multiple images */}
                             {allImages.length > 1 && (
                                 <>
-                                    {/* Previous Button */}
                                     <button
                                         onClick={goToPreviousImage}
                                         className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 
@@ -248,7 +246,6 @@ export default function ProductDetailPage() {
                                         />
                                     </button>
 
-                                    {/* Next Button */}
                                     <button
                                         onClick={goToNextImage}
                                         className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 
@@ -269,7 +266,6 @@ export default function ProductDetailPage() {
                                 </>
                             )}
 
-                            {/* Image Counter */}
                             {allImages.length > 1 && (
                                 <div className="absolute top-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm font-medium">
                                     {activeImage
@@ -282,7 +278,7 @@ export default function ProductDetailPage() {
                             )}
                         </div>
                     </div>
-                    {/* Thumbnail Gallery */}
+
                     {allImages.length > 1 && (
                         <div className="mt-4">
                             <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -324,12 +320,10 @@ export default function ProductDetailPage() {
                     )}
                 </div>
 
-                {/* RIGHT: details (2/5) */}
                 <div className="md:col-span-2 max-w-xl md:max-w-none mt-6 md:mt-0">
                     <h1 className="text-3xl md:text-5xl font-medium text-gray-900 mb-3">
                         {product.name}
                     </h1>
-                    {/* Rating dan jumlah review */}
                     <div className="flex items-center gap-2 mb-2">
                         <StarRating rating={avgRating} />
                         <span className="text-sm text-yellow-600">
@@ -349,16 +343,14 @@ export default function ProductDetailPage() {
 
                     {user?.role !== 'admin' && (
                         <>
-                            {/* Quantity UI — smaller */}
                             <div className="flex items-center gap-3 mb-2">
-                                {/* Left: white square display (smaller) */}
+
                                 <div className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 flex items-center justify-center">
                                     <span className="text-lg font-semibold text-black leading-none">
                                         {quantity}
                                     </span>
                                 </div>
 
-                                {/* Right: dark pill with minus | plus (smaller) */}
                                 <div className="h-7 px-2 rounded-full bg-[#415A77] text-white flex items-center">
                                     <button
                                         type="button"
@@ -434,7 +426,6 @@ export default function ProductDetailPage() {
                                 Stok: {product.stock ?? 0}
                             </p>
 
-                            {/* Add to Cart */}
                             <button
                                 onClick={handleAddToCart}
                                 className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#1B263B] text-white font-semibold py-3 px-6 hover:brightness-110 transition"
@@ -446,7 +437,6 @@ export default function ProductDetailPage() {
                     )}
                 </div>
             </div>
-            {/* Customer Reviews Section */}
             <div className="mt-10">
                 <h2 className="text-xl font-bold mb-4">Customer Reviews</h2>
                 {reviews.length === 0 ? (
