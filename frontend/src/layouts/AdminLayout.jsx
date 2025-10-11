@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-// import SearchBar from '../components/SearchBar';
+import SearchBar from '../components/SearchBar';
+import NotificationBell from '../components/NotificationBell';
 import AdminSidebar from '../components/admin/AdminSidebar';
+import axiosClient from '../api/axiosClient';
 
 function AdminLayout() {
     const { user, logout, loading } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (!loading && (!user || user.role !== 'admin')) {
@@ -39,12 +42,138 @@ function AdminLayout() {
             <AdminSidebar user={user} handleLogout={handleLogout} />
 
             <main className="flex-1 p-6 overflow-y-auto bg-[#D3D7DD] min-h-0">
-                {/* Header dengan SearchBar Disembunyikan untuk Admin */}
-                {/* <header className="flex justify-end items-center mb-6">
-                    <div className="w-full max-w-md">
-                        <SearchBar />
-                    </div>
-                </header> */}
+                <header className="flex items-center justify-end mb-6 space-x-4">
+                    {(() => {
+                        const hideOnPrefixes = [
+                            '/admin/dashboard',
+                            '/admin/products',
+                            '/admin/orders',
+                        ];
+                        const shouldShowHeader = !hideOnPrefixes.some((p) =>
+                            location.pathname.startsWith(p)
+                        );
+
+                        if (!shouldShowHeader) return null;
+
+                        return (
+                            <div className="w-full max-w-md">
+                                <SearchBar
+                                    onSelect={(product) => {
+                                        navigate(
+                                            `/admin/dashboard?product_id=${product.id}`,
+                                            {
+                                                state: {
+                                                    admin_product_selected:
+                                                        String(product.id),
+                                                },
+                                            }
+                                        );
+                                    }}
+                                    onSubmit={async (q) => {
+                                        try {
+                                            const res = await axiosClient.get(
+                                                `/products?search=${encodeURIComponent(
+                                                    q
+                                                )}&limit=10&all=1`
+                                            );
+                                            let arr =
+                                                res.data?.data?.data ||
+                                                res.data?.data ||
+                                                res.data;
+                                            arr = Array.isArray(arr) ? arr : [];
+
+                                            const trimmed = (q || '')
+                                                .trim()
+                                                .toLowerCase();
+                                            const exact = arr.find(
+                                                (p) =>
+                                                    p.name &&
+                                                    p.name.toLowerCase() ===
+                                                        trimmed
+                                            );
+
+                                            if (exact) {
+                                                navigate(
+                                                    `/admin/dashboard?product_id=${exact.id}`,
+                                                    {
+                                                        state: {
+                                                            admin_product_selected:
+                                                                String(
+                                                                    exact.id
+                                                                ),
+                                                        },
+                                                    }
+                                                );
+                                            } else if (arr.length === 1) {
+                                                navigate(
+                                                    `/admin/dashboard?product_id=${arr[0].id}`,
+                                                    {
+                                                        state: {
+                                                            admin_product_selected:
+                                                                String(
+                                                                    arr[0].id
+                                                                ),
+                                                        },
+                                                    }
+                                                );
+                                            } else {
+                                                navigate('/admin/dashboard', {
+                                                    state: {
+                                                        product_not_found: true,
+                                                        search_query: q,
+                                                    },
+                                                });
+                                            }
+                                        } catch (err) {
+                                            console.error(
+                                                'Search submit error',
+                                                err
+                                            );
+                                            navigate('/admin/dashboard', {
+                                                state: {
+                                                    product_not_found: true,
+                                                    search_query: q,
+                                                },
+                                            });
+                                        }
+                                    }}
+                                    onClear={() => {
+                                        try {
+                                            sessionStorage.removeItem(
+                                                'admin_product_selected'
+                                            );
+                                        } catch (e) {}
+                                        navigate('/admin/dashboard', {
+                                            replace: true,
+                                        });
+
+                                        try {
+                                            window.dispatchEvent(
+                                                new CustomEvent(
+                                                    'clearProductSummary'
+                                                )
+                                            );
+                                        } catch (e) {
+                                            console.error('Error dispatching clearProductSummary event:', e);
+                                        }
+                                    }}
+                                />
+                            </div>
+                        );
+                    })()}
+                    {(() => {
+                        const hideOnPrefixes = [
+                            '/admin/dashboard',
+                            '/admin/products',
+                            '/admin/orders',
+                        ];
+                        const shouldShowHeader = !hideOnPrefixes.some((p) =>
+                            location.pathname.startsWith(p)
+                        );
+
+                        return shouldShowHeader ? <NotificationBell /> : null;
+                    })()}
+                </header>
                 <Outlet />
             </main>
         </div>

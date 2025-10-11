@@ -11,29 +11,31 @@ import {
 function AdminSidebar({ user, handleLogout }) {
     const baseLinkClass =
         'flex items-center p-2 text-base font-normal rounded-lg transition-colors duration-150';
-    const activeLinkClass = `${baseLinkClass} bg-[#415A77] text-white`; // abu kebiruan untuk active
+    const activeLinkClass = `${baseLinkClass} bg-[#415A77] text-white`;
     const normalLinkClass = `${baseLinkClass} text-gray-100 hover:bg-[#4D809E]`;
 
     return (
         <aside className="w-64 flex-shrink-0" aria-label="Sidebar">
-            <div className="relative overflow-y-auto py-4 px-3 h-full bg-[#1B263B] text-white font-montserrat">
+            <div className="relative overflow-y-auto py-4 px-3 h-full bg-[#1B263B] text-white font-montserrat flex flex-col">
                 <Link to="/" className="flex items-center justify-center mb-5">
                     <div className="text-center">
                         <div className="text-6xl font-bold text-white leading-none">
                             Toko
                         </div>
-                        <div className="text-4xl font-bold text-white -mt-2 leading-none">
+                        <div className="text-5xl font-bold text-white -mt-1 leading-none">
                             Kita
                         </div>
                     </div>
                 </Link>
-                <div className="p-2 mb-4 border-t border-b border-gray-700">
-                    <p className="text-sm font-semibold text-gray-200">
-                        Selamat Datang,
-                    </p>
-                    <p className="font-bold">{user.name}</p>
+
+                <div className="border-t border-white/20 mt-2 mb-4" />
+                <div className="px-3 mb-2">
+                    <div className="text-xs uppercase text-white/60 font-semibold">
+                        General
+                    </div>
                 </div>
-                <ul className="space-y-2">
+
+                <ul className="space-y-2 flex-1">
                     <li>
                         <NavLink
                             to="/"
@@ -79,14 +81,17 @@ function AdminSidebar({ user, handleLogout }) {
                         </NavLink>
                     </li>
                 </ul>
-                <div className="absolute bottom-0 left-0 p-4 w-64">
-                    <button
-                        onClick={handleLogout}
-                        className={`w-full ${normalLinkClass}`}
-                    >
-                        <LogOut className="w-6 h-6" />
-                        <span className="ml-3">Logout</span>
-                    </button>
+
+                <div className="mt-auto">
+                    <div className="border-t border-white/20 mb-4" />
+                    <div className="px-3 text-center">
+                        <div className="text-xs text-white/50">
+                            © 2025 Toko Kita
+                        </div>
+                        <div className="text-xs text-white/40 mt-1">
+                            All rights reserved
+                        </div>
+                    </div>
                 </div>
             </div>
         </aside>

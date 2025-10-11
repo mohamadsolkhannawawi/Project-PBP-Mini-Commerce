@@ -3,16 +3,22 @@ import { Search, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
-function SearchBar() {
+function SearchBar({ onSelect, onSubmit, onClear }) {
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const searchContainerRef = useRef(null);
+    const justSelectedRef = useRef(false);
 
     useEffect(() => {
         if (query.length < 2) {
             setSuggestions([]);
+            return;
+        }
+
+        if (justSelectedRef.current) {
+            justSelectedRef.current = false;
             return;
         }
 
@@ -41,11 +47,9 @@ function SearchBar() {
     const fetchSuggestions = async () => {
         setLoading(true);
         try {
-            // Ambil semua produk yang cocok, non-paginated, limit 10
             const response = await axiosClient.get(
                 `/products?search=${query}&limit=10&all=1`
             );
-            // Cek jika response.data.data adalah paginated, ambil .data
             let arr =
                 response.data?.data?.data ||
                 response.data?.data ||
@@ -60,19 +64,28 @@ function SearchBar() {
     };
 
     const handleInputChange = (e) => {
-        setQuery(e.target.value);
+        const v = e.target.value;
+        setQuery(v);
+        if ((v || '').trim().length === 0 && onClear) {
+            onClear();
+        }
     };
 
     const handleClear = () => {
         setQuery('');
         setSuggestions([]);
+        if (onClear) onClear();
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (query.trim()) {
             setSuggestions([]);
-            navigate(`/search?q=${query}`);
+            if (onSubmit) {
+                onSubmit(query);
+            } else {
+                navigate(`/search?q=${query}`);
+            }
         }
     };
 
@@ -81,30 +94,34 @@ function SearchBar() {
             className="relative w-full max-w-md mx-auto"
             ref={searchContainerRef}
         >
-            <form onSubmit={handleSubmit} className="relative">
-                <input
-                    type="text"
-                    value={query}
-                    onChange={handleInputChange}
-                    placeholder="Cari produk..."
-                    className="w-full px-4 py-2 pr-10 text-gray-700 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
+            <form onSubmit={handleSubmit} className="relative group">
+            <input
+                type="text"
+                value={query}
+                onChange={handleInputChange}
+                placeholder="Cari produk..."
+                className="w-full h-11 px-4 pr-10 text-gray-700 bg-white border border-gray-300
+                        rounded-full transition-colors
+                        hover:bg-gray-50 group-hover:bg-gray-50
+                        focus:outline-none focus:ring-1 focus:ring-[#415A77] focus:border-[#415A77]"
+            />
+            <button
+                type="submit"
+                className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700"
+            >
+                <Search size={24} />
+            </button>
+            {query && (
                 <button
-                    type="submit"
-                    className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700"
+                type="button"
+                onClick={handleClear}
+                className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600"
                 >
-                    <Search size={24} />
+                <X size={20} />
                 </button>
-                {query && (
-                    <button
-                        type="button"
-                        onClick={handleClear}
-                        className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600"
-                    >
-                        <X size={20} />
-                    </button>
-                )}
+            )}
             </form>
+
 
             {suggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -113,14 +130,18 @@ function SearchBar() {
                             <li
                                 key={product.id}
                                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                    setQuery(product.name || '');
+                                    justSelectedRef.current = true;
+                                    setSuggestions([]);
+                                    if (onSelect) {
+                                        onSelect(product);
+                                    } else {
+                                        navigate(`/product/${product.slug}`);
+                                    }
+                                }}
                             >
-                                <Link
-                                    to={`/product/${product.slug}`}
-                                    className="block"
-                                    onClick={() => setSuggestions([])}
-                                >
-                                    {product.name}
-                                </Link>
+                                <div className="block">{product.name}</div>
                             </li>
                         ))}
                         {loading && (

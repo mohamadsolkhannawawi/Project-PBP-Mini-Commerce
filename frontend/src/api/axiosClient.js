@@ -13,7 +13,6 @@ axiosClient.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Let the browser set the Content-Type for FormData.
     if (config.data instanceof FormData) {
         delete config.headers['Content-Type'];
     }
