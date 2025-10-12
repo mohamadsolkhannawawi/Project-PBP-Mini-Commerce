@@ -136,18 +136,18 @@ function LoginPage() {
                                         Sedang masuk...
                                     </div>
                                 ) : (
-                                    'SIGN IN'
+                                    'LOGIN'
                                 )}
                             </button>
                         </form>
                         <p className="mt-6 text-center text-sm text-gray-500">
-                            Don't have an account yet?{' '}
+                            Belum punya akun?{' '}
                             <Link
                                 to="/register"
                                 className="font-medium transition-colors duration-200 hover:underline hover:text-[#415A77]"
                                 style={{ color: '#1B263B' }}
                             >
-                                Register for free
+                                Daftar sekarang
                             </Link>
                         </p>
                     </div>

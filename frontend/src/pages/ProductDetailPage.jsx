@@ -189,7 +189,6 @@ export default function ProductDetailPage() {
             className="container mx-auto px-4 md:px-8 py-6"
             style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui' }}
         >
-            {/* Tombol Kembali ke Home di pojok kiri atas */}
             <div className="mb-6">
                 <button
                     onClick={() => navigate('/')}
@@ -204,9 +203,7 @@ export default function ProductDetailPage() {
                 </button>
             </div>
 
-            {/* 3/5 image + 2/5 details */}
             <div className="grid grid-cols-1 md:grid-cols-5 md:gap-10 items-start">
-                {/* LEFT: image area (3/5) */}
                 <div className="md:col-span-3">
                     <div className="rounded-[14px] bg-gray-200 p-3 md:p-4 shadow-sm relative">
                         <div
