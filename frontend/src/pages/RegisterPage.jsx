@@ -145,7 +145,6 @@ function RegisterPage() {
     return (
         <div className="min-h-screen w-full bg-[#1B263B] font-montserrat flex items-center justify-center">
             <div className="bg-[#EAEAEA] rounded-3xl flex flex-col md:flex-row w-full max-w-4xl shadow-xl p-4 md:p-0">
-                {/* Form Section */}
                 <div className="flex-1 flex items-center justify-center p-4">
                     <div className="w-full max-w-md bg-white bg-opacity-60 rounded-2xl shadow-lg p-6">
                         <h2
@@ -331,27 +330,25 @@ function RegisterPage() {
                             </button>
                         </form>
                         <p className="mt-6 text-center text-sm text-gray-500">
-                            Already have an account?{' '}
+                            Sudah punya akun?{' '}
                             <Link
                                 to="/login"
                                 className="font-medium transition-colors duration-200 hover:underline hover:text-[#415A77]"
                                 style={{ color: '#1B263B' }}
                             >
-                                Sign in here
+                                Login di sini
                             </Link>
                         </p>
                     </div>
                 </div>
 
-                {/* Branding Section */}
                 <div className="hidden md:flex flex-1 flex-col items-center justify-center p-4">
-                    <div>
-                        <h1 className="text-6xl font-extrabold text-[#1B263B] drop-shadow-lg text-center leading-tight">
-                            Toko
-                            <br />
-                            Kita
+                    <div className="text-center">
+                        <h1 className="font-extrabold text-[#1B263B] drop-shadow-lg leading-tight">
+                            <span className="block text-7xl">Toko</span>
+                            <span className="block text-5xl -mt-2">Kita</span>
                         </h1>
-                        <p className="mt-4 text-2xl font-semibold text-[#415A77] text-center drop-shadow">
+                        <p className="mt-3 text-2xl font-semibold text-[#415A77] drop-shadow">
                             Easy to shop!
                         </p>
                     </div>

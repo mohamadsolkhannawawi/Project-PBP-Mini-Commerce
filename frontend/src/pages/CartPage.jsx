@@ -9,7 +9,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
     const [selectedItems, setSelectedItems] = useState([]);
-    const [editingItemId, setEditingItemId] = useState(null); // TAMBAHAN: untuk edit manual
+    const [editingItemId, setEditingItemId] = useState(null);
     const navigate = useNavigate();
     const { showWarning } = useToast();
 
@@ -35,7 +35,7 @@ function CartPage() {
         if (newQuantity < 1) return;
         try {
             await updateCartItem(itemId, newQuantity);
-            setEditingItemId(null); // TAMBAHAN: tutup edit mode setelah update
+            setEditingItemId(null);
         } catch (error) {
             console.error('Error updating quantity:', error);
         }
