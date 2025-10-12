@@ -499,7 +499,8 @@ function ManageProductsPage() {
                                             <button
                                                 onClick={() =>
                                                     handlePermanentDelete(
-                                                        product.id
+                                                        product.id,
+                                                        product.name
                                                     )
                                                 }
                                                 className="text-red-600"
