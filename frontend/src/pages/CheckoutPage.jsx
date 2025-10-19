@@ -1,5 +1,6 @@
 // frontend/src/pages/CheckoutPage.jsx
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
@@ -9,6 +10,7 @@ import { useToast } from '../contexts/ToastContext';
 // Checkout page for processing orders
 function CheckoutPage() {
     const { fetchCart } = useCart();
+    const { user } = useAuth();
     const [address, setAddress] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -20,6 +22,9 @@ function CheckoutPage() {
 
     if (!items || items.length === 0) {
         return <Navigate to="/keranjang" replace />;
+    }
+    if (user?.role === 'admin') {
+        return <Navigate to="/" replace />;
     }
 
     const subtotal = items.reduce((total, item) => {

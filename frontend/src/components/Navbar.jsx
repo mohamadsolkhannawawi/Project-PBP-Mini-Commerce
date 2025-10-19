@@ -180,6 +180,7 @@ function Navbar() {
                             <button
                                 onClick={() => navigate('/keranjang')}
                                 className="relative text-gray-600 hover:text-[#1B263B] transition-colors"
+                                aria-label="Keranjang"
                             >
                                 <ShoppingCart size={24} />
                                 {cartCount > 0 && (
