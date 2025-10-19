@@ -95,35 +95,28 @@ Ensure the following software is installed on your machine:
      ```bash
      php artisan migrate --seed
      ```
-7. Run the backend development server:
-   ```bash
-   php artisan serve
-   ```
-   The API will be available at `http://127.0.0.1:8000`.
-
-### 4. Frontend Configuration (React)
-1. Open a new terminal and navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install JavaScript dependencies:
-   ```bash
-   npm install
-   ```
-3. Create an environment file if it doesn't exist, but this version not required:
-   ```bash
-   cp .env.example .env
-   or
-   copy .env.example .env
-   ```
-4. Open the `.env` file and ensure the API base URL is correct, but this version not required:
-   ```env
-   VITE_API_BASE_URL=http://127.0.0.1:8000
-   ```
-5. Run the frontend development server:
-   ```bash
-   npm run dev
-   ```
-
+   - Create a symbolic link to make uploaded images publicly accessible:
+     ```bash
+     php artisan storage:link
+     ```
+   7. Run the backend development server:
+      ```bash
+      php artisan serve
+      ```
+      The API will be available at `http://127.0.0.1:8000`.
+   
+   ### 4. Frontend Configuration (React)
+   1. Open a new terminal and navigate to the frontend directory:
+      ```bash
+      cd frontend
+      ```
+   2. Install JavaScript dependencies:
+      ```bash
+      npm install
+      ```
+   3. Run the frontend development server:
+      ```bash
+      npm run dev
+      ```
 ### 5. Accessing the Application
 - Open your browser and navigate to the URL provided by Vite (usually `http://localhost:5173`).
