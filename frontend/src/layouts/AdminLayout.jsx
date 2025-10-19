@@ -1,3 +1,4 @@
+// frontend/src/layouts/AdminLayout.jsx
 import React, { useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,17 +7,20 @@ import NotificationBell from '../components/NotificationBell';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import axiosClient from '../api/axiosClient';
 
+// Layout for admin pages with sidebar and header
 function AdminLayout() {
     const { user, logout, loading } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Redirect non-admin users to home
     useEffect(() => {
         if (!loading && (!user || user.role !== 'admin')) {
             navigate('/');
         }
     }, [user, loading, navigate]);
 
+    // Handle admin logout
     const handleLogout = async () => {
         await logout();
         navigate('/login');
@@ -154,7 +158,10 @@ function AdminLayout() {
                                                 )
                                             );
                                         } catch (e) {
-                                            console.error('Error dispatching clearProductSummary event:', e);
+                                            console.error(
+                                                'Error dispatching clearProductSummary event:',
+                                                e
+                                            );
                                         }
                                     }}
                                 />

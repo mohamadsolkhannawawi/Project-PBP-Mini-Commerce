@@ -7,16 +7,17 @@ use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
+// Seeder for default products (with categories)
 class ProductSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(): void // create products for each category
     {
         $categories = Category::pluck('id', 'name');
 
-        $productsData = [
+    $productsData = [ // product data grouped by category
             [
                 'category_name' => 'Elektronik',
                 'name' => 'Smart TV 4K 55 Inch',

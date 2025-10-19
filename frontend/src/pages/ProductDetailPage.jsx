@@ -1,3 +1,4 @@
+// frontend/src/pages/ProductDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
@@ -16,6 +17,7 @@ import StarRating from '../components/StarRating';
 import { getImageUrl } from '../utils/imageUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+// Page for displaying product details and add to cart
 export default function ProductDetailPage() {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -31,6 +33,7 @@ export default function ProductDetailPage() {
     const [touchStart, setTouchStart] = useState(null);
     const [touchEnd, setTouchEnd] = useState(null);
 
+    // Fetch product details on mount
     useEffect(() => {
         (async () => {
             try {
@@ -51,6 +54,7 @@ export default function ProductDetailPage() {
         })();
     }, [productId]);
 
+    // Set active image if not set
     useEffect(() => {
         if (product && !activeImage) {
             const allImages = [
@@ -107,7 +111,9 @@ export default function ProductDetailPage() {
 
     const handleAddToCart = async () => {
         if (!user) {
-            showError('Silakan login atau register terlebih dahulu untuk menambahkan produk ke keranjang.');
+            showError(
+                'Silakan login atau register terlebih dahulu untuk menambahkan produk ke keranjang.'
+            );
             navigate('/login');
             return;
         }
@@ -167,7 +173,13 @@ export default function ProductDetailPage() {
     };
 
     if (loading)
-        return <LoadingSpinner text="Memuat detail produk..." size="lg" className="py-12" />;
+        return (
+            <LoadingSpinner
+                text="Memuat detail produk..."
+                size="lg"
+                className="py-12"
+            />
+        );
     if (error)
         return <div className="text-center py-10 text-red-500">{error}</div>;
     if (!product) return null;
@@ -341,7 +353,6 @@ export default function ProductDetailPage() {
                     {user?.role !== 'admin' && (
                         <>
                             <div className="flex items-center gap-3 mb-2">
-
                                 <div className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 flex items-center justify-center">
                                     <span className="text-lg font-semibold text-black leading-none">
                                         {quantity}

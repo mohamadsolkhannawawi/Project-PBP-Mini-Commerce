@@ -8,11 +8,12 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    // List products with optional search/category filters and basic stats
     public function index(Request $request)
     {
         $query = Product::with(['category'])
-            ->withCount('reviews')
-            ->withAvg('reviews', 'rating')
+            ->withCount('reviews') // how many reviews each product has
+            ->withAvg('reviews', 'rating') // average rating using Laravel aggregate
             ->where('is_active', true);
 
         if ($request->has('search')) {
@@ -24,18 +25,19 @@ class ProductController extends Controller
             $query->where('category_id', $request->input('category_id'));
         }
 
-        $products = $query->withCount('orderItems')->paginate(12);
+    $products = $query->withCount('orderItems')->paginate(12); // include count of items sold (by order items)
 
         return response()->json(['success' => true, 'data' => $products]);
     }
 
+    // Show a single active product by slug with stats and relations
     public function show($slug)
     {
         $product = Product::where('slug', $slug)
             ->with(['category', 'reviews.user'])
-            ->withCount('reviews')
-            ->withAvg('reviews', 'rating')
-            ->withCount('orderItems')
+            ->withCount('reviews') // total reviews
+            ->withAvg('reviews', 'rating') // average rating
+            ->withCount('orderItems') // total sold (by line items)
             ->where('is_active', true)
             ->first();
         if (!$product) {
@@ -44,6 +46,7 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'data' => $product]);
     }
 
+    // Quick sales/metrics summary for a product by id (uses raw DB queries for speed)
     public function summary($id)
     {
         $product = Product::find($id);
@@ -89,6 +92,7 @@ class ProductController extends Controller
         ]);
     }
 
+    // Extended summary with recent orders, top buyers, and last line items
     public function summaryV2($id)
     {
         $product = Product::find($id);
@@ -164,4 +168,6 @@ class ProductController extends Controller
         ]);
     }
 }
+
+// backend\app\Http\Controllers\Api\ProductController.php
 

@@ -6,12 +6,13 @@ use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
+// Seeder for default categories
 class CategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(): void // create categories with unique slugs
     {
         $categories = [
             'Elektronik',
@@ -31,7 +32,7 @@ class CategorySeeder extends Seeder
             'Musik & Audio'
         ];
 
-        foreach ($categories as $categoryName) {
+        foreach ($categories as $categoryName) { // ensure slug uniqueness
             $slug = Str::slug($categoryName);
             
             $existingCategory = Category::where('slug', $slug)->first();
@@ -47,3 +48,5 @@ class CategorySeeder extends Seeder
         }
     }
 }
+
+// backend\database\seeders\CategorySeeder.php

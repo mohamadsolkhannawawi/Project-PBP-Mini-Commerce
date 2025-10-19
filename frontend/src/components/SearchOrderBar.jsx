@@ -1,8 +1,11 @@
+// frontend/src/components/SearchOrderBar.jsx
 import React, { useState } from 'react';
 
+// Search bar for orders/products in admin
 const SearchOrderBar = ({ onSearch }) => {
     const [query, setQuery] = useState('');
 
+    // Submit search query
     const handleSubmit = (e) => {
         e.preventDefault();
         onSearch(query.trim());

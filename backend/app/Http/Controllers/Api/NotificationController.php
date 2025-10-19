@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    // List notifications for the authenticated user (database channel)
     public function index(Request $request)
     {
         $user = $request->user();
@@ -26,6 +27,7 @@ class NotificationController extends Controller
         return response()->json(['notifications' => $notifications]);
     }
 
+    // Mark a single notification as read
     public function markRead(Request $request, $id)
     {
         $user = $request->user();
@@ -35,6 +37,7 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
+    // Mark all unread notifications as read
     public function markAllRead(Request $request)
     {
         $user = $request->user();
@@ -42,6 +45,7 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
+    // Delete a notification
     public function delete(Request $request, $id)
     {
         $user = $request->user();
@@ -51,3 +55,5 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 }
+
+// backend\app\Http\Controllers\Api\NotificationController.php

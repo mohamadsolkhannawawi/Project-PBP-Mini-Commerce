@@ -1,7 +1,9 @@
+// frontend/src/components/admin/ProductForm.jsx
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
 import { getImageUrl } from '../../utils/imageUtils';
 
+// Form for creating/editing products (admin)
 function ProductForm({ product, onSave, onCancel }) {
     const [formData, setFormData] = useState({
         name: '',
@@ -17,6 +19,7 @@ function ProductForm({ product, onSave, onCancel }) {
     const [categories, setCategories] = useState([]);
     const [errors, setErrors] = useState({});
 
+    // Fetch categories on mount
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -30,6 +33,7 @@ function ProductForm({ product, onSave, onCancel }) {
         fetchCategories();
     }, []);
 
+    // Populate form if editing existing product
     useEffect(() => {
         if (product) {
             setFormData({
@@ -58,6 +62,7 @@ function ProductForm({ product, onSave, onCancel }) {
         }
     }, [product]);
 
+    // Handle input changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({
@@ -66,24 +71,29 @@ function ProductForm({ product, onSave, onCancel }) {
         }));
     };
 
+    // Handle primary image file input
     const handlePrimaryImageChange = (e) => {
         setPrimaryImage(e.target.files[0]);
     };
 
+    // Handle gallery images file input
     const handleGalleryImagesChange = (e) => {
         setGalleryImages((prev) => [...prev, ...e.target.files]);
     };
 
+    // Remove gallery image from new uploads
     const handleRemoveGalleryImage = (idx) => {
         setGalleryImages((prev) => prev.filter((_, i) => i !== idx));
     };
 
+    // Remove gallery image from existing images
     const handleRemoveExistingGalleryImage = (imgId) => {
         setExistingGalleryImages((prev) =>
             prev.filter((img) => img.id !== imgId)
         );
     };
 
+    // Submit form data to backend
     const handleSubmit = async (e) => {
         e.preventDefault();
         const data = new FormData();

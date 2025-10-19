@@ -1,3 +1,4 @@
+// frontend/src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
@@ -21,6 +22,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Main app component with route and provider setup
 function App() {
     return (
         <BrowserRouter>
@@ -47,8 +49,14 @@ function App() {
                                     path="product/:productId"
                                     element={<ProductDetailPage />}
                                 />
-                                <Route path="keranjang" element={<CartPage />} />
-                                <Route path="checkout" element={<CheckoutPage />} />
+                                <Route
+                                    path="keranjang"
+                                    element={<CartPage />}
+                                />
+                                <Route
+                                    path="checkout"
+                                    element={<CheckoutPage />}
+                                />
                                 <Route
                                     path="search"
                                     element={<SearchResultsPage />}
@@ -61,13 +69,18 @@ function App() {
 
                             <Route element={<AuthLayout />}>
                                 <Route path="login" element={<LoginPage />} />
-                                <Route path="register" element={<RegisterPage />} />
+                                <Route
+                                    path="register"
+                                    element={<RegisterPage />}
+                                />
                             </Route>
 
                             <Route path="/admin" element={<AdminLayout />}>
                                 <Route
                                     index
-                                    element={<Navigate to="dashboard" replace />}
+                                    element={
+                                        <Navigate to="dashboard" replace />
+                                    }
                                 />
                                 <Route
                                     path="dashboard"

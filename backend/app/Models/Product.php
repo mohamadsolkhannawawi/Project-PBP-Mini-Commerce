@@ -35,23 +35,27 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    protected $appends = ['sold_count', 'primary_image', 'gallery_images'];
+    protected $appends = ['sold_count', 'primary_image', 'gallery_images']; // virtual attributes appended to serialization
 
+    // Category this product belongs to
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    // Reviews written for this product
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
+    // All images for this product
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
 
+    // Accessor: return the primary image (fallback to first)
     public function getPrimaryImageAttribute()
     {
         $primaryImage = $this->images()->where('is_primary', true)->first();
@@ -62,18 +66,23 @@ class Product extends Model
         return $this->images()->first();
     }
 
+    // Accessor: return non-primary images as gallery
     public function getGalleryImagesAttribute()
     {
         return $this->images()->where('is_primary', false)->get();
     }
 
+    // Line items referencing this product
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
+    // Aggregated sold quantity via order_items
     public function getSoldCountAttribute()
     {
         return $this->orderItems()->sum('quantity');
     }
 }
+
+// backend\app\Models\Product.php

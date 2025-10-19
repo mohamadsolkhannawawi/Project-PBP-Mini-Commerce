@@ -9,7 +9,7 @@ use App\Models\ProductImage;
 
 class CleanupProductImages extends Command
 {
-    protected $signature = 'app:cleanup-product-images';
+    protected $signature = 'app:cleanup-product-images'; // artisan command signature
     protected $description = 'Remove orphaned product images from storage that are no longer in the database.';
 
     public function handle()
@@ -21,7 +21,7 @@ class CleanupProductImages extends Command
         $imageStoragePath = storage_path('app/public/' . $imageFolderOnDisk);
 
         // 1. Get all image filenames from the database.
-        $dbImages = ProductImage::pluck('image_path')->map(function ($path) {
+        $dbImages = ProductImage::pluck('image_path')->map(function ($path) { // only keep filenames
             return basename($path);
         })->toArray();
         $this->info(count($dbImages) . ' images found in the database.');
@@ -31,7 +31,7 @@ class CleanupProductImages extends Command
             $this->error("The directory does not exist: {$imageStoragePath}");
             return;
         }
-        $diskFilenames = array_map(fn($file) => $file->getFilename(), File::files($imageStoragePath));
+    $diskFilenames = array_map(fn($file) => $file->getFilename(), File::files($imageStoragePath)); // ignore .gitignore with File::files
         $this->info(count($diskFilenames) . ' image files found on the disk.');
 
         // 3. Find orphaned files.
@@ -80,3 +80,15 @@ class CleanupProductImages extends Command
         }
     }
 }
+
+// backend\app\Console\Commands\CleanupProductImages.php
+// To run the command, use:
+// php artisan app:cleanup-product-images
+// Make sure to register the command in app/Console/Kernel.php
+// protected $commands = [
+//     Commands\CleanupProductImages::class,
+// ];
+
+// Make sure run this command:
+// php artisan storage:link
+// to create a symbolic link from "public/storage" to "storage/app/public"

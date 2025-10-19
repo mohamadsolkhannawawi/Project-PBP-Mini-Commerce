@@ -1,8 +1,10 @@
+// frontend/src/components/ReviewForm.jsx
 import React, { useState } from 'react';
 import StarRating from './StarRating';
 import axiosClient from '../api/axiosClient';
 import { useToast } from '../contexts/ToastContext';
 
+// Form for submitting product review
 const ReviewForm = ({ productId, orderItemId, onSuccess, onClose }) => {
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
@@ -10,13 +12,14 @@ const ReviewForm = ({ productId, orderItemId, onSuccess, onClose }) => {
     const [error, setError] = useState('');
     const { showSuccess, showError, showLoading, updateToast } = useToast();
 
+    // Submit review to backend
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         const toastId = showLoading('Mengirim review...');
         setLoading(true);
         setError('');
-        
+
         try {
             const res = await axiosClient.post('/reviews', {
                 product_id: productId,
@@ -24,21 +27,27 @@ const ReviewForm = ({ productId, orderItemId, onSuccess, onClose }) => {
                 rating,
                 comment,
             });
-            
-            updateToast(toastId, 'Review berhasil dikirim! Terima kasih atas ulasan Anda.', 'success');
-            
+
+            updateToast(
+                toastId,
+                'Review berhasil dikirim! Terima kasih atas ulasan Anda.',
+                'success'
+            );
+
             setTimeout(() => {
                 if (onClose) onClose();
-                
+
                 setTimeout(() => {
                     window.location.reload();
                 }, 500);
             }, 3000);
-            
         } catch (err) {
             console.error('Error submitting review:', err);
-            const errorMessage = err.response?.data?.message || err.message || 'Gagal mengirim review. Silakan coba lagi.';
-            
+            const errorMessage =
+                err.response?.data?.message ||
+                err.message ||
+                'Gagal mengirim review. Silakan coba lagi.';
+
             updateToast(toastId, errorMessage, 'error');
             setError(errorMessage);
         } finally {
@@ -53,14 +62,14 @@ const ReviewForm = ({ productId, orderItemId, onSuccess, onClose }) => {
                 onSubmit={handleSubmit}
             >
                 <h2 className="text-lg font-bold mb-4">Tulis Review</h2>
-                
+
                 <label className="block mb-2">Rating:</label>
                 <StarRating
                     rating={rating}
                     readOnly={false}
                     onRate={setRating}
                 />
-                
+
                 <label className="block mt-4 mb-2">Komentar:</label>
                 <textarea
                     className="w-full border rounded p-2"
@@ -70,9 +79,11 @@ const ReviewForm = ({ productId, orderItemId, onSuccess, onClose }) => {
                     placeholder="Tulis komentar..."
                     disabled={loading}
                 />
-                
-                {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
-                
+
+                {error && (
+                    <div className="text-red-500 mt-2 text-sm">{error}</div>
+                )}
+
                 <div className="flex gap-2 mt-6">
                     <button
                         type="submit"

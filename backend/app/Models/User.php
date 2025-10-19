@@ -46,5 +46,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-        public function reviews() { return $this->hasMany(Review::class); }
+    // Reviews written by this user
+    public function reviews() { return $this->hasMany(Review::class); }
 }
+
+// backend\app\Models\User.php

@@ -1,7 +1,9 @@
+// frontend/src/layouts/MainLayout.jsx
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
+// Layout for main user pages (navbar, footer)
 function MainLayout() {
     return (
         <div className="flex flex-col min-h-screen">

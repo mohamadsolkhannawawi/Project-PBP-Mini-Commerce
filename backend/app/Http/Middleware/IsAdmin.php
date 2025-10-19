@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+// Middleware to restrict access to admin-only routes
 class IsAdmin
 {
     /**
@@ -15,6 +16,7 @@ class IsAdmin
      * @param  \Closure  $next
      * @return mixed
      */
+    // Only allow requests from users with role 'admin'
     public function handle(Request $request, Closure $next)
     {
         $user = $request->user();
@@ -26,3 +28,5 @@ class IsAdmin
         return $next($request);
     }
 }
+
+// backend\app\Http\Middleware\IsAdmin.php

@@ -1,8 +1,10 @@
+// frontend/src/pages/CategoryPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+// Page for displaying products in a category
 function CategoryPage() {
     const { categoryId } = useParams();
     const [category, setCategory] = useState(null);
@@ -10,6 +12,7 @@ function CategoryPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Fetch category and products on mount
     useEffect(() => {
         const fetchCategoryAndProducts = async () => {
             setLoading(true);
@@ -41,7 +44,13 @@ function CategoryPage() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            {loading && <LoadingSpinner text="Memuat kategori..." size="lg" className="py-12" />}
+            {loading && (
+                <LoadingSpinner
+                    text="Memuat kategori..."
+                    size="lg"
+                    className="py-12"
+                />
+            )}
             {error && <p className="text-center text-red-500">{error}</p>}
             {!loading && !error && category && (
                 <>

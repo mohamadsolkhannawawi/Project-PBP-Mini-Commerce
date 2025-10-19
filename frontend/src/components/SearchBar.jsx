@@ -1,8 +1,10 @@
+// frontend/src/components/SearchBar.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
+// Search bar with live suggestions
 function SearchBar({ onSelect, onSubmit, onClear }) {
     const [query, setQuery] = useState('');
     const [suggestions, setSuggestions] = useState([]);
@@ -11,6 +13,7 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
     const searchContainerRef = useRef(null);
     const justSelectedRef = useRef(false);
 
+    // Debounce and fetch suggestions
     useEffect(() => {
         if (query.length < 2) {
             setSuggestions([]);
@@ -29,6 +32,7 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
         return () => clearTimeout(debounceTimeout);
     }, [query]);
 
+    // Close suggestions when clicking outside
     useEffect(() => {
         function handleClickOutside(event) {
             if (
@@ -44,6 +48,7 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
         };
     }, [searchContainerRef]);
 
+    // Fetch product suggestions from backend
     const fetchSuggestions = async () => {
         setLoading(true);
         try {
@@ -63,6 +68,7 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
         }
     };
 
+    // Handle input change
     const handleInputChange = (e) => {
         const v = e.target.value;
         setQuery(v);
@@ -71,12 +77,14 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
         }
     };
 
+    // Clear search input and suggestions
     const handleClear = () => {
         setQuery('');
         setSuggestions([]);
         if (onClear) onClear();
     };
 
+    // Submit search query
     const handleSubmit = (e) => {
         e.preventDefault();
         if (query.trim()) {
@@ -95,33 +103,32 @@ function SearchBar({ onSelect, onSubmit, onClear }) {
             ref={searchContainerRef}
         >
             <form onSubmit={handleSubmit} className="relative group">
-            <input
-                type="text"
-                value={query}
-                onChange={handleInputChange}
-                placeholder="Cari produk..."
-                className="w-full h-11 px-4 pr-10 text-gray-700 bg-white border border-gray-300
+                <input
+                    type="text"
+                    value={query}
+                    onChange={handleInputChange}
+                    placeholder="Cari produk..."
+                    className="w-full h-11 px-4 pr-10 text-gray-700 bg-white border border-gray-300
                         rounded-full transition-colors
                         hover:bg-gray-50 group-hover:bg-gray-50
                         focus:outline-none focus:ring-1 focus:ring-[#415A77] focus:border-[#415A77]"
-            />
-            <button
-                type="submit"
-                className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700"
-            >
-                <Search size={24} />
-            </button>
-            {query && (
+                />
                 <button
-                type="button"
-                onClick={handleClear}
-                className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600"
+                    type="submit"
+                    className="absolute top-0 right-0 mt-2 mr-3 text-gray-500 hover:text-gray-700"
                 >
-                <X size={20} />
+                    <Search size={24} />
                 </button>
-            )}
+                {query && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="absolute top-0 right-10 mt-2 mr-2 text-gray-400 hover:text-gray-600"
+                    >
+                        <X size={20} />
+                    </button>
+                )}
             </form>
-
 
             {suggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">

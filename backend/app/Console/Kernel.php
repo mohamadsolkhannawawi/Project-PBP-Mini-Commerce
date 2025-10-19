@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('sanctum:prune-expired')->daily();
+        // Instruct the scheduler to run the built-in Artisan command
+        $schedule->command('sanctum:prune-expired')->daily(); // which cleans up expired API tokens
     }
 
     /**
@@ -27,6 +28,8 @@ class Kernel extends ConsoleKernel
     {
         $this->load(__DIR__.'/Commands');
 
-        require base_path('routes/console.php');
+        require base_path('routes/console.php'); // Closure-based commands without needing to create a new file
     }
 }
+
+// backend\app\Console\Kernel.php

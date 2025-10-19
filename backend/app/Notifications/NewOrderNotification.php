@@ -7,6 +7,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\DatabaseMessage;
 use App\Models\Order;
 
+// Database notification for new order (sent to admins)
 class NewOrderNotification extends Notification
 {
     use Queueable;
@@ -18,11 +19,13 @@ class NewOrderNotification extends Notification
         $this->order = $order;
     }
 
+    // Only use database channel
     public function via($notifiable)
     {
         return ['database'];
     }
 
+    // Data stored in notifications table
     public function toDatabase($notifiable)
     {
         return [
@@ -33,3 +36,5 @@ class NewOrderNotification extends Notification
         ];
     }
 }
+
+// backend\app\Notifications\NewOrderNotification.php

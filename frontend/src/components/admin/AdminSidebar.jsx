@@ -1,3 +1,4 @@
+// frontend/src/components/admin/AdminSidebar.jsx
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import {
@@ -8,7 +9,9 @@ import {
     Home as House,
 } from 'lucide-react';
 
+// Sidebar navigation for admin dashboard
 function AdminSidebar({ user, handleLogout }) {
+    // Utility classes for active/inactive nav links
     const baseLinkClass =
         'flex items-center p-2 text-base font-normal rounded-lg transition-colors duration-150';
     const activeLinkClass = `${baseLinkClass} bg-[#415A77] text-white`;
@@ -36,6 +39,7 @@ function AdminSidebar({ user, handleLogout }) {
                 </div>
 
                 <ul className="space-y-2 flex-1">
+                    {/* Main navigation links */}
                     <li>
                         <NavLink
                             to="/"

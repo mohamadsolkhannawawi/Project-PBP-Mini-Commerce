@@ -1,9 +1,11 @@
+// frontend/src/pages/RegisterPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { Eye, EyeOff } from 'lucide-react';
 
+// Registration form for new users
 function RegisterPage() {
     const navigate = useNavigate();
     const { register } = useAuth();
@@ -18,6 +20,7 @@ function RegisterPage() {
 
     const { showError, showLoading, updateToast } = useToast();
 
+    // Validate registration form fields
     const validate = () => {
         const newErrors = {};
 
@@ -51,6 +54,7 @@ function RegisterPage() {
         return newErrors;
     };
 
+    // Handle registration form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validate();

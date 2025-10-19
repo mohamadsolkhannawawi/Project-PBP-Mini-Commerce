@@ -18,21 +18,23 @@ use App\Http\Controllers\Api\Admin\DashboardController;
 |--------------------------------------------------------------------------
 */
 
+// Public auth endpoints
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product:slug}', [ProductController::class, 'show']);
+Route::get('/products/{product:slug}', [ProductController::class, 'show']); // implicit binding by slug field
 Route::get('/products/{id}/summary', [ProductController::class, 'summary']);
 Route::get('/products/{id}/summary_v2', [ProductController::class, 'summaryV2']);
 
+// Endpoints requiring Sanctum API authentication
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']); // revoke current token
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/cart', [CartController::class, 'store']);
     Route::put('/cart-items/{cartItem}', [CartController::class, 'update']);
@@ -42,7 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reviews', [ReviewController::class, 'store']);
     Route::post('/checkout', [OrderController::class, 'store']);
 
-    // Notifications endpoints
+    // Notifications endpoints (database channel)
     Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markRead']);
     Route::delete('/notifications/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'delete']);
@@ -77,9 +79,10 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+// Admin-only endpoints (custom is.admin middleware)
 Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function () {
     Route::apiResource('/products', AdminProductController::class)->except(['update']);
-    Route::post('/products/{product}', [AdminProductController::class, 'update'])->name('products.update.post');
+    Route::post('/products/{product}', [AdminProductController::class, 'update'])->name('products.update.post'); // form-data upload workaround
     Route::patch('/products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus']);
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::get('/debug/categories', [ProductController::class, 'debugCategories'])->middleware('auth:sanctum');
@@ -87,4 +90,6 @@ Route::middleware(['auth:sanctum', 'is.admin'])->prefix('admin')->group(function
     Route::put('/orders/{order}', [AdminOrderController::class, 'update']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });
+
+// backend\routes\api.php
 

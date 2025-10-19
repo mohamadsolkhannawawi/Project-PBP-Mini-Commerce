@@ -1,11 +1,14 @@
+// frontend/src/components/Pagination.jsx
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+// Pagination controls for product lists
 function Pagination({ pagination, onPageChange }) {
     const { current_page, last_page, per_page, total, from, to } = pagination;
 
     if (total === 0) return null;
 
+    // Calculate visible page numbers for pagination
     const getVisiblePages = () => {
         const pages = [];
         const maxVisible = 5;
@@ -49,7 +52,6 @@ function Pagination({ pagination, onPageChange }) {
 
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
-
             <div className="text-sm text-gray-600 order-2 sm:order-1">
                 Showing {from} to {to} of {total} product
                 {total !== 1 ? 's' : ''}
