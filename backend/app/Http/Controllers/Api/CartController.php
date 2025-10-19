@@ -42,6 +42,10 @@ class CartController extends Controller
         }
 
         $user = Auth::user();
+        // Block admin from adding to cart
+        if ($user && $user->role === 'admin') {
+            return response()->json(['message' => 'Admin tidak dapat menambah produk ke keranjang.'], 403);
+        }
         $product = Product::find($request->product_id);
 
         // Check if there is enough stock for the requested quantity

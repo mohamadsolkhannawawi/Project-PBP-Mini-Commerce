@@ -110,6 +110,7 @@ export default function ProductDetailPage() {
         setQuantity((q) => Math.min(product?.stock ?? Infinity, q + 1));
 
     const handleAddToCart = async () => {
+        if (user?.role === 'admin') return;
         if (!user) {
             showError(
                 'Silakan login atau register terlebih dahulu untuk menambahkan produk ke keranjang.'
@@ -350,99 +351,107 @@ export default function ProductDetailPage() {
                             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'}
                     </p>
 
-                    {user?.role !== 'admin' && (
-                        <>
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 flex items-center justify-center">
-                                    <span className="text-lg font-semibold text-black leading-none">
-                                        {quantity}
-                                    </span>
-                                </div>
-
-                                <div className="h-7 px-2 rounded-full bg-[#415A77] text-white flex items-center">
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setQuantity((q) =>
-                                                Math.max(1, q - 1)
-                                            )
-                                        }
-                                        aria-label="Kurangi"
-                                        className="h-4 w-4 rounded-full border border-white flex items-center justify-center  mr-4 hover:bg-white/10"
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="3"
-                                            strokeLinecap="round"
-                                        >
-                                            <line
-                                                x1="5"
-                                                y1="12"
-                                                x2="19"
-                                                y2="12"
-                                            />
-                                        </svg>
-                                    </button>
-
-                                    <span className="h-4 w-px bg-white/80" />
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setQuantity((q) =>
-                                                Math.min(
-                                                    product?.stock ?? Infinity,
-                                                    q + 1
-                                                )
-                                            )
-                                        }
-                                        aria-label="Tambah"
-                                        className="h-4 w-4 rounded-full border border-white flex items-center justify-center ml-4 hover:bg-white/10"
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="14"
-                                            height="14"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="3"
-                                            strokeLinecap="round"
-                                        >
-                                            <line
-                                                x1="12"
-                                                y1="5"
-                                                x2="12"
-                                                y2="19"
-                                            />
-                                            <line
-                                                x1="5"
-                                                y1="12"
-                                                x2="19"
-                                                y2="12"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
+                    <>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 flex items-center justify-center">
+                                <span className="text-lg font-semibold text-black leading-none">
+                                    {quantity}
+                                </span>
                             </div>
-                            <p className="text-sm text-gray-500 mb-5">
-                                Stok: {product.stock ?? 0}
-                            </p>
 
-                            <button
-                                onClick={handleAddToCart}
-                                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#1B263B] text-white font-semibold py-3 px-6 hover:brightness-110 transition"
-                            >
-                                <ShoppingCart size={20} />
-                                Tambahkan ke Keranjang
-                            </button>
-                        </>
-                    )}
+                            <div className="h-7 px-2 rounded-full bg-[#415A77] text-white flex items-center">
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        user?.role === 'admin'
+                                            ? null
+                                            : setQuantity((q) =>
+                                                  Math.max(1, q - 1)
+                                              )
+                                    }
+                                    aria-label="Kurangi"
+                                    className={`h-4 w-4 rounded-full border border-white flex items-center justify-center  mr-4 ${
+                                        user?.role === 'admin'
+                                            ? 'opacity-50 cursor-not-allowed'
+                                            : 'hover:bg-white/10'
+                                    }`}
+                                    disabled={user?.role === 'admin'}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="3"
+                                        strokeLinecap="round"
+                                    >
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg>
+                                </button>
+
+                                <span className="h-4 w-px bg-white/80" />
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        user?.role === 'admin'
+                                            ? null
+                                            : setQuantity((q) =>
+                                                  Math.min(
+                                                      product?.stock ??
+                                                          Infinity,
+                                                      q + 1
+                                                  )
+                                              )
+                                    }
+                                    aria-label="Tambah"
+                                    className={`h-4 w-4 rounded-full border border-white flex items-center justify-center ml-4 ${
+                                        user?.role === 'admin'
+                                            ? 'opacity-50 cursor-not-allowed'
+                                            : 'hover:bg-white/10'
+                                    }`}
+                                    disabled={user?.role === 'admin'}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="3"
+                                        strokeLinecap="round"
+                                    >
+                                        <line x1="12" y1="5" x2="12" y2="19" />
+                                        <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-5">
+                            Stok: {product.stock ?? 0}
+                        </p>
+
+                        <button
+                            onClick={handleAddToCart}
+                            className={`w-full inline-flex items-center justify-center gap-2 rounded-full font-semibold py-3 px-6 transition ${
+                                user?.role === 'admin'
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                                    : 'bg-[#1B263B] text-white hover:brightness-110'
+                            }`}
+                            disabled={user?.role === 'admin'}
+                            title={
+                                user?.role === 'admin'
+                                    ? 'Admin tidak dapat menambah ke keranjang'
+                                    : 'Tambah ke Keranjang'
+                            }
+                        >
+                            <ShoppingCart size={20} />
+                            Tambahkan ke Keranjang
+                        </button>
+                    </>
                 </div>
             </div>
             <div className="mt-10">

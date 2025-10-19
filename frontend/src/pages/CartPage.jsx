@@ -1,5 +1,6 @@
 // frontend/src/pages/CartPage.jsx
 import React, { useState, useMemo } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
@@ -10,6 +11,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 // Shopping cart page for managing cart items
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
+    const { user } = useAuth();
     const [selectedItems, setSelectedItems] = useState([]);
     const [editingItemId, setEditingItemId] = useState(null);
     const navigate = useNavigate();
@@ -63,6 +65,10 @@ function CartPage() {
 
     // Proceed to checkout with selected items
     const handleCheckout = () => {
+        if (user?.role === 'admin') {
+            showWarning('Admin tidak dapat melakukan checkout.');
+            return;
+        }
         if (itemsToCheckout.length > 0) {
             navigate('/checkout', { state: { items: itemsToCheckout } });
         } else {
@@ -375,12 +381,25 @@ function CartPage() {
             >
                 <button
                     onClick={handleCheckout}
-                    disabled={selectedItems.length === 0}
-                    className="px-8 py-3 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={
+                        selectedItems.length === 0 || user?.role === 'admin'
+                    }
+                    className={`px-8 py-3 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                        user?.role === 'admin' ? 'bg-gray-400' : ''
+                    }`}
                     style={{
                         backgroundColor:
-                            selectedItems.length > 0 ? '#4A90E2' : '#6B7280',
+                            user?.role === 'admin'
+                                ? '#6B7280'
+                                : selectedItems.length > 0
+                                ? '#4A90E2'
+                                : '#6B7280',
                     }}
+                    title={
+                        user?.role === 'admin'
+                            ? 'Admin tidak dapat checkout'
+                            : 'Checkout'
+                    }
                 >
                     Checkout
                 </button>

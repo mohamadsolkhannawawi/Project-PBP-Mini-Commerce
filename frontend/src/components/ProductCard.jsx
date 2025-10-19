@@ -1,5 +1,6 @@
 // frontend/src/components/ProductCard.jsx
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
@@ -11,6 +12,7 @@ import { getProductImageUrl } from '../utils/imageUtils';
 function ProductCard({ product, onAddToCart }) {
     const [loading, setLoading] = useState(false);
     const { addToCart } = useCart();
+    const { user } = useAuth();
 
     const imageUrl = getProductImageUrl(product);
 
@@ -19,7 +21,7 @@ function ProductCard({ product, onAddToCart }) {
         e.preventDefault();
         e.stopPropagation();
 
-        if (loading) return;
+        if (loading || user?.role === 'admin') return;
 
         try {
             setLoading(true);
@@ -85,12 +87,19 @@ function ProductCard({ product, onAddToCart }) {
                     </div>
 
                     <button
-                        className={`absolute top-4 right-4 bg-yellow-400 hover:bg-yellow-500 text-white rounded-full p-2 shadow-lg transition-all ${
-                            loading ? 'opacity-75 cursor-not-allowed' : ''
+                        className={`absolute top-4 right-4 bg-yellow-400 text-white rounded-full p-2 shadow-lg transition-all ${
+                            loading || user?.role === 'admin'
+                                ? 'opacity-75 cursor-not-allowed'
+                                : 'hover:bg-yellow-500'
                         }`}
                         onClick={handleAddToCart}
-                        disabled={loading}
+                        disabled={loading || user?.role === 'admin'}
                         aria-label="Tambah ke Keranjang"
+                        title={
+                            user?.role === 'admin'
+                                ? 'Admin tidak dapat menambah ke keranjang'
+                                : 'Tambah ke Keranjang'
+                        }
                     >
                         {loading ? (
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
