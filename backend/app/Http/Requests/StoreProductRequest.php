@@ -19,12 +19,12 @@ class StoreProductRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
-            'is_active' => 'nullable|in:true,false', // Accept "true" or "false" string
+            'is_active' => 'nullable|in:true,false', // Accept string values; converted in controller
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
 
-        // Primary image required only on creation
+        // Primary image required only on creation (POST without route-model binding)
         if ($this->isMethod('post') && !$this->route('product')) {
             $rules['primary_image'] = 'required|image|mimes:jpeg,png,jpg,gif|max:2048';
         } else {
@@ -33,3 +33,5 @@ class StoreProductRequest extends FormRequest
         return $rules;
     }
 }
+
+// backend\app\Http\Requests\StoreProductRequest.php

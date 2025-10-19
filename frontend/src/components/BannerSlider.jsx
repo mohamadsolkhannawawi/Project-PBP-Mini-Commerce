@@ -1,6 +1,9 @@
+// frontend/src/components/BannerSlider.jsx
 import React from 'react';
 
+// Banner slider for homepage hero section
 export default function BannerSlider({ height = '40vh' }) {
+    // Generate SVG background for banner
     const createBannerBg = () =>
         'data:image/svg+xml;utf8,' +
         encodeURIComponent(
@@ -31,31 +34,36 @@ export default function BannerSlider({ height = '40vh' }) {
     const bannerContent = {
         src: createBannerBg(),
         title: 'Selamat Datang di TokoKita',
-        subtitle: 'Platform belanja online terpercaya dengan ribuan produk berkualitas',
-        ctaText: 'Jelajahi Produk'
+        subtitle:
+            'Platform belanja online terpercaya dengan ribuan produk berkualitas',
+        ctaText: 'Jelajahi Produk',
     };
 
+    // Scroll to products section when CTA clicked
     const scrollToProducts = () => {
-        const productHeader = document.querySelector('[data-section="products"] h2') ||
-                              document.querySelector('#products h2') ||
-                              document.querySelector('h2:contains("Produk Pilihan")') ||
-                              document.querySelector('[data-section="products"]') ||
-                              document.querySelector('#products');
+        const productHeader =
+            document.querySelector('[data-section="products"] h2') ||
+            document.querySelector('#products h2') ||
+            document.querySelector('h2:contains("Produk Pilihan")') ||
+            document.querySelector('[data-section="products"]') ||
+            document.querySelector('#products');
 
         if (productHeader) {
-            const productSection = productHeader.closest('section') || productHeader.parentElement;
+            const productSection =
+                productHeader.closest('section') || productHeader.parentElement;
             const offset = 100;
-            const elementPosition = productSection.getBoundingClientRect().top + window.pageYOffset;
+            const elementPosition =
+                productSection.getBoundingClientRect().top + window.pageYOffset;
             const offsetPosition = elementPosition - offset;
 
             window.scrollTo({
                 top: offsetPosition,
-                behavior: 'smooth'
+                behavior: 'smooth',
             });
         } else {
             window.scrollTo({
                 top: window.innerHeight * 0.9,
-                behavior: 'smooth'
+                behavior: 'smooth',
             });
         }
     };

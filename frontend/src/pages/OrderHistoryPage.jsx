@@ -1,3 +1,4 @@
+// frontend/src/pages/OrderHistoryPage.jsx
 import React, { useEffect, useState } from 'react';
 import ReviewForm from '../components/ReviewForm';
 import StarRating from '../components/StarRating';
@@ -8,6 +9,7 @@ import Footer from '../components/Footer';
 import SearchOrderBar from '../components/SearchOrderBar';
 import { useNavigate } from 'react-router-dom';
 
+// Page for displaying user's order history
 const OrderHistoryPage = () => {
     const [orders, setOrders] = useState([]);
     const [filteredOrders, setFilteredOrders] = useState([]);
@@ -17,6 +19,7 @@ const OrderHistoryPage = () => {
     const [activeStatus, setActiveStatus] = useState('all');
     const navigate = useNavigate();
 
+    // Fetch orders on mount and when status changes
     useEffect(() => {
         const fetchOrders = async () => {
             setLoading(true);
@@ -42,12 +45,14 @@ const OrderHistoryPage = () => {
         setSearchQuery('');
     }, [activeStatus]);
 
+    // Refresh page after successful review
     const handleReviewSuccess = (review) => {
         setSelectedItem(null);
         window.location.reload();
     };
 
     const [searchQuery, setSearchQuery] = useState('');
+    // Filter orders by search query
     const handleSearch = (query) => {
         setSearchQuery(query);
         let base = orders;
@@ -106,7 +111,13 @@ const OrderHistoryPage = () => {
                 >
                     Kembali ke Homepage
                 </button>
-                {loading && <LoadingSpinner text="Memuat riwayat pesanan..." size="lg" className="py-12" />}
+                {loading && (
+                    <LoadingSpinner
+                        text="Memuat riwayat pesanan..."
+                        size="lg"
+                        className="py-12"
+                    />
+                )}
                 {error && <div className="text-red-500">{error}</div>}
                 {filteredOrders.length === 0 && !loading && (
                     <div>

@@ -1,14 +1,17 @@
+// frontend/src/components/CartItem.jsx
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
 
+// Cart page for displaying and managing cart items
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
     const [selectedItems, setSelectedItems] = useState([]);
     const navigate = useNavigate();
 
+    // Select/deselect a cart item
     const handleSelectItem = (itemId) => {
         setSelectedItems((prevSelected) => {
             if (prevSelected.includes(itemId)) {
@@ -19,14 +22,16 @@ function CartPage() {
         });
     };
 
+    // Select/deselect all cart items
     const handleSelectAll = () => {
         if (selectedItems.length === cartItems.length) {
             setSelectedItems([]);
         } else {
-            setSelectedItems(cartItems.map(item => item.id));
+            setSelectedItems(cartItems.map((item) => item.id));
         }
     };
 
+    // Change quantity for a cart item
     const handleQuantityChange = async (itemId, newQuantity) => {
         if (newQuantity < 1) return;
         try {
@@ -36,22 +41,25 @@ function CartPage() {
         }
     };
 
+    // Remove item from cart
     const handleRemoveItem = async (itemId) => {
         if (window.confirm('Hapus item ini dari keranjang?')) {
             try {
                 await removeFromCart(itemId);
-                setSelectedItems(prev => prev.filter(id => id !== itemId));
+                setSelectedItems((prev) => prev.filter((id) => id !== itemId));
             } catch (error) {
                 console.error('Error removing item:', error);
             }
         }
     };
 
+    // Memoized list of selected items for checkout
     const itemsToCheckout = useMemo(
         () => cartItems.filter((item) => selectedItems.includes(item.id)),
         [cartItems, selectedItems]
     );
 
+    // Proceed to checkout with selected items
     const handleCheckout = () => {
         if (itemsToCheckout.length > 0) {
             navigate('/checkout', { state: { items: itemsToCheckout } });
@@ -61,28 +69,43 @@ function CartPage() {
     };
 
     if (loading) {
-        return <LoadingSpinner text="Memuat keranjang..." size="lg" className="py-12" />;
+        return (
+            <LoadingSpinner
+                text="Memuat keranjang..."
+                size="lg"
+                className="py-12"
+            />
+        );
     }
 
     if (cartItems.length === 0) {
         return (
             <div className="min-h-screen bg-gray-100 font-montserrat">
                 <div className="container mx-auto px-4">
-                    <div className="flex items-center justify-center" style={{ minHeight: 'calc(100vh - 200px)' }}>
+                    <div
+                        className="flex items-center justify-center"
+                        style={{ minHeight: 'calc(100vh - 200px)' }}
+                    >
                         <div className="text-center">
                             <h1 className="text-6xl font-bold mb-8 text-black leading-tight">
                                 Keranjang Anda Masih Kosong!
                             </h1>
                             <p className="text-black mb-12 text-lg max-w-2xl mx-auto leading-relaxed">
-                                Jelajahi lebih banyak produk dan dapatkan Penawaran Terbaik hanya di<br />
+                                Jelajahi lebih banyak produk dan dapatkan
+                                Penawaran Terbaik hanya di
+                                <br />
                                 TokoKita!
                             </p>
                             <Link
                                 to="/"
                                 className="inline-block px-10 py-4 text-white font-medium rounded-lg transition-colors text-base"
                                 style={{ backgroundColor: '#1B263B' }}
-                                onMouseEnter={(e) => e.target.style.backgroundColor = '#0F1A2A'}
-                                onMouseLeave={(e) => e.target.style.backgroundColor = '#1B263B'}
+                                onMouseEnter={(e) =>
+                                    (e.target.style.backgroundColor = '#0F1A2A')
+                                }
+                                onMouseLeave={(e) =>
+                                    (e.target.style.backgroundColor = '#1B263B')
+                                }
                             >
                                 Lanjutkan Belanja?
                             </Link>
@@ -98,35 +121,53 @@ function CartPage() {
             <div className="container mx-auto px-4 py-6">
                 {/* Header Table */}
                 <div className="mb-4 rounded-lg overflow-hidden shadow-lg">
-                    <div 
+                    <div
                         className="flex items-center py-4 px-6 text-white font-medium"
                         style={{ backgroundColor: '#1B263B' }}
                     >
                         <div className="flex items-center justify-start w-16">
                             <input
                                 type="checkbox"
-                                checked={selectedItems.length === cartItems.length && cartItems.length > 0}
+                                checked={
+                                    selectedItems.length === cartItems.length &&
+                                    cartItems.length > 0
+                                }
                                 onChange={handleSelectAll}
                                 className="w-5 h-5 rounded border-2 border-white bg-transparent focus:ring-0"
                                 style={{ accentColor: '#4A90E2' }}
                             />
                         </div>
-                        <div className="flex-1 text-left flex items-center">Produk</div>
-                        <div className="w-40 text-center flex items-center justify-center">Jumlah</div>
-                        <div className="w-32 text-center flex items-center justify-center">Total Harga</div>
-                        <div className="w-20 text-center flex items-center justify-center">Aksi</div>
+                        <div className="flex-1 text-left flex items-center">
+                            Produk
+                        </div>
+                        <div className="w-40 text-center flex items-center justify-center">
+                            Jumlah
+                        </div>
+                        <div className="w-32 text-center flex items-center justify-center">
+                            Total Harga
+                        </div>
+                        <div className="w-20 text-center flex items-center justify-center">
+                            Aksi
+                        </div>
                     </div>
                 </div>
 
                 <div className="space-y-3 mb-8">
                     {cartItems.map((item) => (
-                        <div key={item.id} className="bg-gray-200 rounded-lg shadow-md">
+                        <div
+                            key={item.id}
+                            className="bg-gray-200 rounded-lg shadow-md"
+                        >
                             <div className="flex items-center p-4">
                                 <div className="w-16 flex justify-start items-center">
                                     <input
                                         type="checkbox"
-                                        checked={selectedItems.includes(item.id)}
-                                        onChange={() => handleSelectItem(item.id)}
+                                        checked={selectedItems.includes(
+                                            item.id
+                                        )}
+                                        onChange={() =>
+                                            handleSelectItem(item.id)
+                                        }
                                         className="w-5 h-5 rounded border-2 border-gray-400"
                                         style={{ accentColor: '#4A90E2' }}
                                     />
@@ -135,15 +176,19 @@ function CartPage() {
                                 <div className="flex-1 flex items-center">
                                     <div className="w-16 h-16 bg-white rounded-lg border-2 border-black flex items-center justify-center mr-4 flex-shrink-0">
                                         {item.product.image_url ? (
-                                            <img 
-                                                src={item.product.image_url} 
+                                            <img
+                                                src={item.product.image_url}
                                                 alt={item.product.name}
                                                 className="w-full h-full object-cover rounded-md"
                                             />
                                         ) : (
                                             <div className="text-gray-600 text-center">
-                                                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                                <svg
+                                                    className="w-6 h-6"
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
+                                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
                                                 </svg>
                                             </div>
                                         )}
@@ -153,7 +198,10 @@ function CartPage() {
                                             {item.product.name}
                                         </h3>
                                         <p className="text-black font-medium text-sm">
-                                            Rp{new Intl.NumberFormat('id-ID').format(item.product.price)}
+                                            Rp
+                                            {new Intl.NumberFormat(
+                                                'id-ID'
+                                            ).format(item.product.price)}
                                         </p>
                                     </div>
                                 </div>
@@ -161,7 +209,12 @@ function CartPage() {
                                 <div className="w-40 text-center flex flex-col items-center">
                                     <div className="flex items-center justify-center space-x-1 mb-1">
                                         <button
-                                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                            onClick={() =>
+                                                handleQuantityChange(
+                                                    item.id,
+                                                    item.quantity - 1
+                                                )
+                                            }
                                             className="w-8 h-8 rounded-md border border-gray-500 bg-white flex items-center justify-center hover:bg-gray-50 text-gray-700 font-medium"
                                             disabled={item.quantity <= 1}
                                         >
@@ -171,16 +224,26 @@ function CartPage() {
                                             type="number"
                                             value={item.quantity}
                                             onChange={(e) => {
-                                                const newQty = parseInt(e.target.value);
+                                                const newQty = parseInt(
+                                                    e.target.value
+                                                );
                                                 if (newQty >= 1) {
-                                                    handleQuantityChange(item.id, newQty);
+                                                    handleQuantityChange(
+                                                        item.id,
+                                                        newQty
+                                                    );
                                                 }
                                             }}
                                             className="w-12 h-8 text-center border border-gray-500 rounded-md bg-white text-black font-medium"
                                             min="1"
                                         />
                                         <button
-                                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                            onClick={() =>
+                                                handleQuantityChange(
+                                                    item.id,
+                                                    item.quantity + 1
+                                                )
+                                            }
                                             className="w-8 h-8 rounded-md border border-gray-500 bg-white flex items-center justify-center hover:bg-gray-50 text-gray-700 font-medium"
                                         >
                                             +
@@ -193,13 +256,18 @@ function CartPage() {
 
                                 <div className="w-32 text-center flex items-center justify-center">
                                     <p className="font-medium text-black text-sm">
-                                        Rp{new Intl.NumberFormat('id-ID').format(item.product.price * item.quantity)}
+                                        Rp
+                                        {new Intl.NumberFormat('id-ID').format(
+                                            item.product.price * item.quantity
+                                        )}
                                     </p>
                                 </div>
 
                                 <div className="w-20 text-center flex items-center justify-center">
                                     <button
-                                        onClick={() => handleRemoveItem(item.id)}
+                                        onClick={() =>
+                                            handleRemoveItem(item.id)
+                                        }
                                         className="text-gray-600 hover:text-red-600 p-2 rounded-lg hover:bg-gray-300 transition-colors"
                                         title="Hapus item"
                                     >
@@ -212,7 +280,7 @@ function CartPage() {
                 </div>
             </div>
 
-            <div 
+            <div
                 className="fixed bottom-0 left-0 right-0 py-4 px-6 flex justify-end shadow-lg"
                 style={{ backgroundColor: '#1B263B' }}
             >
@@ -220,8 +288,9 @@ function CartPage() {
                     onClick={handleCheckout}
                     disabled={selectedItems.length === 0}
                     className="px-8 py-3 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ 
-                        backgroundColor: selectedItems.length > 0 ? '#4A90E2' : '#6B7280'
+                    style={{
+                        backgroundColor:
+                            selectedItems.length > 0 ? '#4A90E2' : '#6B7280',
                     }}
                 >
                     Checkout

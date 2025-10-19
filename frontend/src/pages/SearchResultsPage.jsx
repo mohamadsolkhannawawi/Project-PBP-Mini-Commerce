@@ -1,9 +1,11 @@
+// frontend/src/pages/SearchResultsPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import ProductCard from '../components/ProductCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+// Page for displaying product search results
 function SearchResultsPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -11,6 +13,7 @@ function SearchResultsPage() {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q');
 
+    // Fetch search results when query changes
     useEffect(() => {
         if (!query) {
             setSearchResults([]);
@@ -42,7 +45,13 @@ function SearchResultsPage() {
     }, [query]);
 
     if (loading) {
-        return <LoadingSpinner text="Mencari produk..." size="lg" className="py-12" />;
+        return (
+            <LoadingSpinner
+                text="Mencari produk..."
+                size="lg"
+                className="py-12"
+            />
+        );
     }
 
     if (error) {

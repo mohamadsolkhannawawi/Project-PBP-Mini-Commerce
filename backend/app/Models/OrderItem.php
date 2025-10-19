@@ -26,16 +26,21 @@ class OrderItem extends Model
         'subtotal',
     ];
 
+    // Product reference for this line item
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    // Parent order of this line item
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    // Optional review tied to this purchased item
     public function review() { return $this->hasOne(Review::class); }
 }
+
+// backend\app\Models\OrderItem.php
 

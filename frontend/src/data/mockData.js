@@ -1,3 +1,4 @@
+// frontend/src/data/mockData.js
 // Mock data for products, can be used for testing API calls or UI components
 export const mockProducts = [
     {

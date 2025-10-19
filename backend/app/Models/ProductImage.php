@@ -25,6 +25,7 @@ class ProductImage extends Model
 
     protected $appends = ['url'];
 
+    // Parent product
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -35,7 +36,7 @@ class ProductImage extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
+    public function getUrlAttribute() // Accessor: generate public URL for stored image
     {
         if ($this->image_path) {
             return asset('storage/' . $this->image_path);
@@ -43,3 +44,5 @@ class ProductImage extends Model
         return null;
     }
 }
+
+// backend\app\Models\ProductImage.php

@@ -1,3 +1,4 @@
+// frontend/src/components/ProductCard.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
@@ -6,21 +7,23 @@ import { useCart } from '../contexts/CartContext';
 import StarRating from './StarRating';
 import { getProductImageUrl } from '../utils/imageUtils';
 
+// Card for displaying product info and add-to-cart button
 function ProductCard({ product, onAddToCart }) {
     const [loading, setLoading] = useState(false);
     const { addToCart } = useCart();
-    
+
     const imageUrl = getProductImageUrl(product);
 
+    // Add product to cart (single item)
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         if (loading) return;
-        
+
         try {
             setLoading(true);
-            
+
             if (typeof onAddToCart === 'function') {
                 await onAddToCart(product);
             } else {
@@ -44,16 +47,16 @@ function ProductCard({ product, onAddToCart }) {
                 style={{ fontFamily: 'Poppins, ui-sans-serif, system-ui' }}
             >
                 <div className="relative h-56 md:h-64 rounded-t-[14px] overflow-hidden bg-white">
-                <img
-                    src={imageUrl}
-                    alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover block"
-                    loading="lazy"
-                    onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = '/no-image.webp';
-                    }}
-                />
+                    <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="absolute inset-0 w-full h-full object-cover block"
+                        loading="lazy"
+                        onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = '/no-image.webp';
+                        }}
+                    />
                 </div>
 
                 <div className="bg-[#415A77] text-white px-5 py-12 flex items-center justify-left relative">

@@ -1,6 +1,8 @@
+// frontend/src/layouts/AuthLayout.jsx
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 
+// Layout for authentication pages (login/register)
 function AuthLayout() {
     return (
         <div className="relative min-h-screen">

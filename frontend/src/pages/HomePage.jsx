@@ -120,9 +120,11 @@ const categoryIcons = {
             <path fillRule="evenodd" d="M14 11V2h1v9zM6 3v10H5V3z" />
             <path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4z" />
         </svg>
+        // frontend/src/pages/HomePage.jsx
     ),
     olahraga: (
         <svg
+            // Icon mapping for product categories
             className="w-6 h-6 text-green-600"
             fill="currentColor"
             viewBox="0 0 16 16"
@@ -145,7 +147,9 @@ const categoryIcons = {
             fill="currentColor"
             viewBox="0 0 16 16"
         >
+            // Main landing page with product list and banners
             <path
+                // Fetch products and categories on mount
                 fillRule="evenodd"
                 d="M5.04.303A.5.5 0 0 1 5.5 0h5c.2 0 .38.12.46.303l3 7a.5.5 0 0 1-.363.687h-.002q-.225.044-.45.081a33 33 0 0 1-4.645.425V13.5a.5.5 0 1 1-1 0V8.495a33 33 0 0 1-4.645-.425q-.225-.036-.45-.08h-.003a.5.5 0 0 1-.362-.688l3-7ZM3.21 7.116A31 31 0 0 0 8 7.5a31 31 0 0 0 4.791-.384L10.171 1H5.83z"
             />
@@ -254,7 +258,8 @@ export default function HomePage() {
         if (categorySection) {
             const offset = 100;
             const elementPosition =
-                categorySection.getBoundingClientRect().top + window.pageYOffset;
+                categorySection.getBoundingClientRect().top +
+                window.pageYOffset;
             const offsetPosition = elementPosition - offset;
 
             window.scrollTo({
@@ -273,10 +278,7 @@ export default function HomePage() {
                 <BannerSlider />
             </section>
 
-            <section
-                id="all-categories"
-                className="mb-8 mt-8 scroll-mt-20"
-            >
+            <section id="all-categories" className="mb-8 mt-8 scroll-mt-20">
                 <h2
                     className="text-xl font-bold text-gray-800 mb-4 pl-2 sm:pl-4 md:pl-6 cursor-pointer hover:text-blue-600 transition-colors"
                     onClick={scrollToCategories}
@@ -336,8 +338,8 @@ export default function HomePage() {
                 </div>
 
                 {loading && (
-                    <LoadingSpinner 
-                        text="Memuat produk..." 
+                    <LoadingSpinner
+                        text="Memuat produk..."
                         size="lg"
                         className="py-12"
                     />

@@ -19,8 +19,11 @@ class Cart extends Model
         'user_id',
     ];
 
+    // Items currently in the cart
     public function items(): HasMany
     {
         return $this->hasMany(CartItem::class);
     }
 }
+
+// backend\app\Models\Cart.php

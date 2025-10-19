@@ -5,12 +5,13 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\ProductImage;
 
+// Seeder to fix image paths in ProductImage table
 class FixImagePathsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(): void // fix path formats for images
     {
         echo "Fixing image paths...\n";
         
@@ -38,3 +39,5 @@ class FixImagePathsSeeder extends Seeder
         echo "Image paths fixing completed!\n";
     }
 }
+
+// backend\database\seeders\FixImagePathsSeeder.php

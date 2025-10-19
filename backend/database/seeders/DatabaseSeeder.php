@@ -4,9 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+// Main database seeder, calls all other seeders
 class DatabaseSeeder extends Seeder
 {
-    public function run(): void
+    public function run(): void // call all seeders
     {
         $this->call([
             UserSeeder::class,
@@ -15,3 +16,5 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 }
+
+// backend\database\seeders\DatabaseSeeder.php

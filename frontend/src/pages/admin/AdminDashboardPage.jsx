@@ -66,6 +66,7 @@ const kpiLabels = {
     totalCustomers: 'Total Customers',
 };
 
+// Main dashboard page for admin
 export default function AdminDashboardPage() {
     const [dashboard, setDashboard] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -80,6 +81,7 @@ export default function AdminDashboardPage() {
         return params.get(name);
     };
 
+    // Fetch dashboard data on mount
     useEffect(() => {
         axiosClient
             .get('/admin/dashboard')
@@ -91,6 +93,7 @@ export default function AdminDashboardPage() {
             .catch(() => setLoading(false));
     }, []);
 
+    // Fetch product summary if product_id is present in query
     useEffect(() => {
         const productId = getQuery('product_id');
         if (!productId) {
@@ -115,6 +118,7 @@ export default function AdminDashboardPage() {
         return () => (mounted = false);
     }, [location.search]);
 
+    // Clear product summary on custom event
     useEffect(() => {
         const handler = () => setProductSummary(null);
         window.addEventListener('clearProductSummary', handler);
@@ -122,7 +126,13 @@ export default function AdminDashboardPage() {
     }, []);
 
     if (loading)
-        return <LoadingSpinner text="Memuat dashboard..." size="lg" className="py-12" />;
+        return (
+            <LoadingSpinner
+                text="Memuat dashboard..."
+                size="lg"
+                className="py-12"
+            />
+        );
     if (!dashboard)
         return (
             <div className="p-8 text-center text-red-500">

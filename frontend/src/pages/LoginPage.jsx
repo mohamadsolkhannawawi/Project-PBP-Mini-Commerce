@@ -1,9 +1,11 @@
+// frontend/src/pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { Eye, EyeOff } from 'lucide-react';
 
+// Login form for user authentication
 function LoginPage() {
     const navigate = useNavigate();
     const { login } = useAuth();
@@ -12,21 +14,22 @@ function LoginPage() {
     const [error, setError] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    
+
     const { showSuccess, showError, showLoading, updateToast } = useToast();
 
+    // Handle login form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         setIsLoading(true);
-        
+
         const toastId = showLoading('Sedang masuk ke akun Anda...');
 
         try {
             const response = await login({ email, password });
-            
+
             updateToast(toastId, 'Login berhasil! Selamat datang!', 'success');
-            
+
             if (response.data.user.role === 'admin') {
                 navigate('/admin');
             } else {
@@ -34,14 +37,14 @@ function LoginPage() {
             }
         } catch (err) {
             let errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
-            
+
             if (err.response && err.response.status === 401) {
                 errorMessage = 'Email atau password salah.';
             } else if (err.response && err.response.data.errors) {
                 const messages = Object.values(err.response.data.errors).flat();
                 errorMessage = messages.join(' ');
             }
-            
+
             setError(errorMessage);
             updateToast(toastId, errorMessage, 'error');
         } finally {
@@ -52,7 +55,6 @@ function LoginPage() {
     return (
         <div className="min-h-screen w-full bg-[#1B263B] font-montserrat flex items-center justify-center">
             <div className="bg-[#EAEAEA] rounded-3xl flex flex-col md:flex-row w-full max-w-4xl shadow-xl p-4 md:p-0">
-
                 <div className="flex-1 flex items-center justify-center p-4">
                     <div className="w-full max-w-md bg-white bg-opacity-60 rounded-2xl shadow-lg p-6">
                         <h2
@@ -94,17 +96,23 @@ function LoginPage() {
                                     <input
                                         id="password"
                                         name="password"
-                                        type={showPassword ? 'text' : 'password'}
+                                        type={
+                                            showPassword ? 'text' : 'password'
+                                        }
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#415A77] focus:border-[#415A77] text-[#1B263B] placeholder-gray-400 transition-all duration-200 hover:border-[#415A77] hover:shadow-sm"
                                         placeholder="Enter your password"
                                         value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
                                         disabled={isLoading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
                                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-[#415A77] transition-colors duration-200 hover:scale-110 active:scale-95"
                                         disabled={isLoading}
                                     >

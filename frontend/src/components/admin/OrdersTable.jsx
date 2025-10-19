@@ -1,5 +1,7 @@
+// frontend/src/components/admin/OrdersTable.jsx
 import React, { useState, useEffect, useRef } from 'react';
 
+// Table for displaying and managing admin orders
 function OrdersTable({
     orders,
     indexOfFirstOrder,
@@ -7,6 +9,7 @@ function OrdersTable({
     setSortConfig,
     sortConfig,
 }) {
+    // Dropdown state for status change
     const [openDropdown, setOpenDropdown] = useState(null);
     const [dropdownPosition, setDropdownPosition] = useState({
         top: 0,
@@ -14,6 +17,7 @@ function OrdersTable({
     });
     const badgeRefs = useRef({});
 
+    // Close dropdown if clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!event.target.closest('.status-dropdown')) {
@@ -27,6 +31,7 @@ function OrdersTable({
         };
     }, []);
 
+    // Open/close status dropdown for a specific order
     const handleBadgeClick = (orderId) => {
         if (openDropdown === orderId) {
             setOpenDropdown(null);
@@ -44,6 +49,7 @@ function OrdersTable({
         setOpenDropdown(orderId);
     };
 
+    // Render sort arrow for table headers
     const renderSortArrow = (key) => {
         if (sortConfig.key === key) {
             return sortConfig.direction === 'asc' ? '▲' : '▼';
@@ -51,6 +57,7 @@ function OrdersTable({
         return '';
     };
 
+    // Handle sorting by column
     const handleSort = (key) => {
         setSortConfig((prevConfig) => ({
             key,
@@ -61,6 +68,7 @@ function OrdersTable({
         }));
     };
 
+    // Utility: get badge color for order status
     const getStatusBadgeColor = (status) => {
         switch (status) {
             case 'selesai':
@@ -78,6 +86,7 @@ function OrdersTable({
         }
     };
 
+    // Utility: get dot color for order status
     const getStatusDotColor = (status) => {
         switch (status) {
             case 'selesai':
@@ -95,6 +104,7 @@ function OrdersTable({
         }
     };
 
+    // Change order status and close dropdown
     const handleStatusClick = (orderId, newStatus) => {
         handleStatusChange(orderId, newStatus);
         setOpenDropdown(null);

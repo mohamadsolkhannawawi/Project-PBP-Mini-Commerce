@@ -1,6 +1,8 @@
+// frontend/src/components/Footer.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+// SVG logo for X (Twitter)
 const XLogo = ({ size = 24 }) => (
     <svg
         width={size}
@@ -16,6 +18,7 @@ const XLogo = ({ size = 24 }) => (
     </svg>
 );
 
+// SVG logo for Instagram
 const InstagramLogo = ({ size = 24 }) => (
     <svg
         width={size}
@@ -31,6 +34,7 @@ const InstagramLogo = ({ size = 24 }) => (
     </svg>
 );
 
+// SVG logo for Facebook
 const FacebookLogo = ({ size = 24 }) => (
     <svg
         width={size}
@@ -46,6 +50,7 @@ const FacebookLogo = ({ size = 24 }) => (
     </svg>
 );
 
+// Footer for site-wide info and links
 function Footer() {
     return (
         <footer style={{ backgroundColor: '#1B263B' }} className="text-white">

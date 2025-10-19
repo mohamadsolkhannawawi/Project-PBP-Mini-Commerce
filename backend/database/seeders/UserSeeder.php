@@ -6,9 +6,10 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
+// Seeder for default users (admin and regular)
 class UserSeeder extends Seeder
 {
-    public function run(): void
+    public function run(): void // create admin and user
     {
         User::create([
             'name' => 'Admin User',
@@ -25,3 +26,5 @@ class UserSeeder extends Seeder
         ]);
     }
 }
+
+// backend\database\seeders\UserSeeder.php

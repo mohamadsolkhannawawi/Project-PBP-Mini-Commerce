@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
+    // List current user's orders with items and reviews
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -28,6 +29,7 @@ class OrderController extends Controller
         return response()->json(['data' => $orders]);
     }
 
+    // Create order from selected cart items, decrement stock, and notify admins
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -87,12 +89,12 @@ class OrderController extends Controller
                     $item->product->decrement('stock', $item->quantity);
                 }
 
-                Cart::where('user_id', $user->id)->first()->items()->whereIn('id', $request->cart_item_ids)->delete();
+                Cart::where('user_id', $user->id)->first()->items()->whereIn('id', $request->cart_item_ids)->delete(); // remove only purchased items
 
                 return $order;
             });
 
-            try {
+            try { // notify admins via database notification (see NewOrderNotification)
                 $admins = User::where('role', 'admin')->get();
                 foreach ($admins as $admin) {
                     $admin->notify(new NewOrderNotification($order));
@@ -108,3 +110,5 @@ class OrderController extends Controller
         }
     }
 }
+
+// backend\app\Http\Controllers\Api\OrderController.php

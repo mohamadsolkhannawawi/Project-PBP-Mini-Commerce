@@ -1,3 +1,4 @@
+// frontend/src/pages/CartPage.jsx
 import React, { useState, useMemo } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { getProductImageUrl } from '../utils/imageUtils';
 import { useToast } from '../contexts/ToastContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+// Shopping cart page for managing cart items
 function CartPage() {
     const { cartItems, loading, updateCartItem, removeFromCart } = useCart();
     const [selectedItems, setSelectedItems] = useState([]);
@@ -13,6 +15,7 @@ function CartPage() {
     const navigate = useNavigate();
     const { showWarning } = useToast();
 
+    // Select/deselect cart item
     const handleSelectItem = (itemId) => {
         setSelectedItems((prevSelected) => {
             if (prevSelected.includes(itemId)) {
@@ -23,6 +26,7 @@ function CartPage() {
         });
     };
 
+    // Select/deselect all cart items
     const handleSelectAll = () => {
         if (selectedItems.length === cartItems.length) {
             setSelectedItems([]);
@@ -31,6 +35,7 @@ function CartPage() {
         }
     };
 
+    // Update quantity for a cart item
     const handleQuantityChange = async (itemId, newQuantity) => {
         if (newQuantity < 1) return;
         try {
@@ -41,6 +46,7 @@ function CartPage() {
         }
     };
 
+    // Remove item from cart
     const handleRemoveItem = async (itemId) => {
         try {
             await removeFromCart(itemId);
@@ -55,6 +61,7 @@ function CartPage() {
         [cartItems, selectedItems]
     );
 
+    // Proceed to checkout with selected items
     const handleCheckout = () => {
         if (itemsToCheckout.length > 0) {
             navigate('/checkout', { state: { items: itemsToCheckout } });
@@ -64,7 +71,13 @@ function CartPage() {
     };
 
     if (loading) {
-        return <LoadingSpinner text="Memuat keranjang..." size="lg" className="py-12" />;
+        return (
+            <LoadingSpinner
+                text="Memuat keranjang..."
+                size="lg"
+                className="py-12"
+            />
+        );
     }
 
     if (cartItems.length === 0) {
@@ -108,7 +121,6 @@ function CartPage() {
     return (
         <div className="min-h-screen bg-white font-montserrat pb-24">
             <div className="container mx-auto px-4 py-6">
-
                 <div className="mb-2 rounded-lg overflow-hidden shadow-lg">
                     <div
                         className="flex items-center py-4 px-6 text-white font-medium"
@@ -164,9 +176,12 @@ function CartPage() {
                                 </div>
 
                                 <div className="flex-1 flex items-center">
-                                    <div 
+                                    <div
                                         className="bg-white rounded-lg border-2 border-black flex items-center justify-center mr-6 flex-shrink-0"
-                                        style={{ width: '100px', height: '100px' }}
+                                        style={{
+                                            width: '100px',
+                                            height: '100px',
+                                        }}
                                     >
                                         <img
                                             src={getProductImageUrl(
@@ -223,7 +238,9 @@ function CartPage() {
                                                         );
                                                     }
                                                 }}
-                                                onBlur={() => setEditingItemId(null)}
+                                                onBlur={() =>
+                                                    setEditingItemId(null)
+                                                }
                                                 onKeyPress={(e) => {
                                                     if (e.key === 'Enter') {
                                                         setEditingItemId(null);
@@ -235,7 +252,9 @@ function CartPage() {
                                             />
                                         ) : (
                                             <div
-                                                onClick={() => setEditingItemId(item.id)}
+                                                onClick={() =>
+                                                    setEditingItemId(item.id)
+                                                }
                                                 className="h-12 w-12 rounded-[10px] bg-white border border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
                                             >
                                                 <span className="text-lg font-semibold text-black">
@@ -267,7 +286,12 @@ function CartPage() {
                                                     strokeWidth="3"
                                                     strokeLinecap="round"
                                                 >
-                                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                                    <line
+                                                        x1="5"
+                                                        y1="12"
+                                                        x2="19"
+                                                        y2="12"
+                                                    />
                                                 </svg>
                                             </button>
 
@@ -281,7 +305,10 @@ function CartPage() {
                                                         item.quantity + 1
                                                     )
                                                 }
-                                                disabled={item.quantity >= item.product.stock}
+                                                disabled={
+                                                    item.quantity >=
+                                                    item.product.stock
+                                                }
                                                 aria-label="Tambah"
                                                 className="h-4 w-4 rounded-full border border-white flex items-center justify-center ml-3 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
@@ -295,8 +322,18 @@ function CartPage() {
                                                     strokeWidth="3"
                                                     strokeLinecap="round"
                                                 >
-                                                    <line x1="12" y1="5" x2="12" y2="19" />
-                                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                                    <line
+                                                        x1="12"
+                                                        y1="5"
+                                                        x2="12"
+                                                        y2="19"
+                                                    />
+                                                    <line
+                                                        x1="5"
+                                                        y1="12"
+                                                        x2="19"
+                                                        y2="12"
+                                                    />
                                                 </svg>
                                             </button>
                                         </div>

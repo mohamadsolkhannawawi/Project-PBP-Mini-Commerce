@@ -1,3 +1,4 @@
+// frontend/src/pages/CheckoutPage.jsx
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
@@ -5,6 +6,7 @@ import axiosClient from '../api/axiosClient';
 import { getProductImageUrl } from '../utils/imageUtils';
 import { useToast } from '../contexts/ToastContext';
 
+// Checkout page for processing orders
 function CheckoutPage() {
     const { fetchCart } = useCart();
     const [address, setAddress] = useState('');
@@ -25,13 +27,14 @@ function CheckoutPage() {
         return total + price * item.quantity;
     }, 0);
 
+    // Handle checkout form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!address) {
             setError('Alamat pengiriman wajib diisi.');
             return;
         }
-        
+
         const toastId = showLoading('Memproses pesanan...');
         setLoading(true);
         setError('');
@@ -43,19 +46,24 @@ function CheckoutPage() {
                 address_text: address,
                 cart_item_ids: selectedCartItemIds,
             });
-            
-            updateToast(toastId, 'Pesanan berhasil dibuat! Terima kasih telah berbelanja.', 'success');
-            
+
+            updateToast(
+                toastId,
+                'Pesanan berhasil dibuat! Terima kasih telah berbelanja.',
+                'success'
+            );
+
             await fetchCart();
-            
+
             setTimeout(() => {
                 navigate('/');
             }, 1500);
-            
         } catch (err) {
             console.error('Gagal checkout:', err);
-            const errorMessage = err.response?.data?.message || 'Gagal memproses pesanan. Silakan coba lagi.';
-            
+            const errorMessage =
+                err.response?.data?.message ||
+                'Gagal memproses pesanan. Silakan coba lagi.';
+
             updateToast(toastId, errorMessage, 'error');
             setError(errorMessage);
         } finally {
@@ -176,7 +184,9 @@ function CheckoutPage() {
                                 onClick={handleSubmit}
                                 disabled={loading || items.length === 0}
                                 className={`w-full py-4 text-white font-semibold rounded-lg transition-all mt-6 ${
-                                    loading ? 'opacity-75 cursor-not-allowed' : 'hover:brightness-110'
+                                    loading
+                                        ? 'opacity-75 cursor-not-allowed'
+                                        : 'hover:brightness-110'
                                 }`}
                                 style={{ backgroundColor: '#1B263B' }}
                             >

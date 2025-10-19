@@ -1,8 +1,10 @@
+// frontend/src/components/NotificationBell.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { Bell } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import { useNavigate } from 'react-router-dom';
 
+// Bell icon and dropdown for notifications
 export default function NotificationBell({ pollInterval = 15000 }) {
     const [notifications, setNotifications] = useState([]);
     const [open, setOpen] = useState(false);
@@ -10,6 +12,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
     const containerRef = useRef(null);
     const navigate = useNavigate();
 
+    // Fetch notifications from backend
     const fetchNotifications = async () => {
         try {
             const res = await axiosClient.get('/notifications');
@@ -20,12 +23,14 @@ export default function NotificationBell({ pollInterval = 15000 }) {
         }
     };
 
+    // Poll notifications periodically
     useEffect(() => {
         fetchNotifications();
         pollRef.current = setInterval(fetchNotifications, pollInterval);
         return () => clearInterval(pollRef.current);
     }, [pollInterval]);
 
+    // Close dropdown when clicking outside
     useEffect(() => {
         const onDocClick = (e) => {
             if (!open) return;
@@ -42,6 +47,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
         return () => document.removeEventListener('mousedown', onDocClick);
     }, [open, notifications]);
 
+    // Mark notification as read and delete
     const markRead = async (id) => {
         try {
             await axiosClient.post(`/notifications/${id}/read`);
@@ -63,6 +69,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
         }
     };
 
+    // Delete read/old notifications
     const cleanupNotifications = async () => {
         const now = Date.now();
         const toDelete = notifications
@@ -80,8 +87,7 @@ export default function NotificationBell({ pollInterval = 15000 }) {
             toDelete.map(async (id) => {
                 try {
                     await axiosClient.delete(`/notifications/${id}`);
-                } catch (err) {
-                }
+                } catch (err) {}
             })
         );
 

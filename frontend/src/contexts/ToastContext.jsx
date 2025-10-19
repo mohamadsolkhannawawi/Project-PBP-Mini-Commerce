@@ -1,8 +1,11 @@
+// frontend/src/contexts/ToastContext.jsx
 import React, { createContext, useContext } from 'react';
 import { toast } from 'react-toastify';
 
+// Context for showing toast notifications
 const ToastContext = createContext();
 
+// Custom hook for using toast context
 export const useToast = () => {
     const context = useContext(ToastContext);
     if (!context) {
@@ -11,10 +14,12 @@ export const useToast = () => {
     return context;
 };
 
+// Provider for toast notification context
 export const ToastProvider = ({ children }) => {
+    // Show success toast
     const showSuccess = (message) => {
         toast.success(message, {
-            position: "bottom-right",
+            position: 'bottom-right',
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
@@ -23,9 +28,10 @@ export const ToastProvider = ({ children }) => {
         });
     };
 
+    // Show error toast
     const showError = (message) => {
         toast.error(message, {
-            position: "bottom-right",
+            position: 'bottom-right',
             autoClose: 4000,
             hideProgressBar: false,
             closeOnClick: true,
@@ -34,9 +40,10 @@ export const ToastProvider = ({ children }) => {
         });
     };
 
+    // Show info toast
     const showInfo = (message) => {
         toast.info(message, {
-            position: "bottom-right",
+            position: 'bottom-right',
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
@@ -45,9 +52,10 @@ export const ToastProvider = ({ children }) => {
         });
     };
 
+    // Show warning toast
     const showWarning = (message) => {
         toast.warning(message, {
-            position: "bottom-right",
+            position: 'bottom-right',
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
@@ -56,9 +64,10 @@ export const ToastProvider = ({ children }) => {
         });
     };
 
-    const showLoading = (message = "Memuat...") => {
+    // Show loading toast
+    const showLoading = (message = 'Memuat...') => {
         return toast.loading(message, {
-            position: "bottom-right",
+            position: 'bottom-right',
         });
     };
 

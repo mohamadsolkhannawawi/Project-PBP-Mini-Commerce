@@ -1,3 +1,4 @@
+// frontend/src/components/Navbar.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { HashLink } from 'react-router-hash-link';
@@ -17,6 +18,7 @@ import { useToast } from '../contexts/ToastContext';
 import SearchBar from './SearchBar';
 import axiosClient from '../api/axiosClient';
 
+// Main navigation bar for site
 function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isCategoryOpen, setCategoryOpen] = useState(false);
@@ -30,6 +32,7 @@ function Navbar() {
     const categoryMenuRef = useRef(null);
     const profileMenuRef = useRef(null);
 
+    // Fetch categories for dropdown
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -42,6 +45,7 @@ function Navbar() {
         fetchCategories();
     }, []);
 
+    // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -63,23 +67,24 @@ function Navbar() {
         };
     }, []);
 
+    // Responsive: close menu on desktop resize
     useEffect(() => {
         const handleResize = () => {
-        if (window.innerWidth >= 768) {
-            setIsOpen(false);
-        }
+            if (window.innerWidth >= 768) {
+                setIsOpen(false);
+            }
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-  
 
+    // Handle user logout
     const handleLogout = async () => {
         if (logoutLoading) return;
-        
+
         setLogoutLoading(true);
         const toastId = showLoading('Logging out...');
-        
+
         try {
             await logout();
             updateToast(toastId, 'Berhasil logout!', 'success');
@@ -109,27 +114,32 @@ function Navbar() {
                             <button
                                 onClick={() => setCategoryOpen(!isCategoryOpen)}
                                 className={[
-                                    "w-full flex items-center justify-between gap-2 h-11 px-4",
-                                    "rounded-full border border-gray-200 bg-white text-[#1B263B]",
-                                    "hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-[#415A77]",
-                                    isCategoryOpen ? "shadow-sm" : ""
-                                ].join(" ")}
-                                  aria-expanded={isCategoryOpen}
-                                  aria-haspopup="menu"
+                                    'w-full flex items-center justify-between gap-2 h-11 px-4',
+                                    'rounded-full border border-gray-200 bg-white text-[#1B263B]',
+                                    'hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-[#415A77]',
+                                    isCategoryOpen ? 'shadow-sm' : '',
+                                ].join(' ')}
+                                aria-expanded={isCategoryOpen}
+                                aria-haspopup="menu"
                             >
-                                    <span className="font-semibold">Categories</span>
-                                    <ChevronDown
-                                        size={18}
-                                        className={[
-                                        "transition-transform duration-200",
-                                        isCategoryOpen ? "rotate-180" : "rotate-0"
-                                        ].join(" ")}
-                                    />
+                                <span className="font-semibold">
+                                    Categories
+                                </span>
+                                <ChevronDown
+                                    size={18}
+                                    className={[
+                                        'transition-transform duration-200',
+                                        isCategoryOpen
+                                            ? 'rotate-180'
+                                            : 'rotate-0',
+                                    ].join(' ')}
+                                />
                             </button>
                             {isCategoryOpen && (
-                                <div     
-                                role="menu"
-                                className="absolute left-0 mt-2 w-full rounded-2xl bg-white border border-gray-200 shadow-2xl p-4 z-10">
+                                <div
+                                    role="menu"
+                                    className="absolute left-0 mt-2 w-full rounded-2xl bg-white border border-gray-200 shadow-2xl p-4 z-10"
+                                >
                                     {categories.slice(0, 5).map((category) => (
                                         <Link
                                             key={category.id}
@@ -208,7 +218,6 @@ function Navbar() {
                                     </button>
                                     {isProfileOpen && (
                                         <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-
                                             {user.role !== 'admin' && (
                                                 <Link
                                                     to="/order-history"
@@ -231,15 +240,17 @@ function Navbar() {
                                                 }}
                                                 disabled={logoutLoading}
                                                 className={`flex items-center w-full px-4 py-2 rounded-md transition-colors ${
-                                                    logoutLoading 
-                                                        ? 'text-gray-500 bg-gray-50 cursor-wait' 
+                                                    logoutLoading
+                                                        ? 'text-gray-500 bg-gray-50 cursor-wait'
                                                         : 'text-red-500 hover:bg-red-50'
                                                 }`}
                                             >
                                                 {logoutLoading ? (
                                                     <>
                                                         <div className="w-4 h-4 mr-2 border-2 border-[#415A77] border-t-transparent rounded-full animate-spin"></div>
-                                                        <span>Logging out...</span>
+                                                        <span>
+                                                            Logging out...
+                                                        </span>
                                                     </>
                                                 ) : (
                                                     <>
@@ -274,85 +285,89 @@ function Navbar() {
                         )}
 
                         <div className="md:hidden relative">
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="text-[#1B263B] focus:outline-none"
-                        >
-                            {isOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
-
-                        {isOpen && (
-                            <div
-                            className="absolute right-0 mt-3 w-56 rounded-xl border border-gray-200 bg-white shadow-xl z-50 py-2transition-all duration-200 ease-out animate-fadeIn"
+                            <button
+                                onClick={() => setIsOpen(!isOpen)}
+                                className="text-[#1B263B] focus:outline-none"
                             >
-                            {user ? (
-                                <>
-                                <div className="px-4 py-2 border-b border-gray-100">
-                                    <span className="block text-sm font-semibold text-[#1B263B]">
-                                    {user.name}
-                                    </span>
-                                    <span className="block text-xs text-gray-500">
-                                    {user.email}
-                                    </span>
+                                {isOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
+
+                            {isOpen && (
+                                <div className="absolute right-0 mt-3 w-56 rounded-xl border border-gray-200 bg-white shadow-xl z-50 py-2transition-all duration-200 ease-out animate-fadeIn">
+                                    {user ? (
+                                        <>
+                                            <div className="px-4 py-2 border-b border-gray-100">
+                                                <span className="block text-sm font-semibold text-[#1B263B]">
+                                                    {user.name}
+                                                </span>
+                                                <span className="block text-xs text-gray-500">
+                                                    {user.email}
+                                                </span>
+                                            </div>
+
+                                            {user.role === 'admin' && (
+                                                <NavLink
+                                                    to="/admin"
+                                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                                    onClick={() =>
+                                                        setIsOpen(false)
+                                                    }
+                                                >
+                                                    <LayoutDashboard
+                                                        size={18}
+                                                    />
+                                                    <span>Admin Panel</span>
+                                                </NavLink>
+                                            )}
+
+                                            {user.role !== 'admin' && (
+                                                <NavLink
+                                                    to="/order-history"
+                                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                                    onClick={() =>
+                                                        setIsOpen(false)
+                                                    }
+                                                >
+                                                    <ClipboardClock size={18} />
+                                                    <span>Riwayat Pesanan</span>
+                                                </NavLink>
+                                            )}
+
+                                            <button
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    handleLogout();
+                                                }}
+                                                className="flex items-center gap-2 w-full px-4 py-2 text-red-500 hover:bg-red-50"
+                                            >
+                                                <LogOut size={18} />
+                                                <span>Logout</span>
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    navigate('/login');
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-[#1B263B] hover:bg-gray-50"
+                                            >
+                                                Login
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setIsOpen(false);
+                                                    navigate('/register');
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-white bg-[#1B263B] hover:opacity-90"
+                                            >
+                                                Register
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
-
-                                {user.role === 'admin' && (
-                                    <NavLink
-                                    to="/admin"
-                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                                    onClick={() => setIsOpen(false)}
-                                    >
-                                    <LayoutDashboard size={18} />
-                                    <span>Admin Panel</span>
-                                    </NavLink>
-                                )}
-
-                                {user.role !== 'admin' && (
-                                    <NavLink
-                                    to="/order-history"
-                                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                                    onClick={() => setIsOpen(false)}
-                                    >
-                                    <ClipboardClock size={18} />
-                                    <span>Riwayat Pesanan</span>
-                                    </NavLink>
-                                )}
-
-                                <button
-                                    onClick={() => {
-                                    setIsOpen(false);
-                                    handleLogout();
-                                    }}
-                                    className="flex items-center gap-2 w-full px-4 py-2 text-red-500 hover:bg-red-50"
-                                >
-                                    <LogOut size={18} />
-                                    <span>Logout</span>
-                                </button>
-                                </>
-                            ) : (
-                                <>
-                                <button
-                                    onClick={() => {
-                                    setIsOpen(false);
-                                    navigate('/login');
-                                    }}
-                                    className="block w-full text-left px-4 py-2 text-[#1B263B] hover:bg-gray-50"
-                                >
-                                    Login
-                                </button>
-                                <button
-                                    onClick={() => {
-                                    setIsOpen(false);
-                                    navigate('/register');
-                                    }}
-                                    className="block w-full text-left px-4 py-2 text-white bg-[#1B263B] hover:opacity-90"
-                                >
-                                    Register
-                                </button>
-                                </>
                             )}
-                            </div>
-                        )}
                         </div>
                     </div>
                 </div>

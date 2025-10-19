@@ -1,9 +1,11 @@
+// frontend/src/components/ProfileMenu.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { User, LogOut } from 'lucide-react';
 
+// Dropdown menu for user profile and logout
 export default function ProfileMenu() {
     const [open, setOpen] = useState(false);
     const [logoutLoading, setLogoutLoading] = useState(false);
@@ -12,6 +14,7 @@ export default function ProfileMenu() {
     const { showLoading, updateToast, showError } = useToast();
     const navigate = useNavigate();
 
+    // Close menu when clicking outside
     useEffect(() => {
         function onDoc(e) {
             if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -20,12 +23,13 @@ export default function ProfileMenu() {
         return () => document.removeEventListener('mousedown', onDoc);
     }, []);
 
+    // Handle user logout
     const handleLogout = async () => {
         if (logoutLoading) return;
-        
+
         setLogoutLoading(true);
         const toastId = showLoading('Logging out...');
-        
+
         try {
             await logout();
             updateToast(toastId, 'Berhasil logout!', 'success');
@@ -63,8 +67,8 @@ export default function ProfileMenu() {
                     <div className="py-1">
                         <button
                             className={`w-full flex items-center justify-center px-4 py-2 text-sm transition-colors ${
-                                logoutLoading 
-                                    ? 'bg-gray-100 cursor-wait' 
+                                logoutLoading
+                                    ? 'bg-gray-100 cursor-wait'
                                     : 'hover:bg-gray-100'
                             }`}
                             onClick={handleLogout}

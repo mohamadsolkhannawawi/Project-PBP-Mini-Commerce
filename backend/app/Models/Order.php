@@ -24,13 +24,17 @@ class Order extends Model
         'address_text',
     ];
 
+    // Items included in this order
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
+    // Customer who placed this order
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 }
+
+// backend\app\Models\Order.php

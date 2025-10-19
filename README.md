@@ -45,7 +45,7 @@ TokoKita/
 
 ### 1. Prerequisites
 Ensure the following software is installed on your machine:
-- PHP (v8.1+ recommended)
+- PHP (v8.2+ recommended)
 - Composer
 - Node.js & NPM
 - A MySQL Server (XAMPP, Laragon, or other solutions are recommended)

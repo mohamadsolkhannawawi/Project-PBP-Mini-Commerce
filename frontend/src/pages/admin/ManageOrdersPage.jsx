@@ -1,9 +1,11 @@
+// frontend/src/pages/admin/ManageOrdersPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import OrdersTable from '../../components/admin/OrdersTable';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useToast } from '../../contexts/ToastContext';
 
+// Page for managing orders in admin panel
 function ManageOrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,6 +23,7 @@ function ManageOrdersPage() {
 
     const { showSuccess, showError, showLoading, updateToast } = useToast();
 
+    // Fetch all orders for admin
     const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
@@ -36,15 +39,17 @@ function ManageOrdersPage() {
         }
     }, []);
 
+    // Fetch orders on mount
     useEffect(() => {
         fetchOrders();
     }, [fetchOrders]);
 
+    // Update order status
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            setStatusLoading(prev => ({ ...prev, [orderId]: true }));
+            setStatusLoading((prev) => ({ ...prev, [orderId]: true }));
             const toastId = showLoading('Memperbarui status pesanan...');
-            
+
             await axiosClient.put(`/admin/orders/${orderId}`, {
                 status: newStatus,
             });
@@ -55,13 +60,17 @@ function ManageOrdersPage() {
                         : order
                 )
             );
-            
-            updateToast(toastId, 'Status pesanan berhasil diperbarui!', 'success');
+
+            updateToast(
+                toastId,
+                'Status pesanan berhasil diperbarui!',
+                'success'
+            );
         } catch (err) {
             showError('Gagal memperbarui status. Silakan coba lagi.');
             fetchOrders();
         } finally {
-            setStatusLoading(prev => ({ ...prev, [orderId]: false }));
+            setStatusLoading((prev) => ({ ...prev, [orderId]: false }));
         }
     };
 
@@ -97,7 +106,13 @@ function ManageOrdersPage() {
     const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
     if (loading)
-        return <LoadingSpinner text="Memuat data pesanan..." size="lg" className="py-12" />;
+        return (
+            <LoadingSpinner
+                text="Memuat data pesanan..."
+                size="lg"
+                className="py-12"
+            />
+        );
     if (error)
         return (
             <div className="text-red-500 bg-red-100 p-4 rounded-md">

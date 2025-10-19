@@ -1,6 +1,8 @@
+// frontend/src/utils/imageUtils.js
 // Utility functions for handling image URLs
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
+// Get full image URL from image object
 export const getImageUrl = (image) => {
     if (!image) return '/no-image.webp';
 
@@ -23,6 +25,7 @@ export const getImageUrl = (image) => {
     return '/no-image.webp';
 };
 
+// Get product image URL from product object
 export const getProductImageUrl = (product) => {
     if (!product) return '/no-image.webp';
 

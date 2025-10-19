@@ -1,3 +1,4 @@
+// frontend/src/pages/admin/ManageProductsPage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../../api/axiosClient';
 import ProductForm from '../../components/admin/ProductForm';
@@ -5,6 +6,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import { Trash2, Edit3, ToggleRight, ToggleLeft } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 
+// Page for managing products in admin panel
 function ManageProductsPage() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -28,6 +30,7 @@ function ManageProductsPage() {
 
     const { showSuccess, showError, showLoading, updateToast } = useToast();
 
+    // Fetch all products for admin
     const fetchProducts = useCallback(async () => {
         try {
             setLoading(true);
@@ -47,6 +50,7 @@ function ManageProductsPage() {
         }
     }, [categoryFilter]);
 
+    // Fetch all categories for product filter
     const fetchCategories = async () => {
         try {
             const response = await axiosClient.get('/categories');
@@ -56,6 +60,7 @@ function ManageProductsPage() {
         }
     };
 
+    // Fetch products on mount and when category filter changes
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
@@ -66,7 +71,9 @@ function ManageProductsPage() {
 
     const handleSave = async (productData) => {
         const toastId = showLoading(
-            selectedProduct ? 'Memperbarui produk...' : 'Menambah produk baru...'
+            selectedProduct
+                ? 'Memperbarui produk...'
+                : 'Menambah produk baru...'
         );
 
         try {
@@ -81,7 +88,11 @@ function ManageProductsPage() {
                 await axiosClient.post('/admin/products', productData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
-                updateToast(toastId, 'Produk baru berhasil ditambahkan!', 'success');
+                updateToast(
+                    toastId,
+                    'Produk baru berhasil ditambahkan!',
+                    'success'
+                );
             }
             setIsModalOpen(false);
             setSelectedProduct(null);
@@ -95,7 +106,7 @@ function ManageProductsPage() {
     };
 
     const handleToggleStatus = async (product) => {
-        setToggleLoading(prev => ({ ...prev, [product.id]: true }));
+        setToggleLoading((prev) => ({ ...prev, [product.id]: true }));
         const toastId = showLoading(
             `${product.is_active ? 'Menonaktifkan' : 'Mengaktifkan'} produk...`
         );
@@ -110,19 +121,21 @@ function ManageProductsPage() {
                 )
             );
             updateToast(
-                toastId, 
-                `Status produk berhasil ${product.is_active ? 'dinonaktifkan' : 'diaktifkan'}!`,
+                toastId,
+                `Status produk berhasil ${
+                    product.is_active ? 'dinonaktifkan' : 'diaktifkan'
+                }!`,
                 'success'
             );
         } catch (err) {
             updateToast(toastId, 'Gagal mengubah status produk.', 'error');
         } finally {
-            setToggleLoading(prev => ({ ...prev, [product.id]: false }));
+            setToggleLoading((prev) => ({ ...prev, [product.id]: false }));
         }
     };
 
     const handlePermanentDelete = async (productId, productName) => {
-        setDeleteLoading(prev => ({ ...prev, [productId]: true }));
+        setDeleteLoading((prev) => ({ ...prev, [productId]: true }));
         const toastId = showLoading('Menghapus produk...');
 
         try {
@@ -130,11 +143,15 @@ function ManageProductsPage() {
             setProducts((prevProducts) =>
                 prevProducts.filter((p) => p.id !== productId)
             );
-            updateToast(toastId, `Produk "${productName}" berhasil dihapus!`, 'success');
+            updateToast(
+                toastId,
+                `Produk "${productName}" berhasil dihapus!`,
+                'success'
+            );
         } catch (err) {
             updateToast(toastId, 'Gagal menghapus produk.', 'error');
         } finally {
-            setDeleteLoading(prev => ({ ...prev, [productId]: false }));
+            setDeleteLoading((prev) => ({ ...prev, [productId]: false }));
         }
     };
 
@@ -174,7 +191,13 @@ function ManageProductsPage() {
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
     if (loading)
-        return <LoadingSpinner text="Memuat data produk..." size="lg" className="py-12" />;
+        return (
+            <LoadingSpinner
+                text="Memuat data produk..."
+                size="lg"
+                className="py-12"
+            />
+        );
     if (error)
         return (
             <div className="text-red-500 bg-red-100 p-4 rounded-md">

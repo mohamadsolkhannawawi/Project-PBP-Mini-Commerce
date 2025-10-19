@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 
 class ReviewController extends Controller
 {
+    // Store a new review for an order item owned by the current user
     public function store(Request $request)
     {
         $request->validate([
@@ -22,7 +23,7 @@ class ReviewController extends Controller
         if (!$orderItem || $orderItem->order->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-        if ($orderItem->order->status !== 'selesai') {
+        if ($orderItem->order->status !== 'selesai') { // ensure order is completed before allowing review
             return response()->json(['message' => 'You can only review items from completed orders.'], 403);
         }
 
@@ -37,3 +38,5 @@ class ReviewController extends Controller
         return response()->json(['success' => true, 'data' => $review], 201);
     }
 }
+
+// backend\app\Http\Controllers\Api\ReviewController.php

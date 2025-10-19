@@ -20,8 +20,11 @@ class Category extends Model
         'slug',
     ];
 
+    // Products that belong to this category
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
     }
 }
+
+// backend\app\Models\Category.php

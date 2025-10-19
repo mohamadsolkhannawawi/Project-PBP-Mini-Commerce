@@ -23,13 +23,17 @@ class CartItem extends Model
         'quantity',
     ];
 
+    // Product for this cart line
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    // Owning cart
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
     }
 }
+
+// backend\app\Models\CartItem.php

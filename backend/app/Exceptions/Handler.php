@@ -23,6 +23,7 @@ class Handler extends ExceptionHandler
      * @var array<string>
      */
     protected $dontFlash = [
+        // This prevents sensitive password field from being saved to the session
         'current_password',
         'password',
         'password_confirmation',
@@ -37,7 +38,7 @@ class Handler extends ExceptionHandler
             if ($request->is('api/*')) {
                 return response()->json([
                     'message' => 'Unauthenticated.'
-                ], 401);
+                ], 401); // if this is an API request, do not redirect. Instead, return a JSON response with message and status 401
             }
         });
 
@@ -47,3 +48,4 @@ class Handler extends ExceptionHandler
     }
 }
 
+// backend\app\Exceptions\Handler.php
