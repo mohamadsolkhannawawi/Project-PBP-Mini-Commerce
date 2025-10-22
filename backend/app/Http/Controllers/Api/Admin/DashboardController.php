@@ -25,7 +25,11 @@ class DashboardController extends Controller
             ->where('orders.status', 'selesai')
             ->sum('order_items.quantity');
         $totalProducts = Product::count(); // total number of products
-        $totalCustomers = User::where('role', 'user')->count(); // total number of customers
+        // only count users who have at least one completed order
+        $totalCustomers = User::where('role', 'user')
+            ->whereHas('orders', function ($query) {
+                $query->where('status', 'selesai');
+            })->count(); // total number of customers with completed orders
 
         // eager load user relationship to avoid N+1 problem
         $recentOrders = Order::with('user')
@@ -44,13 +48,15 @@ class DashboardController extends Controller
             ->orderBy('date', 'ASC')
             ->get();
 
-    // top 5 best-selling products
-        $topSellingProducts = Product::withCount(['orderItems as items_sold' => function ($query) { // custom count for items sold
-                $query->select(DB::raw('sum(quantity)'));
-            }])
-            ->orderByDesc('items_sold')
-            ->take(5)
-            ->get();
+    // top 5 best-selling products (only from completed orders)
+        $topSellingProducts = Product::withCount(['orderItems as items_sold' => function ($query) {
+            $query->select(DB::raw('sum(quantity)'))
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->where('orders.status', 'selesai');
+        }])
+        ->orderByDesc('items_sold')
+        ->take(5)
+        ->get();
 
         // return the compiled dashboard data as JSON response
         return response()->json([

@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -48,6 +49,12 @@ class User extends Authenticatable
     }
     // Reviews written by this user
     public function reviews() { return $this->hasMany(Review::class); }
+
+    // Orders placed by this user
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }
 
 // backend\app\Models\User.php
