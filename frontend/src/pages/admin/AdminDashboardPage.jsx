@@ -396,8 +396,8 @@ export default function AdminDashboardPage() {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-xl p-6 shadow md:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                <div className="bg-white rounded-xl p-6 shadow md:col-span-2">
                     <h2 className="text-lg font-bold mb-4 text-[#415A77]">
                         {productSummary ? 'Top Buyers' : 'Top Selling Products'}
                     </h2>
@@ -441,7 +441,7 @@ export default function AdminDashboardPage() {
                     </ul>
                 </div>
 
-                <div className="bg-white rounded-xl p-6 shadow md:col-span-2">
+                <div className="bg-white rounded-xl p-6 shadow md:col-span-3">
                     <h2 className="text-lg font-bold mb-4 text-[#415A77]">
                         Recent Orders
                     </h2>
@@ -463,15 +463,15 @@ export default function AdminDashboardPage() {
                             productSummary.recent_orders.map((order) => (
                                 <li
                                     key={order.id}
-                                    className="flex items-center justify-between py-2 border-b last:border-b-0"
+                                    className="grid items-center grid-cols-[200px_1fr_auto] py-2 border-b last:border-b-0"
                                 >
-                                    <span className="mr-4">
+                                    <span className="pl-0 mr-2">
                                         #{order.order_number}
                                     </span>
-                                    <span className="flex-1 px-4 text-left">
+                                    <span className="px-2 text-left min-w-0 truncate">
                                         {order.user?.name ?? 'User'}
                                     </span>
-                                    <span className="font-bold text-[#F07167]">
+                                    <span className="text-right font-bold text-[#F07167]">
                                         Rp{' '}
                                         {Number(order.total).toLocaleString(
                                             'id-ID'
@@ -484,15 +484,15 @@ export default function AdminDashboardPage() {
                             recentOrders.map((order) => (
                                 <li
                                     key={order.id}
-                                    className="flex items-center justify-between py-2 border-b last:border-b-0"
+                                    className="grid items-center grid-cols-[200px_1fr_auto] py-2 border-b last:border-b-0"
                                 >
-                                    <span className="mr-4">
+                                    <span className="pl-0 mr-2">
                                         #{order.order_number}
                                     </span>
-                                    <span className="flex-1 px-4 text-left">
+                                    <span className="px-2 text-left min-w-0 truncate">
                                         {order.user?.name ?? 'User'}
                                     </span>
-                                    <span className="font-bold text-[#F07167]">
+                                    <span className="text-right font-bold text-[#F07167]">
                                         Rp{' '}
                                         {Number(order.total).toLocaleString(
                                             'id-ID'
